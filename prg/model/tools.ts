@@ -1,5 +1,5 @@
 
-export var targetTerminale = { name: 'Terminale' };
+export const targetTerminale = { name: 'Terminale' };
 
 export interface IPrintabile {
     PrintMenu(): any
@@ -7,4 +7,9 @@ export interface IPrintabile {
 
 export enum IType {
     number, text, date
+}
+
+export interface IResponse{
+    codiceErrore: number;
+    messaggioErrore: string;    
 }

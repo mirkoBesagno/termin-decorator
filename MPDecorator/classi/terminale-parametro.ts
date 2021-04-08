@@ -1,4 +1,4 @@
-import { ColumnType } from "typeorm";
+
 import { IPrintabile, targetTerminale } from "../tools";
 import { CheckMetodoMetaData, TerminaleMetodo } from "./terminale-metodo";
 
@@ -10,8 +10,8 @@ import { ListaTerminaleMetodo } from "../liste/lista-terminale-metodo";
 
 export class TerminaleParametro {
     nome: string;
-    tipo: ColumnType;
-    constructor(nome: string, tipo: ColumnType) {
+    tipo: string;
+    constructor(nome: string, tipo: string) {
         this.nome = nome;
         this.tipo = tipo;
     }
@@ -41,7 +41,7 @@ export class TerminaleParametro {
  * @param nome 
  * @returns 
  */
-export function mpPar(tipoParametro: ColumnType) {
+export function mpPar(tipoParametro: string) {
     return function (target: any, propertyKey: string | symbol, parameterIndex: number) {
 
         const classe = CheckClasseMetaData(target.constructor.name);
@@ -51,7 +51,7 @@ export function mpPar(tipoParametro: ColumnType) {
 }
 
 
-export function CheckParametroMetaData(terminale: TerminaleMetodo, parameterIndex: string, tipoParametro: ColumnType) {
+export function CheckParametroMetaData(terminale: TerminaleMetodo, parameterIndex: string, tipoParametro: string) {
     let tmp: ListaTerminaleMetodo = Reflect.getMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, targetTerminale); // vado a prendere la struttura legata alle funzioni
     if (terminale != undefined && tmp != undefined)/* controllo esista ma s'ho esistere */ {
         //creo un terminale parametro e lo aggiungo

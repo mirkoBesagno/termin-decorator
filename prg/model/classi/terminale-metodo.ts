@@ -1,10 +1,10 @@
-import { IPrintabile, targetTerminale } from "../tools";
+import { IPrintabile, IResponse, targetTerminale } from "../tools";
 import { CheckClasseMetaData, TerminaleClasse } from "./terminale-classe";
 import { TerminaleParametro } from "./terminale-parametro";
 
 
 import superagent from "superagent";
-import express, { Router } from "express";
+import express, { Router, Request, Response } from "express";
 import { ListaTerminaleMetodo } from "../liste/lista-terminale-metodo";
 import { ListaTerminaleParametro } from "../liste/lista-terminale-parametro";
 
@@ -21,11 +21,11 @@ export class TerminaleMetodo implements IPrintabile {
     private _nome: string | Symbol;
     metodoAvviabile: any;
     private _path: string;
-    constructor(nome: string, path: string, classeParth: string) {
+    constructor(nome: string, path: string, classePath: string) {
         this._listaParametri = new ListaTerminaleParametro();
         this._nome = nome;
         this._path = path;
-        this.classePath = this.classePath;
+        this.classePath = classePath;
         this.tipo = TypeMetodo.indefinita;
     }
     /* start : get e set */
@@ -81,9 +81,10 @@ export class TerminaleMetodo implements IPrintabile {
                 case TypeMetodo.get:
                     (<IReturn>this.metodoAvviabile).body;
                     rotte.get("/" + this.path.toString(),
-                        (req: any, res: any) => {
-                            const tmp = this.metodoAvviabile();
-                            res.send((<IReturn>tmp).body);
+                        (req: Request, res: Response) => {
+
+                            const tmp = this.metodoAvviabile(this.listaParametri);
+                            res.status((<IResponse>tmp).codiceErrore).send((<IResponse>tmp).messaggioErrore);
                         });
                     break;
                 default:
@@ -144,6 +145,8 @@ export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse)
     let terminale = tmp.CercaConNome(nomeMetodo, classe.path); //cerca la mia funzione
     if (terminale == undefined)/* se non c'è */ {
         terminale = new TerminaleMetodo(nomeMetodo, "", classe.nome); // creo la funzione
+        tmp.AggiungiElemento(terminale);
+        Reflect.defineMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, tmp, targetTerminale);//e lo aggiungo a i metadata
     }
     return terminale;
 }

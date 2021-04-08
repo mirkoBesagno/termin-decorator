@@ -12,7 +12,7 @@ import { mpMain, Main } from "./model/classi/terminale-main";
 import { mpClass } from "./model/classi/terminale-classe";
 import { mpMet, TypeMetodo } from "./model/classi/terminale-metodo";
 import {  mpPar } from "./model/classi/terminale-parametro";
-import { IType } from "./model/tools";
+import { IResponse, IType } from "./model/tools";
 
 class ListaMetodo {
     lista: IMetodo[] = [];
@@ -391,6 +391,7 @@ interface IMetodo {
          .catch(err => { console.log("Errore !!!  : ", err) });
  }) */
  // Property Decorator
+
 function mpReturn() {
     return function(target: Object, key: string | symbol) {
   console.log('ciao');
@@ -407,6 +408,9 @@ function mpReturn() {
             @mpMet(TypeMetodo.get,'123445567')
             SetNome(@mpPar(IType.text) nomeFuturo: string) {
                 this.nome = nomeFuturo;
+                return <IResponse>{
+                    codiceErrore:400,messaggioErrore:"Ciaoooooo"
+                };
             }
             MetodoPrint() {
                 if ('nome' in this) {
@@ -489,6 +493,7 @@ function mpReturn() {
 
         main.Inizializza();
         main.PrintMenu();
+        main.serverExpressDecorato.listen(3333);
         console.log('fineeeeeeeeeee');
         
         /* (<any>classecosi).Inizializza();

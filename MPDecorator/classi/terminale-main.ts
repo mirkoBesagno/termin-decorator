@@ -37,14 +37,17 @@ class TerminaleMain implements IPrintabile {
 /**
  * 
  */
-export function mpMain(path:string) {
+let mpMain = {};
+let mpM = {};
+
+mpMain = mpM = function (path: string) {
     return function (ctr: Function) {
         //tmp.PrintMenu();
         ctr.prototype.serverExpressDecorato = express();
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         for (let index = 0; index < tmp.length; index++) {
             const element = tmp[index];
-            ctr.prototype.serverExpressDecorato.use('/'+path+'/' + element.path, element.rotte);
+            ctr.prototype.serverExpressDecorato.use('/' + path + '/' + element.path, element.rotte);
         }
         ctr.prototype.PrintMenu = () => {
             console.log("mpMain" + '->' + 'PrintMenu');
@@ -54,5 +57,7 @@ export function mpMain(path:string) {
             tmp.PrintMenu(); */
         };
     }
-
 }
+export {
+    mpM, mpMain
+};

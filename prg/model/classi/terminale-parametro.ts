@@ -48,7 +48,7 @@ export class TerminaleParametro {
         CheckParametroMetaData(metodo, parameterIndex.toString(), tipoParametro);
     }
 } */
-var MPPar: Function, mpPar: Function, mpParametro: Function, mpDecoratoreParametro: Function;
+let MPPar: Function, mpPar: Function, mpParametro: Function, mpDecoratoreParametro: Function;
 MPPar = mpPar = mpParametro = mpDecoratoreParametro = function mpPar(tipoParametro: IType) {
     return function (target: any, propertyKey: string | symbol, parameterIndex: number) {
 
