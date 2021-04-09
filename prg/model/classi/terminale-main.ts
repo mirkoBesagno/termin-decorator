@@ -41,23 +41,20 @@ export function mpMain(path: string) {
     return function (ctr: Function) {
         //tmp.PrintMenu();
         ctr.prototype.serverExpressDecorato = express();
-        ctr.prototype.Inizializza = () => {
+        /* ctr.prototype.Inizializza = () => {
             let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
             for (let index = 0; index < tmp.length; index++) {
                 const element = tmp[index];
+                element.SettaPathRoot_e_Global(path, '/' + path + '/' + element.path);
                 ctr.prototype.serverExpressDecorato.use('/' + path + '/' + element.path, element.rotte);
-                element.SettaPathRoot(path);
             }
         }
         ctr.prototype.PrintMenu = () => {
             let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
             console.log("mpMain" + ' -> ' + 'PrintMenu');
             tmp.PrintMenu();
-            /* const listaClassi: ListaTerminaleClasse = new ListaTerminaleClasse();
-            tmp.PrintMenu(); */
-        };
+        }; */
     }
-
 }
 export class Main {
     path: string;
@@ -69,12 +66,14 @@ export class Main {
         else this.serverExpressDecorato = server;
         this.listaTerminaleClassi = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
     }
+
     Inizializza() {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         for (let index = 0; index < tmp.length; index++) {
             const element = tmp[index];
-            this.serverExpressDecorato.use('/' + this.path + '/' + element.path, element.rotte);
-            element.SettaPathRoot(this.path);
+            const pathGlobal = '/' + this.path + '/' + element.path;
+            element.SettaPathRoot_e_Global(this.path, pathGlobal);
+            this.serverExpressDecorato.use(pathGlobal, element.rotte);
         }
     }
     PrintMenu() {
@@ -84,4 +83,7 @@ export class Main {
         /* const listaClassi: ListaTerminaleClasse = new ListaTerminaleClasse();
         tmp.PrintMenu(); */
     };
+    StartExpress() {
+        this.serverExpressDecorato.listen(3000);
+    }
 }

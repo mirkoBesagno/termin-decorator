@@ -17,17 +17,24 @@ import { TerminaleMetodo } from "../classi/terminale-metodo";
                 //throw new Error("Errore mio !");
 
             }
+            CercaConNomeRev(nome: string): TerminaleMetodo | undefined {
+                for (let index = 0; index < this.length; index++) {
+                    const element = this[index];
+                    if (element.nome == nome) return element;
+                }
+                return undefined;        
+            }
             AggiungiElemento(item: TerminaleMetodo) {
                 for (let index = 0; index < this.length; index++) {
                     const element = this[index];
                     if (element.nome == item.nome && element.classePath == item.classePath) {
                         this[index] = item;
-                        this.rotte = item.ConfiguraRotta(this.rotte);
+                        this.rotte = item.ConfiguraRotta(this.rotte, '');
                         return item;
                     }
                 }
                 this.push(item);
-                this.rotte = item.ConfiguraRotta(this.rotte);
+                this.rotte = item.ConfiguraRotta(this.rotte, '');
                 return item;
             }
         }

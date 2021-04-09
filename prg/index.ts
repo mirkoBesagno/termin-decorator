@@ -9,12 +9,132 @@ import { ColumnType } from "typeorm";
 import express from "express";
 import { Request, Response, Router } from "express";
 import { mpMain, Main } from "./model/classi/terminale-main";
-import { mpClass } from "./model/classi/terminale-classe";
-import { mpMet, TypeMetodo } from "./model/classi/terminale-metodo";
-import {  mpPar } from "./model/classi/terminale-parametro";
-import { IResponse, IType } from "./model/tools";
+import { mpClass, mpClasseRev } from "./model/classi/terminale-classe";
+import { IReturn, mpMet, mpMetRev, TypeMetodo } from "./model/classi/terminale-metodo";
+import {  mpPar, mpParRev } from "./model/classi/terminale-parametro";
+import { IType } from "./model/tools";
 
-class ListaMetodo {
+       /*  @mpMain('app') */
+        @mpClasseRev('classe-test')
+        class ClasseTest {
+            nome: string;
+            constructor(nome: string) {
+                this.nome = nome;
+            }
+            @mpMetRev(TypeMetodo.get,'123445567')
+            SetNome(@mpParRev(IType.text) nomeFuturo: string) {
+                this.nome = nomeFuturo;
+                const tmp : IReturn={
+                    body:{
+                        "nome":"lollllloooo",
+                        "cognome":"bibbolooo"
+                    },
+                    stato:200};
+                return tmp;
+            }
+            MetodoPrint() {
+                if ('nome' in this) {
+                    console.log(this.nome != undefined ? this.nome : "sono undefined");
+                }
+                else {
+                    console.log("Classe senza nome");
+
+                }
+            }
+        }
+
+        @mpClasseRev('classe-test-1')
+        class ClasseTestSeconda {
+            nome: string;
+            constructor(nome: string) {
+                this.nome = nome;
+            }
+            @mpMetRev(TypeMetodo.get,'lllloko')
+            SetNome(@mpParRev(IType.text) nomeFuturo: string) {
+                this.nome = nomeFuturo;
+                const tmp : IReturn={
+                    body:{
+                        "nome":"mirkoooo",
+                        "cognome":"pizziniiii"
+                    },
+                    stato:200};
+                return tmp;
+            }
+/* 
+            @mpMet('metodo-test-1')
+            SetNomePrimo(@mpPar("char") nomeFuturoPrimo: string) {
+                this.nome = nomeFuturoPrimo;
+            }
+            @mpMet('metodo-test-2')
+            SetNomeSecondo(@mpPar("char") nomeFuturoSecondo: string) {
+                this.nome = nomeFuturoSecondo;
+            } */
+
+            MetodoPrint() {
+                if ('nome' in this) {
+                    console.log(this.nome != undefined ? this.nome : "sono undefined");
+                }
+                else {
+                    console.log("Classe senza nome");
+
+                }
+            }
+        }
+
+        /* @mpClass('classe1')
+        class Classe1 {
+            nome: string;
+            constructor(nome: string) {
+                this.nome = nome;
+            }
+            @mpMet()
+            SetNome(@mpPar("char") nomeFuturo: string) {
+                this.nome = nomeFuturo;
+            }
+
+            @mpMet()
+            SetNomePrimo(@mpPar("char") nomeFuturoPrimo: string) {
+                this.nome = nomeFuturoPrimo;
+            }
+            @mpMet()
+            SetNomeSecondo(@mpPar("char") nomeFuturoSecondo: string) {
+                this.nome = nomeFuturoSecondo;
+            }
+
+            MetodoPrint() {
+                if ('nome' in this) {
+                    console.log(this.nome != undefined ? this.nome : "sono undefined");
+                }
+                else {
+                    console.log("Classe senza nome");
+
+                }
+            }
+        } */
+
+        const classecosi = new ClasseTest("prima classe!!");
+        classecosi.MetodoPrint();
+
+        const main = new Main("app");
+
+        main.Inizializza();
+        main.PrintMenu();
+        main.StartExpress();
+        console.log('fineeeeeeeeeee');
+        
+        /* (<any>classecosi).Inizializza();
+        (<any>classecosi).serverExpressDecorato.listen(3000);
+        console.log("PrintMenu, inizio dall'init");
+        
+        (<any>classecosi).PrintMenu(); */
+        /* (classecosi).PrintMenuLL(); */
+
+
+
+
+
+        
+/* class ListaMetodo {
     lista: IMetodo[] = [];
     constructor() {
         this.lista = [];
@@ -25,7 +145,7 @@ class ListaMetodo {
 }
 interface IMetodo {
     nome: string
-}
+} */
     /*  .then(() => {
  
          function logData(message: string): ClassDecorator {
@@ -391,119 +511,12 @@ interface IMetodo {
          .catch(err => { console.log("Errore !!!  : ", err) });
  }) */
  // Property Decorator
-
-function mpReturn() {
+/* function mpReturn() {
     return function(target: Object, key: string | symbol) {
   console.log('ciao');
   
   }
-}
-       /*  @mpMain('app') */
-        @mpClass('classe-test')
-        class ClasseTest {
-            nome: string;
-            constructor(nome: string) {
-                this.nome = nome;
-            }
-            @mpMet(TypeMetodo.get,'123445567')
-            SetNome(@mpPar(IType.text) nomeFuturo: string) {
-                this.nome = nomeFuturo;
-                return <IResponse>{
-                    codiceErrore:400,messaggioErrore:"Ciaoooooo"
-                };
-            }
-            MetodoPrint() {
-                if ('nome' in this) {
-                    console.log(this.nome != undefined ? this.nome : "sono undefined");
-                }
-                else {
-                    console.log("Classe senza nome");
-
-                }
-            }
-        }
-
-        @mpClass('classe-test-1')
-        class ClasseTestSeconda {
-            nome: string;
-            constructor(nome: string) {
-                this.nome = nome;
-            }
-            @mpMet(TypeMetodo.get,'lllloko')
-            SetNome(@mpPar(IType.text) nomeFuturo: string) {
-                this.nome = nomeFuturo;
-
-            }
-/* 
-            @mpMet('metodo-test-1')
-            SetNomePrimo(@mpPar("char") nomeFuturoPrimo: string) {
-                this.nome = nomeFuturoPrimo;
-            }
-            @mpMet('metodo-test-2')
-            SetNomeSecondo(@mpPar("char") nomeFuturoSecondo: string) {
-                this.nome = nomeFuturoSecondo;
-            } */
-
-            MetodoPrint() {
-                if ('nome' in this) {
-                    console.log(this.nome != undefined ? this.nome : "sono undefined");
-                }
-                else {
-                    console.log("Classe senza nome");
-
-                }
-            }
-        }
-
-        /* @mpClass('classe1')
-        class Classe1 {
-            nome: string;
-            constructor(nome: string) {
-                this.nome = nome;
-            }
-            @mpMet()
-            SetNome(@mpPar("char") nomeFuturo: string) {
-                this.nome = nomeFuturo;
-            }
-
-            @mpMet()
-            SetNomePrimo(@mpPar("char") nomeFuturoPrimo: string) {
-                this.nome = nomeFuturoPrimo;
-            }
-            @mpMet()
-            SetNomeSecondo(@mpPar("char") nomeFuturoSecondo: string) {
-                this.nome = nomeFuturoSecondo;
-            }
-
-            MetodoPrint() {
-                if ('nome' in this) {
-                    console.log(this.nome != undefined ? this.nome : "sono undefined");
-                }
-                else {
-                    console.log("Classe senza nome");
-
-                }
-            }
-        } */
-
-        const classecosi = new ClasseTest("prima classe!!");
-        classecosi.MetodoPrint();
-
-        const main = new Main("app");
-
-        main.Inizializza();
-        main.PrintMenu();
-        main.serverExpressDecorato.listen(3333);
-        console.log('fineeeeeeeeeee');
-        
-        /* (<any>classecosi).Inizializza();
-        (<any>classecosi).serverExpressDecorato.listen(3000);
-        console.log("PrintMenu, inizio dall'init");
-        
-        (<any>classecosi).PrintMenu(); */
-        /* (classecosi).PrintMenuLL(); */
-
-
+} */
 
 
 

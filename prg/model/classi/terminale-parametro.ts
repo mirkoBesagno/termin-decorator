@@ -5,8 +5,9 @@ import { CheckMetodoMetaData, TerminaleMetodo } from "./terminale-metodo";
 
 import superagent from "superagent";
 import express from "express";
-import { CheckClasseMetaData } from "./terminale-classe";
+import { CheckClasseMetaData, GetListaClasseMetaData, SalvaListaClasseMetaData } from "./terminale-classe";
 import { ListaTerminaleMetodo } from "../liste/lista-terminale-metodo";
+import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 
 export class TerminaleParametro {
     nome: string;
@@ -48,8 +49,9 @@ export class TerminaleParametro {
         CheckParametroMetaData(metodo, parameterIndex.toString(), tipoParametro);
     }
 } */
-let MPPar: Function, mpPar: Function, mpParametro: Function, mpDecoratoreParametro: Function;
-MPPar = mpPar = mpParametro = mpDecoratoreParametro = function mpPar(tipoParametro: IType) {
+var MPPar: Function, mpPar: Function, mpParametro: Function, mpDecoratoreParametro: Function;
+MPPar = mpPar = mpParametro = mpDecoratoreParametro = 
+function mpPar(tipoParametro: IType) {
     return function (target: any, propertyKey: string | symbol, parameterIndex: number) {
 
         const classe = CheckClasseMetaData(target.constructor.name);
@@ -60,6 +62,16 @@ MPPar = mpPar = mpParametro = mpDecoratoreParametro = function mpPar(tipoParamet
 export {
     MPPar, mpParametro, mpDecoratoreParametro, mpPar
 };
+
+export function mpParRev(tipoParametro: IType) {
+    return function (target: any, propertyKey: string | symbol, parameterIndex: number) {        
+        const list: ListaTerminaleClasse = GetListaClasseMetaData();
+        const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
+        const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+        metodo.CercaParametroSeNoAggiungi(parameterIndex.toString(), tipoParametro);
+        SalvaListaClasseMetaData(list);
+    }
+}
 
 
 

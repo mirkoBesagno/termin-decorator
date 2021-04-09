@@ -5,6 +5,7 @@ import express, { Router } from "express";
 import chiedi from "prompts";
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import { ListaTerminaleMetodo } from "../liste/lista-terminale-metodo";
+import { TerminaleMetodo } from "./terminale-metodo";
 
 export class TerminaleClasse implements IPrintabile {
     static nomeMetadataKeyTarget = "ClasseTerminaleTarget";
@@ -14,6 +15,7 @@ export class TerminaleClasse implements IPrintabile {
     path: string;
     private pathRoot: string;
     rotte: Router;
+    pathGlobal: string;
     constructor(nome: string, path?: string) {
         this.id = Math.random().toString();
         this.rotte = Router();
@@ -22,6 +24,7 @@ export class TerminaleClasse implements IPrintabile {
         if (path) this.path = path;
         else this.path = nome;
         this.pathRoot = "";
+        this.pathGlobal = '';
     }
     /* async PrintMenu() {
             console.log("Scegli un metodo:");
@@ -41,7 +44,7 @@ export class TerminaleClasse implements IPrintabile {
     async PrintMenu() {
         const tab = '\t\t';
         console.log(tab + 'TerminaleClasse' + '->' + 'PrintMenu');
-        console.log(tab + this.nome + ' | ' + this.id + ' | ' +'/' + this.pathRoot + '/' + this.path + ' ;');
+        console.log(tab + this.nome + ' | ' + this.id + ' | ' + '/' + this.pathRoot + '/' + this.path + ' ;');
 
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
@@ -54,10 +57,23 @@ export class TerminaleClasse implements IPrintabile {
             "listaMetodi.length:" + this.listaMetodi.length + ":;:";
         //console.log(tmp);
     }
-    SettaPathRoot(item: string) {
+    SettaPathRoot_e_Global(item: string, pathGlobal: string) {
         this.pathRoot = item;
+        this.pathGlobal = pathGlobal;
+        for (let index = 0; index < this.listaMetodi.length; index++) {
+            const element = this.listaMetodi[index];
+            element.ConfiguraRotta(this.rotte,this.pathGlobal);
+        }
     }
+    CercaMetodoSeNoAggiungiMetodo(nome: string) {
+        let terminale = this.listaMetodi.CercaConNomeRev(nome)
 
+        if (terminale == undefined)/* se non c'è */ {
+            terminale = new TerminaleMetodo(nome, "", this.nome); // creo la funzione
+            this.listaMetodi.AggiungiElemento(terminale);
+        }
+        return terminale;
+    }
 }
 
 /**
@@ -73,7 +89,14 @@ export function mpClass(percorso: string): any {
         Reflect.defineMetadata(TerminaleClasse.nomeMetadataKeyTarget, classe, targetTerminale); //e lo vado a salvare nel meta data
     }
 }
-
+export function mpClasseRev(percorso: string): any {
+    return (ctr: Function) => {
+        const list: ListaTerminaleClasse = GetListaClasseMetaData();
+        const classe = list.CercaConNomeSeNoAggiungi(ctr.name);
+        classe.path = percorso;
+        SalvaListaClasseMetaData(list);
+    }
+}
 
 export function CheckClasseMetaData(nome: string) {
     let listClasse: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale); // vado a prendere la struttura legata alle funzioni ovvero le classi
@@ -89,4 +112,15 @@ export function CheckClasseMetaData(nome: string) {
         Reflect.defineMetadata(TerminaleClasse.nomeMetadataKeyTarget, classe, targetTerminale); //e lo vado a salvare nel meta data
     }
     return classe;
+}
+
+export function SalvaListaClasseMetaData(tmp: ListaTerminaleClasse) {
+    Reflect.defineMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, tmp, targetTerminale);
+}
+export function GetListaClasseMetaData() {
+    let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
+    if (tmp == undefined) {
+        tmp = new ListaTerminaleClasse();
+    }
+    return tmp;
 }

@@ -1,5 +1,5 @@
-import { IPrintabile, IResponse, targetTerminale } from "../tools";
-import { CheckClasseMetaData, TerminaleClasse } from "./terminale-classe";
+import { IPrintabile, IType, targetTerminale } from "../tools";
+import { CheckClasseMetaData, GetListaClasseMetaData, SalvaListaClasseMetaData, TerminaleClasse } from "./terminale-classe";
 import { TerminaleParametro } from "./terminale-parametro";
 
 
@@ -7,9 +7,11 @@ import superagent from "superagent";
 import express, { Router, Request, Response } from "express";
 import { ListaTerminaleMetodo } from "../liste/lista-terminale-metodo";
 import { ListaTerminaleParametro } from "../liste/lista-terminale-parametro";
+import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 
 export interface IReturn {
     body: object;
+    stato:number;
 }
 
 export class TerminaleMetodo implements IPrintabile {
@@ -21,12 +23,14 @@ export class TerminaleMetodo implements IPrintabile {
     private _nome: string | Symbol;
     metodoAvviabile: any;
     private _path: string;
-    constructor(nome: string, path: string, classePath: string) {
+    pathGlobal: string;
+    constructor(nome: string, path: string, classeParth: string) {
         this._listaParametri = new ListaTerminaleParametro();
         this._nome = nome;
         this._path = path;
-        this.classePath = classePath;
+        this.classePath = this.classePath;
         this.tipo = TypeMetodo.indefinita;
+        this.pathGlobal='';
     }
     /* start : get e set */
     public get nome(): string | Symbol {
@@ -72,9 +76,12 @@ export class TerminaleMetodo implements IPrintabile {
         }
         if (pathRoot != undefined) console.log(tab + this.nome + ' | ' + '/' + pathRoot + '/' + this.path + '  |  ' + parametri);
         else console.log(tab + this.nome + ' | ' + "/" + this.path + '  |  ' + parametri);
+        console.log(this.pathGlobal);
+        
 
     }
-    ConfiguraRotta(rotte: Router): Router {
+    ConfiguraRotta(rotte: Router, pathglobal: string): Router {
+        this.pathGlobal=pathglobal +'/'+ this.path;
         if (this.metodoAvviabile != undefined) {
             //rotte.get('/' + this.nome, this.metodoAvviabile);
             switch (this.tipo) {
@@ -82,9 +89,9 @@ export class TerminaleMetodo implements IPrintabile {
                     (<IReturn>this.metodoAvviabile).body;
                     rotte.get("/" + this.path.toString(),
                         (req: Request, res: Response) => {
-
-                            const tmp = this.metodoAvviabile(this.listaParametri);
-                            res.status((<IResponse>tmp).codiceErrore).send((<IResponse>tmp).messaggioErrore);
+                            const tmp = this.metodoAvviabile();
+                            res.status((<IReturn>tmp).stato).send((<IReturn>tmp).body);
+                            return res;
                         });
                     break;
                 default:
@@ -92,6 +99,9 @@ export class TerminaleMetodo implements IPrintabile {
             }
         }
         return rotte;
+    }
+    CercaParametroSeNoAggiungi(parameterIndex: string, tipoParametro: IType) {
+        this.listaParametri.push(new TerminaleParametro(parameterIndex, tipoParametro))//.lista.push({ propertyKey: propertyKey, Metodo: target });                                           
     }
 
 }
@@ -134,7 +144,28 @@ export function mpMet(tipo: TypeMetodo, path?: string): MethodDecorator {
         }
     }
 }
+export function mpMetRev(tipo: TypeMetodo, path?: string): MethodDecorator {
+    return function (
+        target: Object,
+        propertyKey: string | symbol,
+        descriptor: PropertyDescriptor
+    ) {
+        const list: ListaTerminaleClasse = GetListaClasseMetaData();
+        const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
+        const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
 
+        if (metodo != undefined && list != undefined && classe != undefined) {
+            metodo.metodoAvviabile = descriptor.value;
+            metodo.tipo = tipo;
+            if (path == undefined) metodo.path = propertyKey.toString();
+            else metodo.path = path;
+            SalvaListaClasseMetaData(list);
+        }
+        else {
+            console.log("Errore mio!");
+        }
+    }
+}
 
 export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse) {
     let tmp: ListaTerminaleMetodo = Reflect.getMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, targetTerminale); // vado a prendere la struttura legata alle funzioni
@@ -145,8 +176,6 @@ export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse)
     let terminale = tmp.CercaConNome(nomeMetodo, classe.path); //cerca la mia funzione
     if (terminale == undefined)/* se non c'è */ {
         terminale = new TerminaleMetodo(nomeMetodo, "", classe.nome); // creo la funzione
-        tmp.AggiungiElemento(terminale);
-        Reflect.defineMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, tmp, targetTerminale);//e lo aggiungo a i metadata
     }
     return terminale;
 }
