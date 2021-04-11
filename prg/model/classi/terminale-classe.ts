@@ -118,7 +118,7 @@ export class TerminaleClasse implements IPrintabile {
  * 
  * @param ctr 
  */
-export function mpClass(percorso: string): any {
+ function decoratoreClasse(percorso: string): any {
     return (ctr: Function) => {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         const classe = CheckClasseMetaData(ctr.name);
@@ -127,7 +127,7 @@ export function mpClass(percorso: string): any {
         Reflect.defineMetadata(TerminaleClasse.nomeMetadataKeyTarget, classe, targetTerminale); //e lo vado a salvare nel meta data
     }
 }
-export function mpClasseRev(percorso: string): any {
+ function decoratoreClasseeRev(percorso: string): any {
     return (ctr: Function) => {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(ctr.name);
@@ -162,3 +162,18 @@ export function GetListaClasseMetaData() {
     }
     return tmp;
 }
+
+
+export { decoratoreClasse as mpClas };
+export { decoratoreClasse as mpC };
+export { decoratoreClasse as mpClasse };
+export { decoratoreClasse as mpDecoratoreClasse };
+export { decoratoreClasse as mpDecClasse };
+export { decoratoreClasse as mpDecClas };
+
+export { decoratoreClasse as MPClas };
+export { decoratoreClasse as MPC };
+export { decoratoreClasse as MPClasse };
+export { decoratoreClasse as MPDecoratoreClasse };
+export { decoratoreClasse as MPDecClasse };
+export { decoratoreClasse as MPDecClas };

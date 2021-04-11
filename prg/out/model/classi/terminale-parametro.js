@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mpParRev = exports.TerminaleParametro = exports.EPosizione = void 0;
+exports.MPDecPar = exports.MPDecParametro = exports.MPDecoratoreParametroGenerico = exports.MPParametro = exports.MPP = exports.MPParRev = exports.mpDecPar = exports.mpDecParametro = exports.mpDecoratoreParametroGenerico = exports.mpParametro = exports.mpP = exports.mpParRev = exports.mpPar = exports.TerminaleParametro = exports.EPosizione = void 0;
 const tools_1 = require("../tools");
 const terminale_classe_1 = require("./terminale-classe");
 var EPosizione;
@@ -26,14 +26,26 @@ class TerminaleParametro {
     }
 }
 exports.TerminaleParametro = TerminaleParametro;
-function mpParRev(tipoParametro, nomeParametro, posizione) {
+function decoratoreParametroGenerico(tipoParametro, nomeParametro, posizione) {
     return function (target, propertyKey, parameterIndex) {
         const list = terminale_classe_1.GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-        metodo.CercaParametroSeNoAggiungi(nomeParametro, tipoParametro, parameterIndex, posizione);
+        metodo.CercaParametroSeNoAggiungi(nomeParametro, tools_1.IType[tipoParametro], parameterIndex, EPosizione[posizione]);
         terminale_classe_1.SalvaListaClasseMetaData(list);
     };
 }
-exports.mpParRev = mpParRev;
+exports.mpPar = decoratoreParametroGenerico;
+exports.mpParRev = decoratoreParametroGenerico;
+exports.mpP = decoratoreParametroGenerico;
+exports.mpParametro = decoratoreParametroGenerico;
+exports.mpDecoratoreParametroGenerico = decoratoreParametroGenerico;
+exports.mpDecParametro = decoratoreParametroGenerico;
+exports.mpDecPar = decoratoreParametroGenerico;
+exports.MPParRev = decoratoreParametroGenerico;
+exports.MPP = decoratoreParametroGenerico;
+exports.MPParametro = decoratoreParametroGenerico;
+exports.MPDecoratoreParametroGenerico = decoratoreParametroGenerico;
+exports.MPDecParametro = decoratoreParametroGenerico;
+exports.MPDecPar = decoratoreParametroGenerico;
 //# sourceMappingURL=terminale-parametro.js.map

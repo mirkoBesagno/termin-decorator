@@ -9,13 +9,13 @@ import { ColumnType } from "typeorm";
 import express from "express";
 import { Request, Response, Router } from "express";
 import { mpMain, Main } from "./model/classi/terminale-main";
-import { mpClass, mpClasseRev } from "./model/classi/terminale-classe";
-import { IReturn, mpMet, mpMetRev, TypeMetodo } from "./model/classi/terminale-metodo";
-import {  EPosizione, mpParRev } from "./model/classi/terminale-parametro";
+import { mpClas } from "./model/classi/terminale-classe";
+import { IReturn, mpMet, TypeMetodo } from "./model/classi/terminale-metodo";
+import {  EPosizione, mpP, mpPar } from "./model/classi/terminale-parametro";
 import { IType } from "./model/tools";
 
 
-        @mpClasseRev('classe-test')
+        @mpClas('classe-test')
         class ClasseTest {
             nome: string;
             cognome:string;
@@ -25,8 +25,8 @@ import { IType } from "./model/tools";
                 this.cognome=cognome;
             }
 
-            @mpMetRev(TypeMetodo.post,'SetNome')
-            SetNome(@mpParRev(IType.text, 'nomeFuturo', EPosizione.body) nomeFuturo: string) {
+            @mpMet('post','SetNome')
+            SetNome(@mpPar('text', 'nomeFuturo', 'body') nomeFuturo: string) {
                 this.nome = nomeFuturo;
                 const tmp : IReturn={
                     body:{
@@ -35,7 +35,7 @@ import { IType } from "./model/tools";
                     stato:200};
                 return tmp;
             }
-            @mpMetRev(TypeMetodo.get, 'GetNome')
+            @mpMet('get', 'GetNome')
             GetNome(){
                 const tmp : IReturn={
                     body:{
@@ -45,8 +45,8 @@ import { IType } from "./model/tools";
                 return tmp;
             }
 
-            @mpMetRev(TypeMetodo.post, "SetCognome")
-            SetCognome(@mpParRev(IType.text, 'cognomeNuovo', EPosizione.body) cognomeNuovo: string) {
+            @mpMet('post', "SetCognome")
+            SetCognome(@mpPar('text', 'cognomeNuovo', 'body') cognomeNuovo: string) {
                 this.cognome = cognomeNuovo;
                 const tmp : IReturn={
                     body:{
@@ -55,7 +55,7 @@ import { IType } from "./model/tools";
                     stato:200};
                 return tmp;
             }
-            @mpMetRev(TypeMetodo.get, 'GetCognome')
+            @mpMet('get', 'GetCognome')
             GetCognome() {
                 const tmp : IReturn={
                     body:{
@@ -64,10 +64,10 @@ import { IType } from "./model/tools";
                     stato:200};
                 return tmp;
             }
-            
-            @mpMetRev(TypeMetodo.post,'set-nome-e-cognome')
-            SetNome_E_Cognome(@mpParRev(IType.text, 'nomeNuovo', EPosizione.body) nome:string, 
-            @mpParRev(IType.text, 'cognomeNuovo', EPosizione.query) cognome:string){
+
+            @mpMet('post','set-nome-e-cognome')
+            SetNome_E_Cognome(@mpP('text', 'nomeNuovo', 'body') nome:string, 
+            @mpP('text', 'cognomeNuovo', 'query') cognome:string){
                 this.cognome = cognome;
                 this.nome= nome;
                 const tmp : IReturn={
@@ -78,7 +78,7 @@ import { IType } from "./model/tools";
                     stato:200};
                 return tmp;
             }
-            @mpMetRev(TypeMetodo.get,'get-nome-e-cognome')
+            @mpMet('get','get-nome-e-cognome')
             GetNome_E_Cognome(){
                 
                 const tmp : IReturn={

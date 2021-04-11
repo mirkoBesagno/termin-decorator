@@ -22,7 +22,6 @@ const terminale_main_1 = require("./model/classi/terminale-main");
 const terminale_classe_1 = require("./model/classi/terminale-classe");
 const terminale_metodo_1 = require("./model/classi/terminale-metodo");
 const terminale_parametro_1 = require("./model/classi/terminale-parametro");
-const tools_1 = require("./model/tools");
 let ClasseTest = class ClasseTest {
     constructor(nome, cognome) {
         this.nome = nome;
@@ -98,47 +97,47 @@ let ClasseTest = class ClasseTest {
     }
 };
 __decorate([
-    terminale_metodo_1.mpMetRev(terminale_metodo_1.TypeMetodo.post, 'SetNome'),
-    __param(0, terminale_parametro_1.mpParRev(tools_1.IType.text, 'nomeFuturo', terminale_parametro_1.EPosizione.body)),
+    terminale_metodo_1.mpMet('post', 'SetNome'),
+    __param(0, terminale_parametro_1.mpPar('text', 'nomeFuturo', 'body')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ClasseTest.prototype, "SetNome", null);
 __decorate([
-    terminale_metodo_1.mpMetRev(terminale_metodo_1.TypeMetodo.get, 'GetNome'),
+    terminale_metodo_1.mpMet('get', 'GetNome'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ClasseTest.prototype, "GetNome", null);
 __decorate([
-    terminale_metodo_1.mpMetRev(terminale_metodo_1.TypeMetodo.post, "SetCognome"),
-    __param(0, terminale_parametro_1.mpParRev(tools_1.IType.text, 'cognomeNuovo', terminale_parametro_1.EPosizione.body)),
+    terminale_metodo_1.mpMet('post', "SetCognome"),
+    __param(0, terminale_parametro_1.mpPar('text', 'cognomeNuovo', 'body')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ClasseTest.prototype, "SetCognome", null);
 __decorate([
-    terminale_metodo_1.mpMetRev(terminale_metodo_1.TypeMetodo.get, 'GetCognome'),
+    terminale_metodo_1.mpMet('get', 'GetCognome'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ClasseTest.prototype, "GetCognome", null);
 __decorate([
-    terminale_metodo_1.mpMetRev(terminale_metodo_1.TypeMetodo.post, 'set-nome-e-cognome'),
-    __param(0, terminale_parametro_1.mpParRev(tools_1.IType.text, 'nomeNuovo', terminale_parametro_1.EPosizione.body)),
-    __param(1, terminale_parametro_1.mpParRev(tools_1.IType.text, 'cognomeNuovo', terminale_parametro_1.EPosizione.query)),
+    terminale_metodo_1.mpMet('post', 'set-nome-e-cognome'),
+    __param(0, terminale_parametro_1.mpP('text', 'nomeNuovo', 'body')),
+    __param(1, terminale_parametro_1.mpP('text', 'cognomeNuovo', 'query')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], ClasseTest.prototype, "SetNome_E_Cognome", null);
 __decorate([
-    terminale_metodo_1.mpMetRev(terminale_metodo_1.TypeMetodo.get, 'get-nome-e-cognome'),
+    terminale_metodo_1.mpMet('get', 'get-nome-e-cognome'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ClasseTest.prototype, "GetNome_E_Cognome", null);
 ClasseTest = __decorate([
-    terminale_classe_1.mpClasseRev('classe-test'),
+    terminale_classe_1.mpClas('classe-test'),
     __metadata("design:paramtypes", [String, String])
 ], ClasseTest);
 /* @mpClass('classe1')

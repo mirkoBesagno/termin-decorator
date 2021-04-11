@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetListaClasseMetaData = exports.SalvaListaClasseMetaData = exports.CheckClasseMetaData = exports.mpClasseRev = exports.mpClass = exports.TerminaleClasse = void 0;
+exports.MPDecClas = exports.MPDecClasse = exports.MPDecoratoreClasse = exports.MPClasse = exports.MPC = exports.MPClas = exports.mpDecClas = exports.mpDecClasse = exports.mpDecoratoreClasse = exports.mpClasse = exports.mpC = exports.mpClas = exports.GetListaClasseMetaData = exports.SalvaListaClasseMetaData = exports.CheckClasseMetaData = exports.TerminaleClasse = void 0;
 const tools_1 = require("../tools");
 const express_1 = require("express");
 const prompts_1 = __importDefault(require("prompts"));
@@ -120,7 +120,7 @@ TerminaleClasse.nomeMetadataKeyTarget = "ClasseTerminaleTarget";
  *
  * @param ctr
  */
-function mpClass(percorso) {
+function decoratoreClasse(percorso) {
     return (ctr) => {
         let tmp = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale);
         const classe = CheckClasseMetaData(ctr.name);
@@ -129,8 +129,19 @@ function mpClass(percorso) {
         Reflect.defineMetadata(TerminaleClasse.nomeMetadataKeyTarget, classe, tools_1.targetTerminale); //e lo vado a salvare nel meta data
     };
 }
-exports.mpClass = mpClass;
-function mpClasseRev(percorso) {
+exports.mpClas = decoratoreClasse;
+exports.mpC = decoratoreClasse;
+exports.mpClasse = decoratoreClasse;
+exports.mpDecoratoreClasse = decoratoreClasse;
+exports.mpDecClasse = decoratoreClasse;
+exports.mpDecClas = decoratoreClasse;
+exports.MPClas = decoratoreClasse;
+exports.MPC = decoratoreClasse;
+exports.MPClasse = decoratoreClasse;
+exports.MPDecoratoreClasse = decoratoreClasse;
+exports.MPDecClasse = decoratoreClasse;
+exports.MPDecClas = decoratoreClasse;
+function decoratoreClasseeRev(percorso) {
     return (ctr) => {
         const list = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(ctr.name);
@@ -138,7 +149,6 @@ function mpClasseRev(percorso) {
         SalvaListaClasseMetaData(list);
     };
 }
-exports.mpClasseRev = mpClasseRev;
 function CheckClasseMetaData(nome) {
     let listClasse = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale); // vado a prendere la struttura legata alle funzioni ovvero le classi
     if (listClasse == undefined) /* se non c'è la creo*/ {

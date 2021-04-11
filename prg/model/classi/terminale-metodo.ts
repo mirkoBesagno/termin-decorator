@@ -216,48 +216,25 @@ export class TerminaleMetodo implements IPrintabile {
 
 }
 
+export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse) {
+    let tmp: ListaTerminaleMetodo = Reflect.getMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, targetTerminale); // vado a prendere la struttura legata alle funzioni
+    if (tmp == undefined) {//se non c'è 
+        tmp = new ListaTerminaleMetodo(classe.rotte);//lo creo
+        Reflect.defineMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, tmp, targetTerminale);//e lo aggiungo a i metadata
+    }
+    let terminale = tmp.CercaConNome(nomeMetodo, classe.path); //cerca la mia funzione
+    if (terminale == undefined)/* se non c'è */ {
+        terminale = new TerminaleMetodo(nomeMetodo, "", classe.nome); // creo la funzione
+    }
+    return terminale;
+}
+
 export enum TypeMetodo {
     get, put, post, patch, purge, delete, indefinita
 }
 export type TypeMetod ="get"| "put"| "post"| "patch"| "purge"| "delete";
 
-
-/**
-* arrivati a questo punto il metodo dovrebbe gia esistere ma se non esiste bisogna crearlo
-* poi deve essere configurata la sua funzione
-* @returns q
-*/
-export function mpMet(tipo: TypeMetodo, path?: string): MethodDecorator {
-    return function (
-        target: Object,
-        propertyKey: string | symbol,
-        descriptor: PropertyDescriptor
-    ) {
-        const classe = CheckClasseMetaData(target.constructor.name);
-        const metodo = CheckMetodoMetaData(propertyKey.toString(), classe);
-
-        ///////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////
-        let tmp: ListaTerminaleMetodo = Reflect.getMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, targetTerminale); // vado a prendere la struttura legata alle funzioni
-
-        if (metodo != undefined && tmp != undefined && classe != undefined) {
-            metodo.metodoAvviabile = descriptor.value;
-            metodo.tipo = tipo;
-            if (path == undefined) metodo.path = propertyKey.toString();
-            else metodo.path = path;
-
-            tmp.AggiungiElemento(metodo);
-            classe.listaMetodi.AggiungiElemento(metodo);
-            Reflect.defineMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, tmp, targetTerminale); // salvo tutto
-            Reflect.defineMetadata(TerminaleClasse.nomeMetadataKeyTarget, classe, targetTerminale); //e lo vado a salvare nel meta data
-            //Reflect.defineMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, classe, targetTerminale);
-        }
-        else {
-            console.log("Errore mio!");
-        }
-    }
-}
-export function mpMetRev(tipo: TypeMetod, path?: string): MethodDecorator {
+function decoratoreMetodo(tipo: TypeMetod, path?: string): MethodDecorator {
     return function (
         target: Object,
         propertyKey: string | symbol,
@@ -280,15 +257,18 @@ export function mpMetRev(tipo: TypeMetod, path?: string): MethodDecorator {
     }
 }
 
-export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse) {
-    let tmp: ListaTerminaleMetodo = Reflect.getMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, targetTerminale); // vado a prendere la struttura legata alle funzioni
-    if (tmp == undefined) {//se non c'è 
-        tmp = new ListaTerminaleMetodo(classe.rotte);//lo creo
-        Reflect.defineMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, tmp, targetTerminale);//e lo aggiungo a i metadata
-    }
-    let terminale = tmp.CercaConNome(nomeMetodo, classe.path); //cerca la mia funzione
-    if (terminale == undefined)/* se non c'è */ {
-        terminale = new TerminaleMetodo(nomeMetodo, "", classe.nome); // creo la funzione
-    }
-    return terminale;
-}
+export { decoratoreMetodo as mpMetRev };
+export { decoratoreMetodo as mpMet };
+export { decoratoreMetodo as mpM };
+export { decoratoreMetodo as mpMetodo };
+export { decoratoreMetodo as mpDecoratoreMetodo };
+export { decoratoreMetodo as mpDecMetodo };
+export { decoratoreMetodo as mpDecMet };
+
+
+export { decoratoreMetodo as MPMetRev };
+export { decoratoreMetodo as MPM };
+export { decoratoreMetodo as MPMetodo };
+export { decoratoreMetodo as MPDecoratoreMetodo };
+export { decoratoreMetodo as MPDecMetodo };
+export { decoratoreMetodo as MPDecMet };
