@@ -66,7 +66,8 @@ import { IType } from "./model/tools";
             }
 
             @mpMet('post','set-nome-e-cognome')
-            SetNome_E_Cognome(@mpP('text', 'nomeNuovo', 'body') nome:string, 
+            SetNome_E_Cognome(
+                @mpP('text', 'nomeNuovo', 'body') nome:string, 
             @mpP('text', 'cognomeNuovo', 'query') cognome:string){
                 this.cognome = cognome;
                 this.nome= nome;
