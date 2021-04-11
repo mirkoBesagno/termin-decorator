@@ -11,27 +11,85 @@ import { Request, Response, Router } from "express";
 import { mpMain, Main } from "./model/classi/terminale-main";
 import { mpClass, mpClasseRev } from "./model/classi/terminale-classe";
 import { IReturn, mpMet, mpMetRev, TypeMetodo } from "./model/classi/terminale-metodo";
-import {  mpPar, mpParRev } from "./model/classi/terminale-parametro";
+import {  EPosizione, mpParRev } from "./model/classi/terminale-parametro";
 import { IType } from "./model/tools";
 
-       /*  @mpMain('app') */
+
         @mpClasseRev('classe-test')
         class ClasseTest {
             nome: string;
-            constructor(nome: string) {
+            cognome:string;
+
+            constructor(nome: string, cognome:string) {
                 this.nome = nome;
+                this.cognome=cognome;
             }
-            @mpMetRev(TypeMetodo.get,'123445567')
-            SetNome(@mpParRev(IType.text) nomeFuturo: string) {
+
+            @mpMetRev(TypeMetodo.post,'SetNome')
+            SetNome(@mpParRev(IType.text, 'nomeFuturo', EPosizione.body) nomeFuturo: string) {
                 this.nome = nomeFuturo;
                 const tmp : IReturn={
                     body:{
-                        "nome":"lollllloooo",
-                        "cognome":"bibbolooo"
+                        "nome": this.nome
                     },
                     stato:200};
                 return tmp;
             }
+            @mpMetRev(TypeMetodo.get, 'GetNome')
+            GetNome(){
+                const tmp : IReturn={
+                    body:{
+                        "nome": this.nome
+                    },
+                    stato:200};
+                return tmp;
+            }
+
+            @mpMetRev(TypeMetodo.post, "SetCognome")
+            SetCognome(@mpParRev(IType.text, 'cognomeNuovo', EPosizione.body) cognomeNuovo: string) {
+                this.cognome = cognomeNuovo;
+                const tmp : IReturn={
+                    body:{
+                        "cognome": this.cognome
+                    },
+                    stato:200};
+                return tmp;
+            }
+            @mpMetRev(TypeMetodo.get, 'GetCognome')
+            GetCognome() {
+                const tmp : IReturn={
+                    body:{
+                        "cognome": this.cognome
+                    },
+                    stato:200};
+                return tmp;
+            }
+            
+            @mpMetRev(TypeMetodo.post,'set-nome-e-cognome')
+            SetNome_E_Cognome(@mpParRev(IType.text, 'nomeNuovo', EPosizione.body) nome:string, 
+            @mpParRev(IType.text, 'cognomeNuovo', EPosizione.query) cognome:string){
+                this.cognome = cognome;
+                this.nome= nome;
+                const tmp : IReturn={
+                    body:{
+                        "nome":this.nome,
+                        "cognome": this.cognome
+                    },
+                    stato:200};
+                return tmp;
+            }
+            @mpMetRev(TypeMetodo.get,'get-nome-e-cognome')
+            GetNome_E_Cognome(){
+                
+                const tmp : IReturn={
+                    body:{
+                        "nome":this.nome,
+                        "cognome": this.cognome
+                    },
+                    stato:200};
+                return tmp;
+            }
+            
             MetodoPrint() {
                 if ('nome' in this) {
                     console.log(this.nome != undefined ? this.nome : "sono undefined");
@@ -43,43 +101,6 @@ import { IType } from "./model/tools";
             }
         }
 
-        @mpClasseRev('classe-test-1')
-        class ClasseTestSeconda {
-            nome: string;
-            constructor(nome: string) {
-                this.nome = nome;
-            }
-            @mpMetRev(TypeMetodo.get,'lllloko')
-            SetNome(@mpParRev(IType.text) nomeFuturo: string) {
-                this.nome = nomeFuturo;
-                const tmp : IReturn={
-                    body:{
-                        "nome":"mirkoooo",
-                        "cognome":"pizziniiii"
-                    },
-                    stato:200};
-                return tmp;
-            }
-/* 
-            @mpMet('metodo-test-1')
-            SetNomePrimo(@mpPar("char") nomeFuturoPrimo: string) {
-                this.nome = nomeFuturoPrimo;
-            }
-            @mpMet('metodo-test-2')
-            SetNomeSecondo(@mpPar("char") nomeFuturoSecondo: string) {
-                this.nome = nomeFuturoSecondo;
-            } */
-
-            MetodoPrint() {
-                if ('nome' in this) {
-                    console.log(this.nome != undefined ? this.nome : "sono undefined");
-                }
-                else {
-                    console.log("Classe senza nome");
-
-                }
-            }
-        }
 
         /* @mpClass('classe1')
         class Classe1 {
@@ -112,15 +133,37 @@ import { IType } from "./model/tools";
             }
         } */
 
-        const classecosi = new ClasseTest("prima classe!!");
+        const classecosi = new ClasseTest("prima classe!!",'cognome prima classe?!??!');
         classecosi.MetodoPrint();
 
         const main = new Main("app");
+        console.log('Inizializzazione inizio .....');
+        
+        main.Inizializza("http://localhost:3000");
+        console.log('..... Inizializzazione fine.');
+        console.log('Menu');
+        console.log('0: express');
+        console.log('1: superagent');
+        chiedi({ 
+            message: 'Scegli: ',
+         type: 'number', 
+         name: 'scelta' 
+        }).then((item)=>{
+            if (item.scelta==0) {
+                main.StartExpress();                
+            } else if(item.scelta==1){
+                main.PrintMenu();
+            }else{
+                console.log('Ciao ciao ...');
+                
+            }
 
-        main.Inizializza();
-        main.PrintMenu();
-        main.StartExpress();
-        console.log('fineeeeeeeeeee');
+        }).catch(err => {
+            console.log(err);
+            
+        });
+       
+        //console.log('fineeeeeeeeeee');
         
         /* (<any>classecosi).Inizializza();
         (<any>classecosi).serverExpressDecorato.listen(3000);

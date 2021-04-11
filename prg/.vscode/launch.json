@@ -5,15 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
             ],
-            "program": "${workspaceFolder}\\index.ts",
-            "outFiles": [
-                "${workspaceFolder}/**/*.js"
+            "args": [
+                "${workspaceFolder}/index.ts"
             ]
         }
     ]

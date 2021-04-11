@@ -1,9 +1,10 @@
 import { IPrintabile, IType, targetTerminale } from "../tools";
 import { CheckClasseMetaData, GetListaClasseMetaData, SalvaListaClasseMetaData, TerminaleClasse } from "./terminale-classe";
-import { TerminaleParametro } from "./terminale-parametro";
+import { EPosizione, TerminaleParametro } from "./terminale-parametro";
+import chiedi from "prompts";
 
 
-import superagent from "superagent";
+import superagent, { head } from "superagent";
 import express, { Router, Request, Response } from "express";
 import { ListaTerminaleMetodo } from "../liste/lista-terminale-metodo";
 import { ListaTerminaleParametro } from "../liste/lista-terminale-parametro";
@@ -11,7 +12,7 @@ import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 
 export interface IReturn {
     body: object;
-    stato:number;
+    stato: number;
 }
 
 export class TerminaleMetodo implements IPrintabile {
@@ -30,7 +31,7 @@ export class TerminaleMetodo implements IPrintabile {
         this._path = path;
         this.classePath = this.classePath;
         this.tipo = TypeMetodo.indefinita;
-        this.pathGlobal='';
+        this.pathGlobal = '';
     }
     /* start : get e set */
     public get nome(): string | Symbol {
@@ -77,11 +78,21 @@ export class TerminaleMetodo implements IPrintabile {
         if (pathRoot != undefined) console.log(tab + this.nome + ' | ' + '/' + pathRoot + '/' + this.path + '  |  ' + parametri);
         else console.log(tab + this.nome + ' | ' + "/" + this.path + '  |  ' + parametri);
         console.log(this.pathGlobal);
-        
+
 
     }
+    PrintStamp() {
+        let parametri = "";
+        for (let index = 0; index < this.listaParametri.length; index++) {
+            const element = this.listaParametri[index];
+            parametri = parametri + element.PrintParametro();
+        }
+        const tmp = this.nome + ' | ' + '/' + this.pathGlobal + '/' + this.path + '  |  ' + parametri;
+        //console.log(tmp);
+        return tmp;
+    }
     ConfiguraRotta(rotte: Router, pathglobal: string): Router {
-        this.pathGlobal=pathglobal +'/'+ this.path;
+        this.pathGlobal = pathglobal + '/' + this.path;
         if (this.metodoAvviabile != undefined) {
             //rotte.get('/' + this.nome, this.metodoAvviabile);
             switch (this.tipo) {
@@ -89,7 +100,22 @@ export class TerminaleMetodo implements IPrintabile {
                     (<IReturn>this.metodoAvviabile).body;
                     rotte.get("/" + this.path.toString(),
                         (req: Request, res: Response) => {
-                            const tmp = this.metodoAvviabile();
+                            console.log('Risposta a chiamata : ' + this.pathGlobal);
+                            const parametri = this.listaParametri.EstraiParametriDaRequest(req);
+                            const tmp = this.metodoAvviabile.apply(this, parametri);
+
+                            res.status((<IReturn>tmp).stato).send((<IReturn>tmp).body);
+                            return res;
+                        });
+                    break;
+                case TypeMetodo.post:
+                    (<IReturn>this.metodoAvviabile).body;
+                    rotte.post("/" + this.path.toString(),
+                        (req: Request, res: Response) => {
+                            console.log('Risposta a chiamata : ' + this.pathGlobal);
+                            const parametri = this.listaParametri.EstraiParametriDaRequest(req);
+                            const tmp = this.metodoAvviabile.apply(this, parametri);
+                            //const tmp = this.metodoAvviabile(req.body.nome);
                             res.status((<IReturn>tmp).stato).send((<IReturn>tmp).body);
                             return res;
                         });
@@ -100,15 +126,102 @@ export class TerminaleMetodo implements IPrintabile {
         }
         return rotte;
     }
-    CercaParametroSeNoAggiungi(parameterIndex: string, tipoParametro: IType) {
-        this.listaParametri.push(new TerminaleParametro(parameterIndex, tipoParametro))//.lista.push({ propertyKey: propertyKey, Metodo: target });                                           
+    async ChiamaLaRotta(headerpath?: string) {
+        if (headerpath == undefined) {
+            headerpath = "http://localhost:3000"
+        }
+        console.log('chiamata per : ' + head + this.pathGlobal + ' | Verbo: ' + this.tipo);
+
+        const parametri = await this.listaParametri.SoddisfaParamtri();
+        let ritorno;
+        switch (this.tipo) {
+            case TypeMetodo.get:
+                try {
+                    ritorno = await superagent
+                        .get(headerpath + this.pathGlobal)
+                        .query(JSON.parse(parametri.query))
+                        .send(JSON.parse(parametri.body))
+                        .set('accept', 'json');
+                } catch (error) {
+                    console.log(error);
+
+                }
+            case TypeMetodo.post:
+                try {
+                    ritorno = await superagent
+                        .post(headerpath + this.pathGlobal)
+                        .query(JSON.parse(parametri.query))
+                        .send(JSON.parse(parametri.body))
+                        .set('accept', 'json');
+                } catch (error) {
+                    console.log(error);
+
+                }
+                return ritorno;
+            case TypeMetodo.purge:
+                try {
+                    ritorno = await superagent
+                        .purge(headerpath + this.pathGlobal)
+                        .query(JSON.parse(parametri.query))
+                        .send(JSON.parse(parametri.body))
+                        .set('accept', 'json');
+                } catch (error) {
+                    console.log(error);
+
+                }
+                return ritorno;
+            case TypeMetodo.patch:
+                try {
+                    ritorno = await superagent
+                        .patch(headerpath + this.pathGlobal)
+                        .query(JSON.parse(parametri.query))
+                        .send(JSON.parse(parametri.body))
+                        .set('accept', 'json');
+                } catch (error) {
+                    console.log(error);
+
+                }
+                return ritorno;
+            case TypeMetodo.delete:
+                try {
+                    ritorno = await superagent
+                        .delete(headerpath + this.pathGlobal)
+                        .query(JSON.parse(parametri.query))
+                        .send(JSON.parse(parametri.body))
+                        .set('accept', 'json');
+                } catch (error) {
+                    console.log(error);
+
+                }
+                return ritorno;
+            default:
+                break;
+        }
+    }
+    async SoddisfaParamtri() {
+        const body = [];
+        for (let index = 0; index < this.listaParametri.length; index++) {
+            const element = this.listaParametri[index];
+            const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
+                + element.tipo + '|Inserire valore :';
+            const scelta = await chiedi({ message: messaggio, type: 'text', name: 'scelta' });
+            body.push({ nome: element.nome, valore: scelta.scelta });
+        }
+
+        return body;
+    }
+    CercaParametroSeNoAggiungi(nome: string, parameterIndex: number, tipoParametro: IType, posizione: EPosizione) {
+        this.listaParametri.push(new TerminaleParametro(nome, tipoParametro, posizione, parameterIndex))//.lista.push({ propertyKey: propertyKey, Metodo: target });                                           
     }
 
 }
 
 export enum TypeMetodo {
-    get, put, indefinita
+    get, put, post, patch, purge, delete, indefinita
 }
+export type TypeMetod ="get"| "put"| "post"| "patch"| "purge"| "delete";
+
+
 /**
 * arrivati a questo punto il metodo dovrebbe gia esistere ma se non esiste bisogna crearlo
 * poi deve essere configurata la sua funzione
@@ -144,7 +257,7 @@ export function mpMet(tipo: TypeMetodo, path?: string): MethodDecorator {
         }
     }
 }
-export function mpMetRev(tipo: TypeMetodo, path?: string): MethodDecorator {
+export function mpMetRev(tipo: TypeMetod, path?: string): MethodDecorator {
     return function (
         target: Object,
         propertyKey: string | symbol,
@@ -156,7 +269,7 @@ export function mpMetRev(tipo: TypeMetodo, path?: string): MethodDecorator {
 
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.metodoAvviabile = descriptor.value;
-            metodo.tipo = tipo;
+            metodo.tipo = TypeMetodo[ tipo];
             if (path == undefined) metodo.path = propertyKey.toString();
             else metodo.path = path;
             SalvaListaClasseMetaData(list);

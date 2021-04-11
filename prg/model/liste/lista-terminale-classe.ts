@@ -1,17 +1,40 @@
 import { SalvaListaClasseMetaData, TerminaleClasse } from "../classi/terminale-classe";
+import chiedi from "prompts";
 
 export class ListaTerminaleClasse extends Array<TerminaleClasse> {
     static nomeMetadataKeyTarget = "ListaTerminaleClasse";
     constructor() {
         super();
     }
-    PrintMenu() {
+    async PrintMenu() {
         const tab = '\t';
         console.log(tab + "ListaTerminaleClasse" + '->' + 'PrintMenu');
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
-            element.PrintMenu();
+            await element.PrintMenu();
         }
+    }
+    async PrintListaClassi(): Promise<string[]> {
+        let ritorno: string[] = [];
+        for (let index = 0; index < this.length; index++) {
+            const element = this[index];
+            const tmp = index + 1;
+            ritorno.push(element.pathGlobal);
+            console.log(tmp + ': ' + element.pathGlobal);
+        }
+        return ritorno;
+    }
+    async PrintMenuClassi() {
+        await this.PrintListaClassi();
+        const scelta = await chiedi({ message: 'Scegli classe: ', type: 'number', name: 'scelta' });
+
+        if (scelta.scelta == 0) {
+        }
+        else {
+            await this[scelta.scelta - 1].PrintMenuClasse();
+            await this.PrintListaClassi();
+        }
+
     }
     CercaConNome(nome: string | Symbol): TerminaleClasse | undefined {
         for (let index = 0; index < this.length; index++) {
@@ -32,8 +55,8 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
         }
         return classe;
     }
-    CercaMetodo(){
-        
+    CercaMetodo() {
+
     }
     AggiungiElemento(item: TerminaleClasse) {
         for (let index = 0; index < this.length; index++) {

@@ -5,34 +5,7 @@ import chiedi from "prompts";
 import superagent from "superagent";
 import express from "express";
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
-
-class TerminaleMain implements IPrintabile {
-    listaClassi: ListaTerminaleClasse;
-    constructor() {
-        this.listaClassi = new ListaTerminaleClasse();
-    }
-    Start() {
-        let listaClassi = Reflect.getMetadata('info', targetTerminale);
-        this.listaClassi = listaClassi;
-        this.PrintMenu();
-    }
-    async PrintMenu() {
-        console.log("Scegli una classe:\n");
-
-        for (let index = 0; index < this.listaClassi.length; index++) {
-            const element = this.listaClassi[index];
-            console.log(index + ":\n");
-            element.PrintCredenziali();
-        }
-        const risultato = await chiedi({ name: "scelta", message: "Digita la scelta :", type: "number" });
-        if (risultato.scelta != 0) {
-            this.listaClassi[risultato.scelta].PrintMenu();
-        } else {
-
-        }
-    }
-
-}
+import * as bodyParser from 'body-parser';
 
 /**
  * 
@@ -67,21 +40,55 @@ export class Main {
         this.listaTerminaleClassi = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
     }
 
-    Inizializza() {
+    Inizializza(patheader: string) {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         for (let index = 0; index < tmp.length; index++) {
             const element = tmp[index];
             const pathGlobal = '/' + this.path + '/' + element.path;
-            element.SettaPathRoot_e_Global(this.path, pathGlobal);
+            element.SettaPathRoot_e_Global(this.path, pathGlobal, patheader);
+            this.serverExpressDecorato.use(bodyParser.json({
+                limit: '50mb',
+                verify(req: any, res, buf, encoding) {
+                    req.rawBody = buf;
+                }
+            }));
             this.serverExpressDecorato.use(pathGlobal, element.rotte);
         }
     }
-    PrintMenu() {
+    async PrintMenu() {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-        console.log("mpMain" + ' -> ' + 'PrintMenu');
-        tmp.PrintMenu();
-        /* const listaClassi: ListaTerminaleClasse = new ListaTerminaleClasse();
-        tmp.PrintMenu(); */
+        //console.log("Menu main, digita il numero della la tua scelta: ");
+        const scelte = [
+            "Stampa albero",
+            "Stampa classi",
+            'Scegli classe'
+        ];
+        for (let index = 0; index < scelte.length; index++) {
+            const element = scelte[index];
+            const tmp = index + 1;
+            console.log(tmp + ': ' + element);
+
+        }
+        const scelta = await chiedi({ message: 'Menu main, digita il numero della la tua scelta: ', type: 'number', name: 'scelta' });
+        switch (scelte[scelta.scelta - 1]) {
+            case scelte[0]:
+                await tmp.PrintMenu();
+                break;
+            case scelte[1]:
+                await tmp.PrintListaClassi();
+                break;
+            case scelte[2]:
+                await tmp.PrintMenuClassi();
+                break;
+            default:
+                break;
+        }
+        if (scelta.scelta == 0) {
+            console.log("Saluti.");
+
+        } else {
+            this.PrintMenu();
+        }
     };
     StartExpress() {
         this.serverExpressDecorato.listen(3000);

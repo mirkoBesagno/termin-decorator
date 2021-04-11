@@ -16,7 +16,9 @@ export class TerminaleClasse implements IPrintabile {
     private pathRoot: string;
     rotte: Router;
     pathGlobal: string;
-    constructor(nome: string, path?: string) {
+    headerPath:string;
+
+    constructor(nome: string, path?: string, headerPath?:string) {
         this.id = Math.random().toString();
         this.rotte = Router();
         this.listaMetodi = new ListaTerminaleMetodo(this.rotte);
@@ -25,6 +27,13 @@ export class TerminaleClasse implements IPrintabile {
         else this.path = nome;
         this.pathRoot = "";
         this.pathGlobal = '';
+        
+        if (headerPath==undefined) {
+            this.headerPath="http://localhost:3000"
+        }
+        else{
+            this.headerPath = headerPath;
+        }
     }
     /* async PrintMenu() {
             console.log("Scegli un metodo:");
@@ -50,19 +59,48 @@ export class TerminaleClasse implements IPrintabile {
             const element = this.listaMetodi[index];
             element.PrintCredenziali(this.pathRoot + '/' + this.path);
         }
+        const scelta = await chiedi({ message: 'Premi invio per continuare', type: 'number', name: 'scelta' });
+
     }
+    async PrintMenuClasse() {
+        console.log('Classe :' + this.nome);
+        let index = 0;
+        for (let index = 0; index < this.listaMetodi.length; index++) {
+            const element = this.listaMetodi[index];
+            const tmp = index + 1;
+            console.log(tmp +': '+ element.PrintStamp());
+        }
+        const scelta = await chiedi({ message: 'Scegli il metodo da eseguire: ', type: 'number', name: 'scelta' });
+
+        if (scelta.scelta == 0) {
+            console.log("Saluti dalla classe : "+ this.nome);
+
+        } else {
+            console.log('Richiamo la rotta');
+            
+            const risposta =  await this.listaMetodi[scelta.scelta -1 ].ChiamaLaRotta();
+            if (risposta == undefined) {
+                console.log("Risposta undefined!");
+            } else {
+                console.log(risposta.body)
+            }
+                
+            await this.PrintMenuClasse();
+        }
+    }
+
     PrintCredenziali() {
         const tmp = "nome:" + this.nome + ":;:" +
             "id:" + this.id + ":;:" +
             "listaMetodi.length:" + this.listaMetodi.length + ":;:";
         //console.log(tmp);
     }
-    SettaPathRoot_e_Global(item: string, pathGlobal: string) {
+    SettaPathRoot_e_Global(item: string, pathGlobal: string, patheader:string) {
         this.pathRoot = item;
         this.pathGlobal = pathGlobal;
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
-            element.ConfiguraRotta(this.rotte,this.pathGlobal);
+            element.ConfiguraRotta(this.rotte, this.pathGlobal);
         }
     }
     CercaMetodoSeNoAggiungiMetodo(nome: string) {
