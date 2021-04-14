@@ -12,10 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MPDecMet = exports.MPDecMetodo = exports.MPDecoratoreMetodo = exports.MPMetodo = exports.MPM = exports.MPMetRev = exports.mpDecMet = exports.mpDecMetodo = exports.mpDecoratoreMetodo = exports.mpMetodo = exports.mpM = exports.mpMet = exports.mpMetRev = exports.mpAddHelmet = exports.mpAddCors = exports.TypeMetodo = exports.CheckMetodoMetaData = exports.TerminaleMetodo = exports.ERuolo = void 0;
+exports.MPDecMet = exports.MPDecMetodo = exports.MPDecoratoreMetodo = exports.MPMetodo = exports.MPM = exports.MPMetRev = exports.mpDecMet = exports.mpDecMetodo = exports.mpDecoratoreMetodo = exports.mpMetodo = exports.mpM = exports.mpMet = exports.mpMetRev = exports.mpAddMiddle = exports.mpAddHelmet = exports.mpAddCors = exports.TypeMetodo = exports.CheckMetodoMetaData = exports.TerminaleMetodo = exports.ERuolo = void 0;
 const tools_1 = require("../tools");
 const terminale_classe_1 = require("./terminale-classe");
 const terminale_parametro_1 = require("./terminale-parametro");
+const prompts_1 = __importDefault(require("prompts"));
 const helmet_1 = __importDefault(require("helmet"));
 const superagent_1 = __importDefault(require("superagent"));
 const lista_terminale_metodo_1 = require("../liste/lista-terminale-metodo");
@@ -29,6 +30,7 @@ var ERuolo;
 class TerminaleMetodo {
     constructor(nome, path, classePath, protetto) {
         this.classePath = '';
+        this.middleware = [];
         this._listaParametri = new lista_terminale_parametro_1.ListaTerminaleParametro();
         this._nome = nome;
         this._path = path;
@@ -121,7 +123,7 @@ class TerminaleMetodo {
                     if (this.cors == undefined) {
                         this.cors == cors_1.default(corsOptions);
                     }
-                    rotte.get("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), (req, res) => __awaiter(this, void 0, void 0, function* () {
+                    rotte.get("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), this.middleware, (req, res) => __awaiter(this, void 0, void 0, function* () {
                         console.log('Risposta a chiamata : ' + this.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         let tmp: IReturn;
@@ -152,7 +154,7 @@ class TerminaleMetodo {
                         this.cors == cors_1.default(corsOptions);
                     }
                     this.metodoAvviabile.body;
-                    rotte.post("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), (req, res) => __awaiter(this, void 0, void 0, function* () {
+                    rotte.post("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), this.middleware, (req, res) => __awaiter(this, void 0, void 0, function* () {
                         console.log('Risposta a chiamata : ' + this.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
@@ -174,7 +176,7 @@ class TerminaleMetodo {
                     if (this.cors == undefined) {
                         this.cors == cors_1.default(corsOptions);
                     }
-                    rotte.delete("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), (req, res) => __awaiter(this, void 0, void 0, function* () {
+                    rotte.delete("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), this.middleware, (req, res) => __awaiter(this, void 0, void 0, function* () {
                         console.log('Risposta a chiamata : ' + this.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
@@ -196,7 +198,7 @@ class TerminaleMetodo {
                         this.cors == cors_1.default(corsOptions);
                     }
                     this.metodoAvviabile.body;
-                    rotte.patch("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), (req, res) => __awaiter(this, void 0, void 0, function* () {
+                    rotte.patch("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), this.middleware, (req, res) => __awaiter(this, void 0, void 0, function* () {
                         console.log('Risposta a chiamata : ' + this.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
@@ -218,7 +220,7 @@ class TerminaleMetodo {
                         this.cors == cors_1.default(corsOptions);
                     }
                     this.metodoAvviabile.body;
-                    rotte.purge("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), (req, res) => __awaiter(this, void 0, void 0, function* () {
+                    rotte.purge("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), this.middleware, (req, res) => __awaiter(this, void 0, void 0, function* () {
                         console.log('Risposta a chiamata : ' + this.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
@@ -240,7 +242,7 @@ class TerminaleMetodo {
                         this.cors == cors_1.default(corsOptions);
                     }
                     this.metodoAvviabile.body;
-                    rotte.put("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), (req, res) => __awaiter(this, void 0, void 0, function* () {
+                    rotte.put("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), this.middleware, (req, res) => __awaiter(this, void 0, void 0, function* () {
                         console.log('Risposta a chiamata : ' + this.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
@@ -261,6 +263,12 @@ class TerminaleMetodo {
     }
     ChiamaLaRotta(headerpath) {
         return __awaiter(this, void 0, void 0, function* () {
+            let chiave = { body: '' };
+            if (this.ruolo == 'bloccato') {
+                console.log();
+                chiave = yield this.RecuperaChiave();
+                chiave.body;
+            }
             if (headerpath == undefined)
                 headerpath = "http://localhost:3000";
             console.log('chiamata per : ' + headerpath + this.pathGlobal + ' | Verbo: ' + this.tipo);
@@ -273,7 +281,8 @@ class TerminaleMetodo {
                             .get(headerpath + this.pathGlobal)
                             .query(JSON.parse(parametri.query))
                             .send(JSON.parse(parametri.body))
-                            .set('accept', 'json');
+                            .set('accept', 'json')
+                            .set('Authorization', `Bearer ${chiave.body}`);
                     }
                     catch (error) {
                         console.log(error);
@@ -285,7 +294,8 @@ class TerminaleMetodo {
                             .post(headerpath + this.pathGlobal)
                             .query(JSON.parse(parametri.query))
                             .send(JSON.parse(parametri.body))
-                            .set('accept', 'json');
+                            .set('accept', 'json')
+                            .set('Authorization', `Bearer ${chiave.body}`);
                     }
                     catch (error) {
                         console.log(error);
@@ -297,7 +307,8 @@ class TerminaleMetodo {
                             .purge(headerpath + this.pathGlobal)
                             .query(JSON.parse(parametri.query))
                             .send(JSON.parse(parametri.body))
-                            .set('accept', 'json');
+                            .set('accept', 'json')
+                            .set('Authorization', `Bearer ${chiave.body}`);
                     }
                     catch (error) {
                         console.log(error);
@@ -309,7 +320,8 @@ class TerminaleMetodo {
                             .patch(headerpath + this.pathGlobal)
                             .query(JSON.parse(parametri.query))
                             .send(JSON.parse(parametri.body))
-                            .set('accept', 'json');
+                            .set('accept', 'json')
+                            .set('Authorization', `Bearer ${chiave.body}`);
                     }
                     catch (error) {
                         console.log(error);
@@ -321,7 +333,8 @@ class TerminaleMetodo {
                             .delete(headerpath + this.pathGlobal)
                             .query(JSON.parse(parametri.query))
                             .send(JSON.parse(parametri.body))
-                            .set('accept', 'json');
+                            .set('accept', 'json')
+                            .set('Authorization', `Bearer ${chiave.body}`);
                     }
                     catch (error) {
                         console.log(error);
@@ -330,7 +343,33 @@ class TerminaleMetodo {
                 default:
                     break;
             }
+            ritorno === null || ritorno === void 0 ? void 0 : ritorno.body;
             return ritorno;
+        });
+    }
+    RecuperaChiave() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log("La rotta è protetta, sono state trovate delle funzioni che potrebbero sbloccarla, scegli:");
+                for (let index = 0; index < TerminaleMetodo.ListaRotteGeneraChiavi.length; index++) {
+                    const element = TerminaleMetodo.ListaRotteGeneraChiavi[index];
+                    console.log(index + ': ' + element.nome);
+                }
+                const tmp = yield prompts_1.default({
+                    message: 'Scegli: ',
+                    type: 'number',
+                    name: 'scelta'
+                });
+                const ritorno = yield TerminaleMetodo.ListaRotteGeneraChiavi[tmp.scelta].ChiamaLaRotta();
+                let tmp2 = { body: '' };
+                if (ritorno) {
+                    tmp2.body = ritorno.body;
+                }
+                return tmp2;
+            }
+            catch (error) {
+                return { body: '' };
+            }
         });
     }
     CercaParametroSeNoAggiungi(nome, parameterIndex, tipoParametro, posizione) {
@@ -411,7 +450,8 @@ class TerminaleMetodo {
     }
 }
 exports.TerminaleMetodo = TerminaleMetodo;
-TerminaleMetodo.ListaRotteRegistrate = {};
+TerminaleMetodo.ListaRotteGeneraChiavi = [];
+TerminaleMetodo.ListaRotteValidaChiavi = [];
 TerminaleMetodo.nomeMetadataKeyTarget = "MetodoTerminaleTarget";
 function CheckMetodoMetaData(nomeMetodo, classe, ruolo) {
     let tmp = Reflect.getMetadata(lista_terminale_metodo_1.ListaTerminaleMetodo.nomeMetadataKeyTarget, tools_1.targetTerminale); // vado a prendere la struttura legata alle funzioni
@@ -452,6 +492,13 @@ function decoratoreMetodo(tipo, path, ruolo) {
                 metodo.path = propertyKey.toString();
             else
                 metodo.path = path;
+            if (metodo.ruolo == 'chiavegen') {
+                classe.listaMetodiGeneraKey.push(metodo);
+                TerminaleMetodo.ListaRotteGeneraChiavi.push(metodo);
+            }
+            else if (metodo.ruolo == 'chiavevalid') {
+                classe.listaMetodiValidaKey.push(metodo);
+            }
             terminale_classe_1.SalvaListaClasseMetaData(list);
         }
         else {
@@ -502,4 +549,19 @@ function mpAddHelmet(helmet) {
     };
 }
 exports.mpAddHelmet = mpAddHelmet;
+function mpAddMiddle(item) {
+    return function (target, propertyKey, descriptor) {
+        const list = terminale_classe_1.GetListaClasseMetaData();
+        const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
+        const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+        if (metodo != undefined && list != undefined && classe != undefined) {
+            metodo.middleware.push(item);
+            terminale_classe_1.SalvaListaClasseMetaData(list);
+        }
+        else {
+            console.log("Errore mio!");
+        }
+    };
+}
+exports.mpAddMiddle = mpAddMiddle;
 //# sourceMappingURL=terminale-metodo.js.map

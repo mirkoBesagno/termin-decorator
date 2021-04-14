@@ -10,28 +10,33 @@ import { TerminaleMetodo } from "./terminale-metodo";
 export class TerminaleClasse implements IPrintabile {
     static nomeMetadataKeyTarget = "ClasseTerminaleTarget";
     listaMetodi: ListaTerminaleMetodo;
+    listaMetodiGeneraKey: ListaTerminaleMetodo;
+    listaMetodiValidaKey: ListaTerminaleMetodo;
     id: string;
     nome: string;
     path: string;
     private pathRoot: string;
     rotte: Router;
     pathGlobal: string;
-    headerPath:string;
+    headerPath: string;
 
-    constructor(nome: string, path?: string, headerPath?:string) {
+    constructor(nome: string, path?: string, headerPath?: string) {
         this.id = Math.random().toString();
         this.rotte = Router();
         this.listaMetodi = new ListaTerminaleMetodo(this.rotte);
+        this.listaMetodiGeneraKey = new ListaTerminaleMetodo(this.rotte);        
+        this.listaMetodiValidaKey = new ListaTerminaleMetodo(this.rotte);
+        
         this.nome = nome;
         if (path) this.path = path;
         else this.path = nome;
         this.pathRoot = "";
         this.pathGlobal = '';
-        
-        if (headerPath==undefined) {
-            this.headerPath="http://localhost:3000"
+
+        if (headerPath == undefined) {
+            this.headerPath = "http://localhost:3000"
         }
-        else{
+        else {
             this.headerPath = headerPath;
         }
     }
@@ -68,23 +73,23 @@ export class TerminaleClasse implements IPrintabile {
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
             const tmp = index + 1;
-            console.log(tmp +': '+ element.PrintStamp());
+            console.log(tmp + ': ' + element.PrintStamp());
         }
         const scelta = await chiedi({ message: 'Scegli il metodo da eseguire: ', type: 'number', name: 'scelta' });
 
         if (scelta.scelta == 0) {
-            console.log("Saluti dalla classe : "+ this.nome);
+            console.log("Saluti dalla classe : " + this.nome);
 
         } else {
             console.log('Richiamo la rotta');
-            
-            const risposta =  await this.listaMetodi[scelta.scelta -1 ].ChiamaLaRotta();
+
+            const risposta = await this.listaMetodi[scelta.scelta - 1].ChiamaLaRotta();
             if (risposta == undefined) {
                 console.log("Risposta undefined!");
             } else {
                 console.log(risposta.body)
             }
-                
+
             await this.PrintMenuClasse();
         }
     }
@@ -95,7 +100,7 @@ export class TerminaleClasse implements IPrintabile {
             "listaMetodi.length:" + this.listaMetodi.length + ":;:";
         //console.log(tmp);
     }
-    SettaPathRoot_e_Global(item: string, pathGlobal: string, patheader:string) {
+    SettaPathRoot_e_Global(item: string, pathGlobal: string, patheader: string) {
         this.pathRoot = item;
         this.pathGlobal = pathGlobal;
         for (let index = 0; index < this.listaMetodi.length; index++) {
@@ -107,7 +112,7 @@ export class TerminaleClasse implements IPrintabile {
         let terminale = this.listaMetodi.CercaConNomeRev(nome)
 
         if (terminale == undefined)/* se non c'è */ {
-            terminale = new TerminaleMetodo(nome, "", this.nome); // creo la funzione
+            terminale = new TerminaleMetodo(nome, "", this.nome, 'bloccato'); // creo la funzione
             this.listaMetodi.AggiungiElemento(terminale);
         }
         return terminale;
@@ -118,7 +123,7 @@ export class TerminaleClasse implements IPrintabile {
  * 
  * @param ctr 
  */
- function decoratoreClasse(percorso: string): any {
+function decoratoreClasse(percorso: string): any {
     return (ctr: Function) => {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         const classe = CheckClasseMetaData(ctr.name);
@@ -127,7 +132,7 @@ export class TerminaleClasse implements IPrintabile {
         Reflect.defineMetadata(TerminaleClasse.nomeMetadataKeyTarget, classe, targetTerminale); //e lo vado a salvare nel meta data
     }
 }
- function decoratoreClasseeRev(percorso: string): any {
+function decoratoreClasseeRev(percorso: string): any {
     return (ctr: Function) => {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(ctr.name);

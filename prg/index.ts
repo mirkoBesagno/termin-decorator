@@ -6,14 +6,17 @@ import superagent from "superagent";
 import { PromptType } from "prompts";
 import { ColumnType } from "typeorm";
 
-import express from "express";
-import { Request, Response, Router } from "express";
+//import express, { request, response,  } from "express";
+import { Request, Response, NextFunction } from "express";
 import { mpMain, Main } from "./model/classi/terminale-main";
 import { mpClas } from "./model/classi/terminale-classe";
-import { IReturn, mpMet, TypeMetodo } from "./model/classi/terminale-metodo";
+import { IReturn, mpAddMiddle, mpMet, TypeMetodo } from "./model/classi/terminale-metodo";
 import {  EPosizione, mpP, mpPar } from "./model/classi/terminale-parametro";
 import { IType } from "./model/tools";
 
+const ff = function (req:Request,  res:Response, nex:NextFunction) {
+    
+};
 
         @mpClas('classe-test')
         class ClasseTest {
@@ -24,8 +27,12 @@ import { IType } from "./model/tools";
                 this.nome = nome;
                 this.cognome=cognome;
             }
+            Valida(){
 
-            @mpMet('post','SetNome')
+            }
+
+            @mpAddMiddle(ff)
+            @mpMet('post','SetNome', 'bloccato')
             SetNome(@mpPar('text', 'nomeFuturo', 'body') nomeFuturo: string) {
                 this.nome = nomeFuturo;
                 const tmp : IReturn={
@@ -35,7 +42,8 @@ import { IType } from "./model/tools";
                     stato:200};
                 return tmp;
             }
-            @mpMet('get', 'GetNome')
+
+            @mpMet('get', 'GetNome', 'chiavegen')
             GetNome(){
                 const tmp : IReturn={
                     body:{
@@ -100,6 +108,7 @@ import { IType } from "./model/tools";
 
                 }
             }
+
         }
 
 
@@ -133,7 +142,6 @@ import { IType } from "./model/tools";
                 }
             }
         } */
-
         const classecosi = new ClasseTest("prima classe!!",'cognome prima classe?!??!');
         classecosi.MetodoPrint();
 

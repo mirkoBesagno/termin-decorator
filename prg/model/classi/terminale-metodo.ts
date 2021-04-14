@@ -14,14 +14,18 @@ import cors from 'cors';
 export enum ERuolo {
     bloccato, chiave
 }
-export type TypeRuolo = "bloccato" | "chiave"
+export type TypeRuolo = "bloccato" | "chiavegen" | "chiavevalid"
 export interface IReturn {
     body: object;
     stato: number;
 }
+export interface IResponse {
+    body: string
+}
 
 export class TerminaleMetodo implements IPrintabile {
-    static ListaRotteRegistrate = {};
+    static ListaRotteGeneraChiavi: TerminaleMetodo[] = [];
+    static ListaRotteValidaChiavi: TerminaleMetodo[] = [];
 
     classePath = '';
     static nomeMetadataKeyTarget = "MetodoTerminaleTarget";
@@ -36,6 +40,7 @@ export class TerminaleMetodo implements IPrintabile {
 
     cors: any;
     helmet: any;
+    middleware: any[] = [];
     constructor(nome: string, path: string, classePath: string, protetto: TypeRuolo) {
         this._listaParametri = new ListaTerminaleParametro();
         this._nome = nome;
@@ -135,6 +140,7 @@ export class TerminaleMetodo implements IPrintabile {
                     rotte.get("/" + this.path.toString(),
                         cors(this.cors),
                         helmet(this.helmet),
+                        this.middleware,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
@@ -169,6 +175,7 @@ export class TerminaleMetodo implements IPrintabile {
                     rotte.post("/" + this.path.toString(),
                         cors(this.cors),
                         helmet(this.helmet),
+                        this.middleware,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
@@ -194,6 +201,7 @@ export class TerminaleMetodo implements IPrintabile {
                     rotte.delete("/" + this.path.toString(),
                         cors(this.cors),
                         helmet(this.helmet),
+                        this.middleware,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
@@ -219,6 +227,7 @@ export class TerminaleMetodo implements IPrintabile {
                     rotte.patch("/" + this.path.toString(),
                         cors(this.cors),
                         helmet(this.helmet),
+                        this.middleware,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
@@ -244,6 +253,7 @@ export class TerminaleMetodo implements IPrintabile {
                     rotte.purge("/" + this.path.toString(),
                         cors(this.cors),
                         helmet(this.helmet),
+                        this.middleware,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
@@ -269,6 +279,7 @@ export class TerminaleMetodo implements IPrintabile {
                     rotte.put("/" + this.path.toString(),
                         cors(this.cors),
                         helmet(this.helmet),
+                        this.middleware,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
@@ -289,6 +300,12 @@ export class TerminaleMetodo implements IPrintabile {
         return rotte;
     }
     async ChiamaLaRotta(headerpath?: string) {
+        let chiave: IResponse = { body: '' };
+        if (this.ruolo == 'bloccato') {
+            console.log();
+            chiave = await this.RecuperaChiave();
+            chiave.body;
+        }
         if (headerpath == undefined) headerpath = "http://localhost:3000"
         console.log('chiamata per : ' + headerpath + this.pathGlobal + ' | Verbo: ' + this.tipo);
         const parametri = await this.listaParametri.SoddisfaParamtri();
@@ -300,7 +317,8 @@ export class TerminaleMetodo implements IPrintabile {
                         .get(headerpath + this.pathGlobal)
                         .query(JSON.parse(parametri.query))
                         .send(JSON.parse(parametri.body))
-                        .set('accept', 'json');
+                        .set('accept', 'json')
+                        .set('Authorization', `Bearer ${chiave.body}`);
                 } catch (error) {
                     console.log(error);
                 }
@@ -311,7 +329,8 @@ export class TerminaleMetodo implements IPrintabile {
                         .post(headerpath + this.pathGlobal)
                         .query(JSON.parse(parametri.query))
                         .send(JSON.parse(parametri.body))
-                        .set('accept', 'json');
+                        .set('accept', 'json')
+                        .set('Authorization', `Bearer ${chiave.body}`);
                 } catch (error) {
                     console.log(error);
                 }
@@ -322,7 +341,8 @@ export class TerminaleMetodo implements IPrintabile {
                         .purge(headerpath + this.pathGlobal)
                         .query(JSON.parse(parametri.query))
                         .send(JSON.parse(parametri.body))
-                        .set('accept', 'json');
+                        .set('accept', 'json')
+                        .set('Authorization', `Bearer ${chiave.body}`);
                 } catch (error) {
                     console.log(error);
                 }
@@ -333,7 +353,8 @@ export class TerminaleMetodo implements IPrintabile {
                         .patch(headerpath + this.pathGlobal)
                         .query(JSON.parse(parametri.query))
                         .send(JSON.parse(parametri.body))
-                        .set('accept', 'json');
+                        .set('accept', 'json')
+                        .set('Authorization', `Bearer ${chiave.body}`);
                 } catch (error) {
                     console.log(error);
                 }
@@ -344,7 +365,8 @@ export class TerminaleMetodo implements IPrintabile {
                         .delete(headerpath + this.pathGlobal)
                         .query(JSON.parse(parametri.query))
                         .send(JSON.parse(parametri.body))
-                        .set('accept', 'json');
+                        .set('accept', 'json')
+                        .set('Authorization', `Bearer ${chiave.body}`);
                 } catch (error) {
                     console.log(error);
                 }
@@ -352,7 +374,30 @@ export class TerminaleMetodo implements IPrintabile {
             default:
                 break;
         }
+        ritorno?.body;
         return ritorno;
+    }
+    async RecuperaChiave(): Promise<IResponse> {
+        try {
+            console.log("La rotta è protetta, sono state trovate delle funzioni che potrebbero sbloccarla, scegli:");
+            for (let index = 0; index < TerminaleMetodo.ListaRotteGeneraChiavi.length; index++) {
+                const element = TerminaleMetodo.ListaRotteGeneraChiavi[index];
+                console.log(index + ': ' + element.nome);
+            }
+            const tmp = await chiedi({
+                message: 'Scegli: ',
+                type: 'number',
+                name: 'scelta'
+            });
+            const ritorno = await TerminaleMetodo.ListaRotteGeneraChiavi[tmp.scelta].ChiamaLaRotta();
+            let tmp2: IResponse = { body: '' };
+            if (ritorno) {
+                tmp2.body = ritorno.body;
+            }
+            return tmp2;
+        } catch (error) {
+            return { body: '' };
+        }
     }
     CercaParametroSeNoAggiungi(nome: string, parameterIndex: number, tipoParametro: IType, posizione: EPosizione) {
         this.listaParametri.push(new TerminaleParametro(nome, tipoParametro, posizione, parameterIndex))//.lista.push({ propertyKey: propertyKey, Metodo: target });                                           
@@ -413,8 +458,8 @@ export class TerminaleMetodo implements IPrintabile {
         console.log("Arrivato in : " + nomeMetodo + "\n"
             + "Data : " + new Date(Date.now()) + "\n"
             + "headersSent : " + req.headersSent + "\n"
-           // + "json : " + req.json + "\n"
-           // + "send : " + req.send + "\n"
+            // + "json : " + req.json + "\n"
+            // + "send : " + req.send + "\n"
             + "sendDate : " + req.sendDate + "\n"
             + "statusCode : " + req.statusCode + '\n'
             + "statuMessage : " + req.statusMessage + '\n'
@@ -472,8 +517,17 @@ function decoratoreMetodo(tipo: TypeMetod, path?: string, ruolo?: TypeRuolo): Me
             metodo.tipo = TypeMetodo[tipo];
             if (ruolo == undefined) metodo.ruolo = 'bloccato';
             else metodo.ruolo = ruolo;
+
             if (path == undefined) metodo.path = propertyKey.toString();
             else metodo.path = path;
+
+            if (metodo.ruolo == 'chiavegen') {
+                classe.listaMetodiGeneraKey.push(metodo);
+                TerminaleMetodo.ListaRotteGeneraChiavi.push(metodo);
+            } else if (metodo.ruolo == 'chiavevalid') {
+                classe.listaMetodiValidaKey.push(metodo);
+            }
+
             SalvaListaClasseMetaData(list);
         }
         else {
@@ -513,6 +567,25 @@ export function mpAddHelmet(helmet: any): MethodDecorator {
 
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.helmet = helmet;
+            SalvaListaClasseMetaData(list);
+        }
+        else {
+            console.log("Errore mio!");
+        }
+    }
+}
+export function mpAddMiddle(item: any): MethodDecorator {
+    return function (
+        target: Object,
+        propertyKey: string | symbol,
+        descriptor: PropertyDescriptor
+    ) {
+        const list: ListaTerminaleClasse = GetListaClasseMetaData();
+        const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
+        const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+
+        if (metodo != undefined && list != undefined && classe != undefined) {
+            metodo.middleware.push(item);
             SalvaListaClasseMetaData(list);
         }
         else {

@@ -24,6 +24,8 @@ class TerminaleClasse {
         this.id = Math.random().toString();
         this.rotte = express_1.Router();
         this.listaMetodi = new lista_terminale_metodo_1.ListaTerminaleMetodo(this.rotte);
+        this.listaMetodiGeneraKey = new lista_terminale_metodo_1.ListaTerminaleMetodo(this.rotte);
+        this.listaMetodiValidaKey = new lista_terminale_metodo_1.ListaTerminaleMetodo(this.rotte);
         this.nome = nome;
         if (path)
             this.path = path;
@@ -108,7 +110,7 @@ class TerminaleClasse {
     CercaMetodoSeNoAggiungiMetodo(nome) {
         let terminale = this.listaMetodi.CercaConNomeRev(nome);
         if (terminale == undefined) /* se non c'è */ {
-            terminale = new terminale_metodo_1.TerminaleMetodo(nome, "", this.nome); // creo la funzione
+            terminale = new terminale_metodo_1.TerminaleMetodo(nome, "", this.nome, 'bloccato'); // creo la funzione
             this.listaMetodi.AggiungiElemento(terminale);
         }
         return terminale;
