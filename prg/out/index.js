@@ -22,10 +22,40 @@ const terminale_main_1 = require("./model/classi/terminale-main");
 const terminale_classe_1 = require("./model/classi/terminale-classe");
 const terminale_metodo_1 = require("./model/classi/terminale-metodo");
 const terminale_parametro_1 = require("./model/classi/terminale-parametro");
+const ff = function (req, res, nex) {
+    return nex;
+};
+const VerificaToken = (request, response, next) => {
+    try {
+        next();
+    }
+    catch (error) {
+        console.log(error);
+        return response.status(403).send("Errore : " + error);
+    }
+};
 let ClasseTest = class ClasseTest {
     constructor(nome, cognome) {
         this.nome = nome;
         this.cognome = cognome;
+    }
+    //@mpMiddle
+    /* VerificaToken = (request: Request, response: Response, next: NextFunction) => {
+        try {
+            next();
+        } catch (error) {
+            console.log(error);
+            return response.status(403).send("Errore : " + error);
+        }
+    }; */
+    Valida(token) {
+        const tmp = {
+            body: {
+                "nome": this.nome
+            },
+            stato: 200
+        };
+        return tmp;
     }
     SetNome(nomeFuturo) {
         this.nome = nomeFuturo;
@@ -46,47 +76,51 @@ let ClasseTest = class ClasseTest {
         };
         return tmp;
     }
-    SetCognome(cognomeNuovo) {
+    /* @mpMet('post', "SetCognome")
+    SetCognome(@mpPar('text', 'cognomeNuovo', 'body') cognomeNuovo: string) {
         this.cognome = cognomeNuovo;
-        const tmp = {
-            body: {
+        const tmp : IReturn={
+            body:{
                 "cognome": this.cognome
             },
-            stato: 200
-        };
+            stato:200};
         return tmp;
     }
+    @mpMet('get', 'GetCognome')
     GetCognome() {
-        const tmp = {
-            body: {
+        const tmp : IReturn={
+            body:{
                 "cognome": this.cognome
             },
-            stato: 200
-        };
+            stato:200};
         return tmp;
     }
-    SetNome_E_Cognome(nome, cognome) {
+
+    @mpMet('post','set-nome-e-cognome')
+    SetNome_E_Cognome(
+        @mpP('text', 'nomeNuovo', 'body') nome:string,
+    @mpP('text', 'cognomeNuovo', 'query') cognome:string){
         this.cognome = cognome;
-        this.nome = nome;
-        const tmp = {
-            body: {
-                "nome": this.nome,
+        this.nome= nome;
+        const tmp : IReturn={
+            body:{
+                "nome":this.nome,
                 "cognome": this.cognome
             },
-            stato: 200
-        };
+            stato:200};
         return tmp;
     }
-    GetNome_E_Cognome() {
-        const tmp = {
-            body: {
-                "nome": this.nome,
+    @mpMet('get','get-nome-e-cognome')
+    GetNome_E_Cognome(){
+        
+        const tmp : IReturn={
+            body:{
+                "nome":this.nome,
                 "cognome": this.cognome
             },
-            stato: 200
-        };
+            stato:200};
         return tmp;
-    }
+    } */
     MetodoPrint() {
         if ('nome' in this) {
             console.log(this.nome != undefined ? this.nome : "sono undefined");
@@ -97,6 +131,14 @@ let ClasseTest = class ClasseTest {
     }
 };
 __decorate([
+    terminale_metodo_1.mpMet('get', 'Valida', 'middleware'),
+    __param(0, terminale_parametro_1.mpPar('text', 'token', 'body')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ClasseTest.prototype, "Valida", null);
+__decorate([
+    terminale_metodo_1.mpAddMiddle('valida'),
     terminale_metodo_1.mpMet('post', 'SetNome'),
     __param(0, terminale_parametro_1.mpPar('text', 'nomeFuturo', 'body')),
     __metadata("design:type", Function),
@@ -109,33 +151,6 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ClasseTest.prototype, "GetNome", null);
-__decorate([
-    terminale_metodo_1.mpMet('post', "SetCognome"),
-    __param(0, terminale_parametro_1.mpPar('text', 'cognomeNuovo', 'body')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ClasseTest.prototype, "SetCognome", null);
-__decorate([
-    terminale_metodo_1.mpMet('get', 'GetCognome'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], ClasseTest.prototype, "GetCognome", null);
-__decorate([
-    terminale_metodo_1.mpMet('post', 'set-nome-e-cognome'),
-    __param(0, terminale_parametro_1.mpP('text', 'nomeNuovo', 'body')),
-    __param(1, terminale_parametro_1.mpP('text', 'cognomeNuovo', 'query')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", void 0)
-], ClasseTest.prototype, "SetNome_E_Cognome", null);
-__decorate([
-    terminale_metodo_1.mpMet('get', 'get-nome-e-cognome'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], ClasseTest.prototype, "GetNome_E_Cognome", null);
 ClasseTest = __decorate([
     terminale_classe_1.mpClas('classe-test'),
     __metadata("design:paramtypes", [String, String])
@@ -179,6 +194,7 @@ console.log('..... Inizializzazione fine.');
 console.log('Menu');
 console.log('0: express');
 console.log('1: superagent');
+console.log('2: biss');
 prompts_1.default({
     message: 'Scegli: ',
     type: 'number',
@@ -188,6 +204,10 @@ prompts_1.default({
         main.StartExpress();
     }
     else if (item.scelta == 1) {
+        main.PrintMenu();
+    }
+    else if (item.scelta == 2) {
+        main.StartExpress();
         main.PrintMenu();
     }
     else {

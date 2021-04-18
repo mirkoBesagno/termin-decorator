@@ -12,53 +12,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MPDecMet = exports.MPDecMetodo = exports.MPDecoratoreMetodo = exports.MPMetodo = exports.MPM = exports.MPMetRev = exports.mpDecMet = exports.mpDecMetodo = exports.mpDecoratoreMetodo = exports.mpMetodo = exports.mpM = exports.mpMet = exports.mpMetRev = exports.mpAddMiddle = exports.mpAddHelmet = exports.mpAddCors = exports.TypeMetodo = exports.CheckMetodoMetaData = exports.TerminaleMetodo = exports.ERuolo = void 0;
+exports.MPDecMet = exports.MPDecMetodo = exports.MPDecoratoreMetodo = exports.MPMetodo = exports.MPM = exports.MPMetRev = exports.mpDecMet = exports.mpDecMetodo = exports.mpDecoratoreMetodo = exports.mpMetodo = exports.mpM = exports.mpMet = exports.mpMetRev = exports.mpAddMiddle = exports.mpAddHelmet = exports.mpAddCors = exports.CheckMetodoMetaData = exports.TerminaleMetodo = void 0;
 const tools_1 = require("../tools");
 const terminale_classe_1 = require("./terminale-classe");
 const terminale_parametro_1 = require("./terminale-parametro");
-const prompts_1 = __importDefault(require("prompts"));
 const helmet_1 = __importDefault(require("helmet"));
 const superagent_1 = __importDefault(require("superagent"));
 const lista_terminale_metodo_1 = require("../liste/lista-terminale-metodo");
 const lista_terminale_parametro_1 = require("../liste/lista-terminale-parametro");
 const cors_1 = __importDefault(require("cors"));
-var ERuolo;
-(function (ERuolo) {
-    ERuolo[ERuolo["bloccato"] = 0] = "bloccato";
-    ERuolo[ERuolo["chiave"] = 1] = "chiave";
-})(ERuolo = exports.ERuolo || (exports.ERuolo = {}));
 class TerminaleMetodo {
-    constructor(nome, path, classePath, protetto) {
+    constructor(nome, path, classePath) {
         this.classePath = '';
         this.middleware = [];
-        this._listaParametri = new lista_terminale_parametro_1.ListaTerminaleParametro();
-        this._nome = nome;
-        this._path = path;
+        this.listaParametri = new lista_terminale_parametro_1.ListaTerminaleParametro();
+        this.nome = nome;
+        this.path = path;
         this.classePath = classePath;
-        this.tipo = TypeMetodo.indefinita;
+        this.tipo = 'get';
         this.pathGlobal = '';
-        this.ruolo = protetto;
+        this.tipoInterazione = "rotta";
+        //this.listaRotteGeneraChiavi = [];
     }
-    /* start : get e set */
-    get nome() {
-        return this._nome;
-    }
-    set nome(value) {
-        this._nome = value;
-    }
-    get path() {
-        return this._path;
-    }
-    set path(value) {
-        this._path = value;
-    }
-    get listaParametri() {
-        return this._listaParametri;
-    }
-    set listaParametri(value) {
-        this._listaParametri = value;
-    }
-    /* end : get e ste */
     PrintMenu() {
         return __awaiter(this, void 0, void 0, function* () {
             for (let index = 0; index < this.listaParametri.length; index++) {
@@ -94,12 +69,18 @@ class TerminaleMetodo {
     }
     ConfiguraRotta(rotte, pathglobal) {
         this.pathGlobal = pathglobal + '/' + this.path;
-        if (this.metodoAvviabile != undefined) {
-            if (this.ruolo == "bloccato") {
+        const middlew = [];
+        this.middleware.forEach(element => {
+            if (element instanceof TerminaleMetodo) {
+                const listaMidd = lista_terminale_metodo_1.GetListaMiddlewareMetaData();
+                const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
+                middlew.push(midd.ConvertiInMiddleare());
             }
+        });
+        if (this.metodoAvviabile != undefined) {
             var corsOptions = {};
             switch (this.tipo) {
-                case TypeMetodo.get:
+                case 'get':
                     this.metodoAvviabile.body;
                     /* const options: cors.CorsOptions = {
                         allowedHeaders: [
@@ -123,19 +104,8 @@ class TerminaleMetodo {
                     if (this.cors == undefined) {
                         this.cors == cors_1.default(corsOptions);
                     }
-                    rotte.get("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), this.middleware, (req, res) => __awaiter(this, void 0, void 0, function* () {
+                    rotte.get("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
                         console.log('Risposta a chiamata : ' + this.pathGlobal);
-                        /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                        let tmp: IReturn;
-                        try {
-                            tmp = this.metodoAvviabile.apply(this, parametri);
-                        } catch (error) {
-                            console.log("Errore : \n" + error);
-                            tmp = {
-                                body: { "Errore Interno filtrato ": 'internal error!!!!' },
-                                stato: 500
-                            }
-                        }   */
                         this.InizializzaLogbaseIn(req, this.nome.toString());
                         const tmp = yield this.Esegui(req);
                         res.status(tmp.stato).send(tmp.body);
@@ -143,7 +113,7 @@ class TerminaleMetodo {
                         return res;
                     }));
                     break;
-                case TypeMetodo.post:
+                case 'post':
                     corsOptions = {
                         methods: "POST"
                     };
@@ -154,7 +124,7 @@ class TerminaleMetodo {
                         this.cors == cors_1.default(corsOptions);
                     }
                     this.metodoAvviabile.body;
-                    rotte.post("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), this.middleware, (req, res) => __awaiter(this, void 0, void 0, function* () {
+                    rotte.post("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
                         console.log('Risposta a chiamata : ' + this.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
@@ -165,7 +135,7 @@ class TerminaleMetodo {
                         return res;
                     }));
                     break;
-                case TypeMetodo.delete:
+                case 'delete':
                     this.metodoAvviabile.body;
                     corsOptions = {
                         methods: "DELETE"
@@ -176,7 +146,7 @@ class TerminaleMetodo {
                     if (this.cors == undefined) {
                         this.cors == cors_1.default(corsOptions);
                     }
-                    rotte.delete("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), this.middleware, (req, res) => __awaiter(this, void 0, void 0, function* () {
+                    rotte.delete("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
                         console.log('Risposta a chiamata : ' + this.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
@@ -187,7 +157,7 @@ class TerminaleMetodo {
                         return res;
                     }));
                     break;
-                case TypeMetodo.patch:
+                case 'patch':
                     corsOptions = {
                         methods: "PATCH"
                     };
@@ -198,7 +168,7 @@ class TerminaleMetodo {
                         this.cors == cors_1.default(corsOptions);
                     }
                     this.metodoAvviabile.body;
-                    rotte.patch("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), this.middleware, (req, res) => __awaiter(this, void 0, void 0, function* () {
+                    rotte.patch("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
                         console.log('Risposta a chiamata : ' + this.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
@@ -209,7 +179,7 @@ class TerminaleMetodo {
                         return res;
                     }));
                     break;
-                case TypeMetodo.purge:
+                case 'purge':
                     corsOptions = {
                         methods: "PURGE"
                     };
@@ -220,7 +190,7 @@ class TerminaleMetodo {
                         this.cors == cors_1.default(corsOptions);
                     }
                     this.metodoAvviabile.body;
-                    rotte.purge("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), this.middleware, (req, res) => __awaiter(this, void 0, void 0, function* () {
+                    rotte.purge("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
                         console.log('Risposta a chiamata : ' + this.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
@@ -231,7 +201,7 @@ class TerminaleMetodo {
                         return res;
                     }));
                     break;
-                case TypeMetodo.put:
+                case 'put':
                     corsOptions = {
                         methods: "PUT"
                     };
@@ -242,7 +212,7 @@ class TerminaleMetodo {
                         this.cors == cors_1.default(corsOptions);
                     }
                     this.metodoAvviabile.body;
-                    rotte.put("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), this.middleware, (req, res) => __awaiter(this, void 0, void 0, function* () {
+                    rotte.put("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
                         console.log('Risposta a chiamata : ' + this.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
@@ -253,8 +223,6 @@ class TerminaleMetodo {
                         return res;
                     }));
                     break;
-                case TypeMetodo.indefinita:
-                    break;
                 default:
                     break;
             }
@@ -263,78 +231,126 @@ class TerminaleMetodo {
     }
     ChiamaLaRotta(headerpath) {
         return __awaiter(this, void 0, void 0, function* () {
-            let chiave = { body: '' };
-            if (this.ruolo == 'bloccato') {
-                console.log();
-                chiave = yield this.RecuperaChiave();
-                chiave.body;
-            }
+            let body = "";
+            let query = "";
+            let header = "";
+            this.middleware.forEach((element) => __awaiter(this, void 0, void 0, function* () {
+                if (element instanceof TerminaleMetodo) {
+                    const listaMidd = lista_terminale_metodo_1.GetListaMiddlewareMetaData();
+                    const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
+                    const rit = yield midd.listaParametri.SoddisfaParamtri();
+                    if (rit.body != "") {
+                        if (body != "") {
+                            body = body + ", " + rit.body;
+                        }
+                        else {
+                            body = rit.body;
+                        }
+                    }
+                    if (rit.query != "") {
+                        if (query != "") {
+                            query = query + ", " + rit.query;
+                        }
+                        else
+                            query = rit.query;
+                    }
+                    if (rit.header != "") {
+                        if (header != "") {
+                            header = header + ", " + rit.header;
+                        }
+                        else
+                            header = rit.header;
+                    }
+                }
+            }));
             if (headerpath == undefined)
                 headerpath = "http://localhost:3000";
             console.log('chiamata per : ' + headerpath + this.pathGlobal + ' | Verbo: ' + this.tipo);
-            const parametri = yield this.listaParametri.SoddisfaParamtri();
+            let parametri = yield this.listaParametri.SoddisfaParamtri();
+            if (parametri.body != "") {
+                if (body != "") {
+                    body = body + ", " + parametri.body;
+                }
+                else {
+                    body = parametri.body;
+                }
+            }
+            if (parametri.query != "") {
+                if (query != "") {
+                    query = query + ", " + parametri.query;
+                }
+                else
+                    query = parametri.query;
+            }
+            if (parametri.header != "") {
+                if (header != "") {
+                    header = header + ", " + parametri.header;
+                }
+                else
+                    header = parametri.header;
+            }
             let ritorno;
             switch (this.tipo) {
-                case TypeMetodo.get:
+                case 'get':
                     try {
                         ritorno = yield superagent_1.default
                             .get(headerpath + this.pathGlobal)
-                            .query(JSON.parse(parametri.query))
-                            .send(JSON.parse(parametri.body))
-                            .set('accept', 'json')
-                            .set('Authorization', `Bearer ${chiave.body}`);
+                            .query(JSON.parse('{ ' + query + ' }'))
+                            .send(JSON.parse('{ ' + body + ' }'))
+                            .set(JSON.parse('{ ' + header + ' }'))
+                            .set('accept', 'json');
                     }
                     catch (error) {
                         console.log(error);
                     }
                     break;
-                case TypeMetodo.post:
+                case 'post':
                     try {
                         ritorno = yield superagent_1.default
                             .post(headerpath + this.pathGlobal)
-                            .query(JSON.parse(parametri.query))
-                            .send(JSON.parse(parametri.body))
-                            .set('accept', 'json')
-                            .set('Authorization', `Bearer ${chiave.body}`);
+                            .query(JSON.parse('{ ' + query + ' }'))
+                            .send(JSON.parse('{ ' + body + ' }'))
+                            .set(JSON.parse('{ ' + header + ' }'))
+                            .set('accept', 'json');
                     }
                     catch (error) {
                         console.log(error);
                     }
                     break;
-                case TypeMetodo.purge:
+                case 'purge':
                     try {
                         ritorno = yield superagent_1.default
                             .purge(headerpath + this.pathGlobal)
-                            .query(JSON.parse(parametri.query))
-                            .send(JSON.parse(parametri.body))
-                            .set('accept', 'json')
-                            .set('Authorization', `Bearer ${chiave.body}`);
+                            .query(JSON.parse('{ ' + query + ' }'))
+                            .send(JSON.parse('{ ' + body + ' }'))
+                            .set(JSON.parse('{ ' + header + ' }'))
+                            .set('accept', 'json');
                     }
                     catch (error) {
                         console.log(error);
                     }
                     break;
-                case TypeMetodo.patch:
+                case 'patch':
                     try {
                         ritorno = yield superagent_1.default
                             .patch(headerpath + this.pathGlobal)
-                            .query(JSON.parse(parametri.query))
-                            .send(JSON.parse(parametri.body))
-                            .set('accept', 'json')
-                            .set('Authorization', `Bearer ${chiave.body}`);
+                            .query(JSON.parse('{ ' + query + ' }'))
+                            .send(JSON.parse('{ ' + body + ' }'))
+                            .set(JSON.parse('{ ' + header + ' }'))
+                            .set('accept', 'json');
                     }
                     catch (error) {
                         console.log(error);
                     }
                     break;
-                case TypeMetodo.delete:
+                case 'delete':
                     try {
                         ritorno = yield superagent_1.default
                             .delete(headerpath + this.pathGlobal)
-                            .query(JSON.parse(parametri.query))
-                            .send(JSON.parse(parametri.body))
-                            .set('accept', 'json')
-                            .set('Authorization', `Bearer ${chiave.body}`);
+                            .query(JSON.parse('{ ' + query + ' }'))
+                            .send(JSON.parse('{ ' + body + ' }'))
+                            .set(JSON.parse('{ ' + header + ' }'))
+                            .set('accept', 'json');
                     }
                     catch (error) {
                         console.log(error);
@@ -347,31 +363,28 @@ class TerminaleMetodo {
             return ritorno;
         });
     }
-    RecuperaChiave() {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                console.log("La rotta è protetta, sono state trovate delle funzioni che potrebbero sbloccarla, scegli:");
-                for (let index = 0; index < TerminaleMetodo.ListaRotteGeneraChiavi.length; index++) {
-                    const element = TerminaleMetodo.ListaRotteGeneraChiavi[index];
-                    console.log(index + ': ' + element.nome);
-                }
-                const tmp = yield prompts_1.default({
-                    message: 'Scegli: ',
-                    type: 'number',
-                    name: 'scelta'
-                });
-                const ritorno = yield TerminaleMetodo.ListaRotteGeneraChiavi[tmp.scelta].ChiamaLaRotta();
-                let tmp2 = { body: '' };
-                if (ritorno) {
-                    tmp2.body = ritorno.body;
-                }
-                return tmp2;
+    /* async RecuperaChiave(): Promise<IResponse> {
+        try {
+            console.log("La rotta è protetta, sono state trovate delle funzioni che potrebbero sbloccarla, scegli:");
+            for (let index = 0; index < this.listaRotteGeneraChiavi.length; index++) {
+                const element = this.listaRotteGeneraChiavi[index];
+                console.log(index + ': ' + element.nome);
             }
-            catch (error) {
-                return { body: '' };
+            const tmp = await chiedi({
+                message: 'Scegli: ',
+                type: 'number',
+                name: 'scelta'
+            });
+            const ritorno = await this.listaRotteGeneraChiavi[tmp.scelta].ChiamaLaRotta();
+            let tmp2: IResponse = { body: '' };
+            if (ritorno) {
+                tmp2.body = ritorno.body;
             }
-        });
-    }
+            return tmp2;
+        } catch (error) {
+            return { body: '' };
+        }
+    } */
     CercaParametroSeNoAggiungi(nome, parameterIndex, tipoParametro, posizione) {
         this.listaParametri.push(new terminale_parametro_1.TerminaleParametro(nome, tipoParametro, posizione, parameterIndex)); //.lista.push({ propertyKey: propertyKey, Metodo: target });                                           
     }
@@ -448,12 +461,16 @@ class TerminaleMetodo {
             + "remote : " + t2 + "\n";
         return tmp;
     }
+    ConvertiInMiddleare() {
+        return (req, res, nex) => __awaiter(this, void 0, void 0, function* () {
+            const tmp = yield this.Esegui(req);
+            return nex;
+        });
+    }
 }
 exports.TerminaleMetodo = TerminaleMetodo;
-TerminaleMetodo.ListaRotteGeneraChiavi = [];
-TerminaleMetodo.ListaRotteValidaChiavi = [];
 TerminaleMetodo.nomeMetadataKeyTarget = "MetodoTerminaleTarget";
-function CheckMetodoMetaData(nomeMetodo, classe, ruolo) {
+function CheckMetodoMetaData(nomeMetodo, classe) {
     let tmp = Reflect.getMetadata(lista_terminale_metodo_1.ListaTerminaleMetodo.nomeMetadataKeyTarget, tools_1.targetTerminale); // vado a prendere la struttura legata alle funzioni
     if (tmp == undefined) { //se non c'è 
         tmp = new lista_terminale_metodo_1.ListaTerminaleMetodo(classe.rotte); //lo creo
@@ -461,43 +478,33 @@ function CheckMetodoMetaData(nomeMetodo, classe, ruolo) {
     }
     let terminale = tmp.CercaConNome(nomeMetodo, classe.path); //cerca la mia funzione
     if (terminale == undefined) /* se non c'è */ {
-        terminale = new TerminaleMetodo(nomeMetodo, "", classe.nome, ruolo); // creo la funzione
+        terminale = new TerminaleMetodo(nomeMetodo, "", classe.nome); // creo la funzione
     }
     return terminale;
 }
 exports.CheckMetodoMetaData = CheckMetodoMetaData;
-var TypeMetodo;
-(function (TypeMetodo) {
-    TypeMetodo[TypeMetodo["get"] = 0] = "get";
-    TypeMetodo[TypeMetodo["put"] = 1] = "put";
-    TypeMetodo[TypeMetodo["post"] = 2] = "post";
-    TypeMetodo[TypeMetodo["patch"] = 3] = "patch";
-    TypeMetodo[TypeMetodo["purge"] = 4] = "purge";
-    TypeMetodo[TypeMetodo["delete"] = 5] = "delete";
-    TypeMetodo[TypeMetodo["indefinita"] = 6] = "indefinita";
-})(TypeMetodo = exports.TypeMetodo || (exports.TypeMetodo = {}));
-function decoratoreMetodo(tipo, path, ruolo) {
+function decoratoreMetodo(tipo, path, interazione) {
     return function (target, propertyKey, descriptor) {
         const list = terminale_classe_1.GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.metodoAvviabile = descriptor.value;
-            metodo.tipo = TypeMetodo[tipo];
-            if (ruolo == undefined)
-                metodo.ruolo = 'bloccato';
+            metodo.tipo = tipo;
+            if (interazione != undefined)
+                metodo.tipoInterazione = interazione;
             else
-                metodo.ruolo = ruolo;
+                metodo.tipoInterazione = 'rotta';
             if (path == undefined)
                 metodo.path = propertyKey.toString();
             else
                 metodo.path = path;
-            if (metodo.ruolo == 'chiavegen') {
-                classe.listaMetodiGeneraKey.push(metodo);
-                TerminaleMetodo.ListaRotteGeneraChiavi.push(metodo);
-            }
-            else if (metodo.ruolo == 'chiavevalid') {
-                classe.listaMetodiValidaKey.push(metodo);
+            if (interazione == 'middleware' || interazione == 'ambo') {
+                const listaMidd = lista_terminale_metodo_1.GetListaMiddlewareMetaData();
+                const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());
+                midd.metodoAvviabile = descriptor.value;
+                midd.listaParametri = metodo.listaParametri;
+                lista_terminale_metodo_1.SalvaListaMiddlewareMetaData(listaMidd);
             }
             terminale_classe_1.SalvaListaClasseMetaData(list);
         }
@@ -554,8 +561,17 @@ function mpAddMiddle(item) {
         const list = terminale_classe_1.GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+        let midd = undefined;
+        const listaMidd = lista_terminale_metodo_1.GetListaMiddlewareMetaData();
+        if (typeof item === 'string' || item instanceof String) {
+            midd = listaMidd.CercaConNomeSeNoAggiungi(String(item));
+            lista_terminale_metodo_1.SalvaListaMiddlewareMetaData(listaMidd);
+        }
+        else {
+            midd = item;
+        }
         if (metodo != undefined && list != undefined && classe != undefined) {
-            metodo.middleware.push(item);
+            metodo.middleware.push(midd);
             terminale_classe_1.SalvaListaClasseMetaData(list);
         }
         else {

@@ -5,9 +5,9 @@ export var targetTerminale = { name: 'Terminale' };
 export interface IPrintabile {
     PrintMenu(): any
 }
-
-export enum IType {
-    number, text, date
+export interface IDescrivibile {
+    descrizione:string;
+    sommario:string;
 }
 
 export type TipoParametro ="number"| "text"| "date";

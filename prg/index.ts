@@ -10,12 +10,23 @@ import { ColumnType } from "typeorm";
 import { Request, Response, NextFunction } from "express";
 import { mpMain, Main } from "./model/classi/terminale-main";
 import { mpClas } from "./model/classi/terminale-classe";
-import { IReturn, mpAddMiddle, mpMet, TypeMetodo } from "./model/classi/terminale-metodo";
-import {  EPosizione, mpP, mpPar } from "./model/classi/terminale-parametro";
-import { IType } from "./model/tools";
+import { IReturn, mpAddMiddle, mpMet } from "./model/classi/terminale-metodo";
+import {  TypePosizione, mpP, mpPar } from "./model/classi/terminale-parametro";
+import { TipoParametro } from "./model/tools";
+
 
 const ff = function (req:Request,  res:Response, nex:NextFunction) {
-    
+    return nex;
+};
+
+
+const VerificaToken = (request: Request, response: Response, next: NextFunction) => {
+    try {
+        next();
+    } catch (error) {
+        console.log(error);
+        return response.status(403).send("Errore : " + error);
+    }
 };
 
         @mpClas('classe-test')
@@ -27,13 +38,30 @@ const ff = function (req:Request,  res:Response, nex:NextFunction) {
                 this.nome = nome;
                 this.cognome=cognome;
             }
-            Valida(){
 
+            //@mpMiddle
+            /* VerificaToken = (request: Request, response: Response, next: NextFunction) => {
+                try {
+                    next();
+                } catch (error) {
+                    console.log(error);
+                    return response.status(403).send("Errore : " + error);
+                }
+            }; */
+
+            @mpMet('get','Valida','middleware')
+            Valida(@mpPar('token', 'body') token: string){
+                const tmp : IReturn={
+                    body:{
+                        "nome": this.nome
+                    },
+                    stato:200};
+                return tmp;
             }
 
-            @mpAddMiddle(ff)
-            @mpMet('post','SetNome', 'bloccato')
-            SetNome(@mpPar('text', 'nomeFuturo', 'body') nomeFuturo: string) {
+            @mpAddMiddle('Valida')
+            @mpMet('post','SetNome')
+            SetNome(@mpPar('nomeFuturo', 'body') nomeFuturo: string) {
                 this.nome = nomeFuturo;
                 const tmp : IReturn={
                     body:{
@@ -43,7 +71,7 @@ const ff = function (req:Request,  res:Response, nex:NextFunction) {
                 return tmp;
             }
 
-            @mpMet('get', 'GetNome', 'chiavegen')
+            @mpMet('get', 'GetNome')
             GetNome(){
                 const tmp : IReturn={
                     body:{
@@ -53,7 +81,8 @@ const ff = function (req:Request,  res:Response, nex:NextFunction) {
                 return tmp;
             }
 
-            @mpMet('post', "SetCognome")
+
+            /* @mpMet('post', "SetCognome")
             SetCognome(@mpPar('text', 'cognomeNuovo', 'body') cognomeNuovo: string) {
                 this.cognome = cognomeNuovo;
                 const tmp : IReturn={
@@ -97,7 +126,7 @@ const ff = function (req:Request,  res:Response, nex:NextFunction) {
                     },
                     stato:200};
                 return tmp;
-            }
+            } */
             
             MetodoPrint() {
                 if ('nome' in this) {
@@ -153,6 +182,8 @@ const ff = function (req:Request,  res:Response, nex:NextFunction) {
         console.log('Menu');
         console.log('0: express');
         console.log('1: superagent');
+        console.log('2: biss');
+        
         chiedi({ 
             message: 'Scegli: ',
          type: 'number', 
@@ -162,7 +193,10 @@ const ff = function (req:Request,  res:Response, nex:NextFunction) {
                 main.StartExpress();                
             } else if(item.scelta==1){
                 main.PrintMenu();
-            }else{
+            }else if(item.scelta==2){
+                main.StartExpress(); 
+                main.PrintMenu();
+            }else {
                 console.log('Ciao ciao ...');
                 
             }

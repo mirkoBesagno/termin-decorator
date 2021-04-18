@@ -1,13 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MPDecPar = exports.MPDecParametro = exports.MPDecoratoreParametroGenerico = exports.MPParametro = exports.MPP = exports.MPParRev = exports.mpDecPar = exports.mpDecParametro = exports.mpDecoratoreParametroGenerico = exports.mpParametro = exports.mpP = exports.mpParRev = exports.mpPar = exports.TerminaleParametro = exports.EPosizione = void 0;
+exports.MPDecPar = exports.MPDecParametro = exports.MPDecoratoreParametroGenerico = exports.MPParametro = exports.MPP = exports.MPParRev = exports.mpDecPar = exports.mpDecParametro = exports.mpDecoratoreParametroGenerico = exports.mpParametro = exports.mpP = exports.mpParRev = exports.mpPar = exports.TerminaleParametro = void 0;
 const tools_1 = require("../tools");
 const terminale_classe_1 = require("./terminale-classe");
-var EPosizione;
-(function (EPosizione) {
-    EPosizione[EPosizione["body"] = 0] = "body";
-    EPosizione[EPosizione["query"] = 1] = "query";
-})(EPosizione = exports.EPosizione || (exports.EPosizione = {}));
 class TerminaleParametro {
     constructor(nome, tipo, posizione, indexParameter) {
         this.nome = nome;
@@ -31,7 +26,7 @@ function decoratoreParametroGenerico(tipoParametro, nomeParametro, posizione) {
         const list = terminale_classe_1.GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-        metodo.CercaParametroSeNoAggiungi(nomeParametro, tools_1.IType[tipoParametro], parameterIndex, EPosizione[posizione]);
+        metodo.CercaParametroSeNoAggiungi(nomeParametro, tools_1.IType[tipoParametro], parameterIndex, posizione);
         terminale_classe_1.SalvaListaClasseMetaData(list);
     };
 }

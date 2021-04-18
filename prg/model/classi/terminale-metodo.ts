@@ -1,20 +1,18 @@
-import { IPrintabile, IType, targetTerminale } from "../tools";
+import { IDescrivibile, IPrintabile, targetTerminale, TipoParametro } from "../tools";
 import { CheckClasseMetaData, GetListaClasseMetaData, SalvaListaClasseMetaData, TerminaleClasse } from "./terminale-classe";
-import { EPosizione, TerminaleParametro } from "./terminale-parametro";
+import { TypePosizione, TerminaleParametro } from "./terminale-parametro";
 import chiedi from "prompts";
 import helmet from "helmet";
 
 import superagent, { head } from "superagent";
-import express, { Router, Request, Response } from "express";
-import { ListaTerminaleMetodo } from "../liste/lista-terminale-metodo";
+import express, { Router, Request, Response, NextFunction } from "express";
+import { GetListaMiddlewareMetaData, ListaTerminaleMetodo, ListaTerminaleMiddleware, SalvaListaMiddlewareMetaData } from "../liste/lista-terminale-metodo";
 import { ListaTerminaleParametro } from "../liste/lista-terminale-parametro";
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import cors from 'cors';
 
-export enum ERuolo {
-    bloccato, chiave
-}
-export type TypeRuolo = "bloccato" | "chiavegen" | "chiavevalid"
+export type TypeInterazone = "rotta" | "middleware" | 'ambo';
+
 export interface IReturn {
     body: object;
     stato: number;
@@ -23,53 +21,40 @@ export interface IResponse {
     body: string
 }
 
-export class TerminaleMetodo implements IPrintabile {
-    static ListaRotteGeneraChiavi: TerminaleMetodo[] = [];
-    static ListaRotteValidaChiavi: TerminaleMetodo[] = [];
+export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
-    classePath = '';
     static nomeMetadataKeyTarget = "MetodoTerminaleTarget";
-    private _listaParametri: ListaTerminaleParametro;
-    tipo: TypeMetodo;
-
-    private _nome: string | Symbol;
+    classePath = '';
+    listaParametri: ListaTerminaleParametro;
+    tipo: TypeMetod;
+    tipoInterazione: TypeInterazone;
+    nome: string | Symbol;
     metodoAvviabile: any;
-    private _path: string;
+    path: string;
     pathGlobal: string;
-    ruolo: TypeRuolo;
 
     cors: any;
     helmet: any;
+
     middleware: any[] = [];
-    constructor(nome: string, path: string, classePath: string, protetto: TypeRuolo) {
-        this._listaParametri = new ListaTerminaleParametro();
-        this._nome = nome;
-        this._path = path;
+
+    descrizione: string;
+    sommario: string;
+
+    constructor(nome: string, path: string, classePath: string) {
+        this.listaParametri = new ListaTerminaleParametro();
+        this.nome = nome;
+        this.path = path;
         this.classePath = classePath;
-        this.tipo = TypeMetodo.indefinita;
+        this.tipo = 'get';
         this.pathGlobal = '';
-        this.ruolo = protetto
+        this.tipoInterazione = "rotta";
+
+        this.descrizione = "";
+        this.sommario = "";
+        //this.listaRotteGeneraChiavi = [];
     }
-    /* start : get e set */
-    public get nome(): string | Symbol {
-        return this._nome;
-    }
-    public set nome(value: string | Symbol) {
-        this._nome = value;
-    }
-    public get path(): string {
-        return this._path;
-    }
-    public set path(value: string) {
-        this._path = value;
-    }
-    public get listaParametri(): ListaTerminaleParametro {
-        return this._listaParametri;
-    }
-    public set listaParametri(value: ListaTerminaleParametro) {
-        this._listaParametri = value;
-    }
-    /* end : get e ste */
+
     async PrintMenu() {
         for (let index = 0; index < this.listaParametri.length; index++) {
             const element = this.listaParametri[index];
@@ -104,14 +89,20 @@ export class TerminaleMetodo implements IPrintabile {
     }
     ConfiguraRotta(rotte: Router, pathglobal: string): Router {
         this.pathGlobal = pathglobal + '/' + this.path;
-        if (this.metodoAvviabile != undefined) {
-            if (this.ruolo == "bloccato") {
+        const middlew: any[] = [];
+        this.middleware.forEach(element => {
 
+            if (element instanceof TerminaleMetodo) {
+                const listaMidd = GetListaMiddlewareMetaData();
+                const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
+                middlew.push(midd.ConvertiInMiddleare());
             }
+        });
+        if (this.metodoAvviabile != undefined) {
             var corsOptions = {
             }
             switch (this.tipo) {
-                case TypeMetodo.get:
+                case 'get':
                     (<IReturn>this.metodoAvviabile).body;
 
                     /* const options: cors.CorsOptions = {
@@ -140,20 +131,9 @@ export class TerminaleMetodo implements IPrintabile {
                     rotte.get("/" + this.path.toString(),
                         cors(this.cors),
                         helmet(this.helmet),
-                        this.middleware,
+                        middlew,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.pathGlobal);
-                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                            let tmp: IReturn;
-                            try {
-                                tmp = this.metodoAvviabile.apply(this, parametri);
-                            } catch (error) {
-                                console.log("Errore : \n" + error);
-                                tmp = {
-                                    body: { "Errore Interno filtrato ": 'internal error!!!!' },
-                                    stato: 500
-                                }
-                            }   */
                             this.InizializzaLogbaseIn(req, this.nome.toString());
                             const tmp = await this.Esegui(req);
                             res.status(tmp.stato).send(tmp.body);
@@ -161,7 +141,7 @@ export class TerminaleMetodo implements IPrintabile {
                             return res;
                         });
                     break;
-                case TypeMetodo.post:
+                case 'post':
                     corsOptions = {
                         methods: "POST"
                     };
@@ -175,7 +155,7 @@ export class TerminaleMetodo implements IPrintabile {
                     rotte.post("/" + this.path.toString(),
                         cors(this.cors),
                         helmet(this.helmet),
-                        this.middleware,
+                        middlew,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
@@ -187,7 +167,7 @@ export class TerminaleMetodo implements IPrintabile {
                             return res;
                         });
                     break;
-                case TypeMetodo.delete:
+                case 'delete':
                     (<IReturn>this.metodoAvviabile).body;
                     corsOptions = {
                         methods: "DELETE"
@@ -201,7 +181,7 @@ export class TerminaleMetodo implements IPrintabile {
                     rotte.delete("/" + this.path.toString(),
                         cors(this.cors),
                         helmet(this.helmet),
-                        this.middleware,
+                        middlew,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
@@ -213,7 +193,7 @@ export class TerminaleMetodo implements IPrintabile {
                             return res;
                         });
                     break;
-                case TypeMetodo.patch:
+                case 'patch':
                     corsOptions = {
                         methods: "PATCH"
                     };
@@ -227,7 +207,7 @@ export class TerminaleMetodo implements IPrintabile {
                     rotte.patch("/" + this.path.toString(),
                         cors(this.cors),
                         helmet(this.helmet),
-                        this.middleware,
+                        middlew,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
@@ -239,7 +219,7 @@ export class TerminaleMetodo implements IPrintabile {
                             return res;
                         });
                     break;
-                case TypeMetodo.purge:
+                case 'purge':
                     corsOptions = {
                         methods: "PURGE"
                     };
@@ -253,7 +233,7 @@ export class TerminaleMetodo implements IPrintabile {
                     rotte.purge("/" + this.path.toString(),
                         cors(this.cors),
                         helmet(this.helmet),
-                        this.middleware,
+                        middlew,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
@@ -265,7 +245,7 @@ export class TerminaleMetodo implements IPrintabile {
                             return res;
                         });
                     break;
-                case TypeMetodo.put:
+                case 'put':
                     corsOptions = {
                         methods: "PUT"
                     };
@@ -279,7 +259,7 @@ export class TerminaleMetodo implements IPrintabile {
                     rotte.put("/" + this.path.toString(),
                         cors(this.cors),
                         helmet(this.helmet),
-                        this.middleware,
+                        middlew,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
@@ -291,8 +271,7 @@ export class TerminaleMetodo implements IPrintabile {
                             return res;
                         });
                     break;
-                case TypeMetodo.indefinita:
-                    break;
+
                 default:
                     break;
             }
@@ -300,88 +279,202 @@ export class TerminaleMetodo implements IPrintabile {
         return rotte;
     }
     async ChiamaLaRotta(headerpath?: string) {
-        let chiave: IResponse = { body: '' };
-        if (this.ruolo == 'bloccato') {
-            console.log();
-            chiave = await this.RecuperaChiave();
-            chiave.body;
+        try {
+
+            let body: string = "";
+            let query: string = "";
+            let header: string = "";
+            for (let index = 0; index < this.middleware.length; index++) {
+                const element = this.middleware[index];
+
+                if (element instanceof TerminaleMetodo) {
+                    const listaMidd = GetListaMiddlewareMetaData();
+                    const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
+                    const rit = await midd.listaParametri.SoddisfaParamtri();
+
+                    if (rit.body != "") {
+                        if (body != "") {
+                            body = body + ", " + rit.body;
+                        } else {
+                            body = rit.body;
+                        }
+                    }
+                    if (rit.query != "") {
+                        if (query != "") {
+                            query = query + ", " + rit.query;
+                        } else
+                            query = rit.query;
+                    }
+                    if (rit.header != "") {
+                        if (header != "") {
+                            header = header + ", " + rit.header;
+                        } else
+                            header = rit.header;
+                    }
+                    if (index + 1 >= this.middleware.length) {
+                        const tmp = await this.MetSpalla(body, query, header, headerpath);
+                        return tmp;
+                    }
+                }
+
+            }
+
+        } catch (error) {
+            throw new Error("Errore :" + error);
+
         }
-        if (headerpath == undefined) headerpath = "http://localhost:3000"
-        console.log('chiamata per : ' + headerpath + this.pathGlobal + ' | Verbo: ' + this.tipo);
-        const parametri = await this.listaParametri.SoddisfaParamtri();
-        let ritorno;
-        switch (this.tipo) {
-            case TypeMetodo.get:
-                try {
-                    ritorno = await superagent
-                        .get(headerpath + this.pathGlobal)
-                        .query(JSON.parse(parametri.query))
-                        .send(JSON.parse(parametri.body))
-                        .set('accept', 'json')
-                        .set('Authorization', `Bearer ${chiave.body}`);
-                } catch (error) {
-                    console.log(error);
-                }
-                break;
-            case TypeMetodo.post:
-                try {
-                    ritorno = await superagent
-                        .post(headerpath + this.pathGlobal)
-                        .query(JSON.parse(parametri.query))
-                        .send(JSON.parse(parametri.body))
-                        .set('accept', 'json')
-                        .set('Authorization', `Bearer ${chiave.body}`);
-                } catch (error) {
-                    console.log(error);
-                }
-                break;
-            case TypeMetodo.purge:
-                try {
-                    ritorno = await superagent
-                        .purge(headerpath + this.pathGlobal)
-                        .query(JSON.parse(parametri.query))
-                        .send(JSON.parse(parametri.body))
-                        .set('accept', 'json')
-                        .set('Authorization', `Bearer ${chiave.body}`);
-                } catch (error) {
-                    console.log(error);
-                }
-                break;
-            case TypeMetodo.patch:
-                try {
-                    ritorno = await superagent
-                        .patch(headerpath + this.pathGlobal)
-                        .query(JSON.parse(parametri.query))
-                        .send(JSON.parse(parametri.body))
-                        .set('accept', 'json')
-                        .set('Authorization', `Bearer ${chiave.body}`);
-                } catch (error) {
-                    console.log(error);
-                }
-                break;
-            case TypeMetodo.delete:
-                try {
-                    ritorno = await superagent
-                        .delete(headerpath + this.pathGlobal)
-                        .query(JSON.parse(parametri.query))
-                        .send(JSON.parse(parametri.body))
-                        .set('accept', 'json')
-                        .set('Authorization', `Bearer ${chiave.body}`);
-                } catch (error) {
-                    console.log(error);
-                }
-                break;
-            default:
-                break;
-        }
-        ritorno?.body;
-        return ritorno;
     }
-    async RecuperaChiave(): Promise<IResponse> {
+    async MetSpalla(body: string, query: string, header: string, headerpath?: string): Promise<string> {
+        try {
+
+            if (headerpath == undefined) headerpath = "http://localhost:3000"
+            console.log('chiamata per : ' + headerpath + this.pathGlobal + ' | Verbo: ' + this.tipo);
+            let parametri = await this.listaParametri.SoddisfaParamtri();
+
+            if (parametri.body != "") {
+                if (body != "") {
+                    body = body + ", " + parametri.body;
+                } else {
+                    body = parametri.body;
+                }
+            }
+            if (parametri.query != "") {
+                if (query != "") {
+                    query = query + ", " + parametri.query;
+                } else
+                    query = parametri.query;
+            }
+            if (parametri.header != "") {
+                if (header != "") {
+                    header = header + ", " + parametri.header;
+                } else
+                    header = parametri.header;
+            }
+
+            let ritorno;
+            if (this.tipo) {
+
+                switch (this.tipo) {
+                    case 'get':
+                        try {
+                            ritorno = await superagent
+                                .get(headerpath + this.pathGlobal)
+                                .query(JSON.parse('{ ' + query + ' }'))
+                                .send(JSON.parse('{ ' + body + ' }'))
+                                .set(JSON.parse('{ ' + header + ' }'))
+                                .set('accept', 'json')
+                                //.auth('my_token', { type: 'bearer' })
+                                ;
+                            if (ritorno) {
+                                return ritorno.body;
+                            } else {
+                                return '';
+                            }
+                        } catch (error) {
+                            console.log(error);
+                            throw new Error("Errore:" + error);
+                        }
+                        break;
+                    case 'post':
+                        try {
+                            ritorno = await superagent
+                                .post(headerpath + this.pathGlobal)
+                                .query(JSON.parse('{ ' + query + ' }'))
+                                .send(JSON.parse('{ ' + body + ' }'))
+                                .set(JSON.parse('{ ' + header + ' }'))
+                                .set('accept', 'json')
+                        /* .set('Authorization', `Bearer ${chiave.body}`) */;
+                            if (ritorno) {
+                                return ritorno.body;
+                            } else {
+                                return '';
+                            }
+                        } catch (error) {
+                            console.log(error);
+                            throw new Error("Errore:" + error);
+                        }
+                        break;
+                    case 'purge':
+                        try {
+                            ritorno = await superagent
+                                .purge(headerpath + this.pathGlobal)
+                                .query(JSON.parse('{ ' + query + ' }'))
+                                .send(JSON.parse('{ ' + body + ' }'))
+                                .set(JSON.parse('{ ' + header + ' }'))
+                                .set('accept', 'json')
+                        /* .set('Authorization', `Bearer ${chiave.body}`) */;
+                            if (ritorno) {
+                                return ritorno.body;
+                            } else {
+                                return '';
+                            }
+                        } catch (error) {
+                            console.log(error);
+                            throw new Error("Errore:" + error);
+                        }
+                        break;
+                    case 'patch':
+                        try {
+                            ritorno = await superagent
+                                .patch(headerpath + this.pathGlobal)
+                                .query(JSON.parse('{ ' + query + ' }'))
+                                .send(JSON.parse('{ ' + body + ' }'))
+                                .set(JSON.parse('{ ' + header + ' }'))
+                                .set('accept', 'json')
+                        /* .set('Authorization', `Bearer ${chiave.body}`) */;
+                            if (ritorno) {
+                                return ritorno.body;
+                            } else {
+                                return '';
+                            }
+                        } catch (error) {
+                            console.log(error);
+                            throw new Error("Errore:" + error);
+                        }
+                        break;
+                    case 'delete':
+                        try {
+                            ritorno = await superagent
+                                .delete(headerpath + this.pathGlobal)
+                                .query(JSON.parse('{ ' + query + ' }'))
+                                .send(JSON.parse('{ ' + body + ' }'))
+                                .set(JSON.parse('{ ' + header + ' }'))
+                                .set('accept', 'json')
+                        /* .set('Authorization', `Bearer ${chiave.body}`) */;
+                            if (ritorno) {
+                                return ritorno.body;
+                            } else {
+                                return '';
+                            }
+                        } catch (error) {
+                            console.log(error);
+                            throw new Error("Errore:" + error);
+                        }
+                        break;
+                    default:
+                        return '';
+                        break;
+                }
+            }
+            else {
+                return '';
+            }
+            /* if (ritorno) {
+                ritorno?.body;
+                return ritorno.body;
+            } else {
+                return undefined;
+            } */
+        } catch (error) {
+            throw new Error("Errore:" + error);
+
+        }
+    }
+    /* async RecuperaChiave(): Promise<IResponse> {
         try {
             console.log("La rotta è protetta, sono state trovate delle funzioni che potrebbero sbloccarla, scegli:");
-            for (let index = 0; index < TerminaleMetodo.ListaRotteGeneraChiavi.length; index++) {
-                const element = TerminaleMetodo.ListaRotteGeneraChiavi[index];
+            for (let index = 0; index < this.listaRotteGeneraChiavi.length; index++) {
+                const element = this.listaRotteGeneraChiavi[index];
                 console.log(index + ': ' + element.nome);
             }
             const tmp = await chiedi({
@@ -389,7 +482,7 @@ export class TerminaleMetodo implements IPrintabile {
                 type: 'number',
                 name: 'scelta'
             });
-            const ritorno = await TerminaleMetodo.ListaRotteGeneraChiavi[tmp.scelta].ChiamaLaRotta();
+            const ritorno = await this.listaRotteGeneraChiavi[tmp.scelta].ChiamaLaRotta();
             let tmp2: IResponse = { body: '' };
             if (ritorno) {
                 tmp2.body = ritorno.body;
@@ -398,11 +491,12 @@ export class TerminaleMetodo implements IPrintabile {
         } catch (error) {
             return { body: '' };
         }
+    } */
+    CercaParametroSeNoAggiungi(nome: string, parameterIndex: number, tipoParametro: TipoParametro, posizione: TypePosizione) {
+        const tmp = this.listaParametri.push(new TerminaleParametro(nome, tipoParametro, posizione, parameterIndex))//.lista.push({ propertyKey: propertyKey, Metodo: target });
+        return this.listaParametri[tmp];
     }
-    CercaParametroSeNoAggiungi(nome: string, parameterIndex: number, tipoParametro: IType, posizione: EPosizione) {
-        this.listaParametri.push(new TerminaleParametro(nome, tipoParametro, posizione, parameterIndex))//.lista.push({ propertyKey: propertyKey, Metodo: target });                                           
-    }
-    Esegui(req: Request): IReturn {
+    async Esegui(req: Request): Promise<IReturn> {
         console.log('Risposta a chiamata : ' + this.pathGlobal);
         const parametri = this.listaParametri.EstraiParametriDaRequest(req);
         let tmp: IReturn;
@@ -417,7 +511,6 @@ export class TerminaleMetodo implements IPrintabile {
         }
         return tmp;
     }
-
 
     InizializzaLogbaseIn(req: Request, nomeMetodo?: string): string {
         console.log("Arrivato in : " + nomeMetodo + "\n"
@@ -482,9 +575,20 @@ export class TerminaleMetodo implements IPrintabile {
             + "remote : " + t2 + "\n";
         return tmp;
     }
+    ConvertiInMiddleare() {
+        return async (req: Request, res: Response, nex: NextFunction) => {
+            const tmp = await this.Esegui(req);
+            if (tmp.stato >= 300) {
+                throw new Error("Errore : " + tmp.body);
+            }
+            else {
+                return nex;
+            }
+        };
+    }
 }
 
-export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse, ruolo: TypeRuolo) {
+export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse) {
     let tmp: ListaTerminaleMetodo = Reflect.getMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, targetTerminale); // vado a prendere la struttura legata alle funzioni
     if (tmp == undefined) {//se non c'è 
         tmp = new ListaTerminaleMetodo(classe.rotte);//lo creo
@@ -492,42 +596,47 @@ export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse,
     }
     let terminale = tmp.CercaConNome(nomeMetodo, classe.path); //cerca la mia funzione
     if (terminale == undefined)/* se non c'è */ {
-        terminale = new TerminaleMetodo(nomeMetodo, "", classe.nome, ruolo); // creo la funzione
+        terminale = new TerminaleMetodo(nomeMetodo, "", classe.nome); // creo la funzione
     }
     return terminale;
 }
 
-export enum TypeMetodo {
-    get, put, post, patch, purge, delete, indefinita
-}
 export type TypeMetod = "get" | "put" | "post" | "patch" | "purge" | "delete";
 
-function decoratoreMetodo(tipo: TypeMetod, path?: string, ruolo?: TypeRuolo): MethodDecorator {
-    return function (
-        target: Object,
-        propertyKey: string | symbol,
-        descriptor: PropertyDescriptor
-    ) {
+function decoratoreMetodo(tipo?: TypeMetod, path?: string, interazione?: TypeInterazone, descrizione?: string, sommario?: string
+): MethodDecorator {
+    return function (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
 
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.metodoAvviabile = descriptor.value;
-            metodo.tipo = TypeMetodo[tipo];
-            if (ruolo == undefined) metodo.ruolo = 'bloccato';
-            else metodo.ruolo = ruolo;
+
+            if (tipo != undefined) metodo.tipo = tipo;
+            else metodo.tipo = 'get';
+
+            if (descrizione != undefined) metodo.descrizione = descrizione;
+            else metodo.descrizione = '';
+
+            if (sommario != undefined) metodo.sommario = sommario;
+            else metodo.sommario = '';
+
+            if (interazione != undefined) metodo.tipoInterazione = interazione;
+            else metodo.tipoInterazione = 'rotta';
 
             if (path == undefined) metodo.path = propertyKey.toString();
             else metodo.path = path;
 
-            if (metodo.ruolo == 'chiavegen') {
-                classe.listaMetodiGeneraKey.push(metodo);
-                TerminaleMetodo.ListaRotteGeneraChiavi.push(metodo);
-            } else if (metodo.ruolo == 'chiavevalid') {
-                classe.listaMetodiValidaKey.push(metodo);
-            }
 
+            if (interazione == 'middleware' || interazione == 'ambo') {
+
+                const listaMidd = GetListaMiddlewareMetaData();
+                const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());
+                midd.metodoAvviabile = descriptor.value;
+                midd.listaParametri = metodo.listaParametri;
+                SalvaListaMiddlewareMetaData(listaMidd);
+            }
             SalvaListaClasseMetaData(list);
         }
         else {
@@ -584,8 +693,19 @@ export function mpAddMiddle(item: any): MethodDecorator {
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
 
+        let midd = undefined;
+        const listaMidd = GetListaMiddlewareMetaData();
+        if (typeof item === 'string' || item instanceof String) {
+            midd = listaMidd.CercaConNomeSeNoAggiungi(String(item));
+            SalvaListaMiddlewareMetaData(listaMidd);
+        }
+        else {
+            midd = item;
+        }
+
+
         if (metodo != undefined && list != undefined && classe != undefined) {
-            metodo.middleware.push(item);
+            metodo.middleware.push(midd);
             SalvaListaClasseMetaData(list);
         }
         else {
@@ -593,6 +713,7 @@ export function mpAddMiddle(item: any): MethodDecorator {
         }
     }
 }
+
 
 export { decoratoreMetodo as mpMetRev };
 export { decoratoreMetodo as mpMet };

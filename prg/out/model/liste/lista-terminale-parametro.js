@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ListaTerminaleParametro = void 0;
 const prompts_1 = __importDefault(require("prompts"));
-const terminale_parametro_1 = require("../classi/terminale-parametro");
 class ListaTerminaleParametro extends Array {
     constructor() {
         super();
@@ -32,16 +31,21 @@ class ListaTerminaleParametro extends Array {
                 const tmp2 = richiesta.query[element.nome];
                 ritorno.push(tmp2);
             }
+            else if (richiesta.headers[element.nome] != undefined) {
+                const tmp3 = richiesta.headers[element.nome];
+                ritorno.push(tmp3);
+            }
         }
         return ritorno;
     }
     SoddisfaParamtri() {
         return __awaiter(this, void 0, void 0, function* () {
-            let body = '{';
+            let body = '';
             let primo = false;
+            console.log('Soddisfa il body:');
             for (let index = 0; index < this.length; index++) {
                 const element = this[index];
-                if (element.posizione == terminale_parametro_1.EPosizione.body) {
+                if (element.posizione == 'body') {
                     if (index != this.length - 1 && primo == true) {
                         body = body + ', ';
                     }
@@ -51,17 +55,16 @@ class ListaTerminaleParametro extends Array {
                     const scelta = yield prompts_1.default({ message: messaggio, type: 'text', name: 'scelta' });
                     body = body + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
                 }
-                if (index == this.length - 1) {
-                    body = body + ' }';
-                }
             }
-            let query = '{';
+            body = body + '';
+            let query = '';
             primo = false;
+            console.log('Soddisfa le query:');
             for (let index = 0; index < this.length; index++) {
                 const element = this[index];
-                if (element.posizione == terminale_parametro_1.EPosizione.query) {
+                if (element.posizione == 'query') {
                     if (index != this.length - 1 && primo == true) {
-                        body = body + ', ';
+                        query = query + ', ';
                     }
                     primo = true;
                     const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
@@ -69,11 +72,26 @@ class ListaTerminaleParametro extends Array {
                     const scelta = yield prompts_1.default({ message: messaggio, type: 'text', name: 'scelta' });
                     query = query + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
                 }
-                if (index == this.length - 1) {
-                    query = query + ' }';
+            }
+            query = query + '';
+            let header = '';
+            primo = false;
+            console.log("Soddisfa l'header:");
+            for (let index = 0; index < this.length; index++) {
+                const element = this[index];
+                if (element.posizione == 'header') {
+                    if (index != this.length - 1 && primo == true) {
+                        header = header + ', ';
+                    }
+                    primo = true;
+                    const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
+                        + element.tipo + '|Inserire valore :';
+                    const scelta = yield prompts_1.default({ message: messaggio, type: 'text', name: 'scelta' });
+                    header = header + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
                 }
             }
-            return { body, query };
+            header = header + '';
+            return { body, query, header };
         });
     }
 }

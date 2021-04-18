@@ -24,8 +24,6 @@ class TerminaleClasse {
         this.id = Math.random().toString();
         this.rotte = express_1.Router();
         this.listaMetodi = new lista_terminale_metodo_1.ListaTerminaleMetodo(this.rotte);
-        this.listaMetodiGeneraKey = new lista_terminale_metodo_1.ListaTerminaleMetodo(this.rotte);
-        this.listaMetodiValidaKey = new lista_terminale_metodo_1.ListaTerminaleMetodo(this.rotte);
         this.nome = nome;
         if (path)
             this.path = path;
@@ -74,7 +72,9 @@ class TerminaleClasse {
             for (let index = 0; index < this.listaMetodi.length; index++) {
                 const element = this.listaMetodi[index];
                 const tmp = index + 1;
-                console.log(tmp + ': ' + element.PrintStamp());
+                if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
+                    console.log(tmp + ': ' + element.PrintStamp());
+                }
             }
             const scelta = yield prompts_1.default({ message: 'Scegli il metodo da eseguire: ', type: 'number', name: 'scelta' });
             if (scelta.scelta == 0) {
@@ -104,13 +104,16 @@ class TerminaleClasse {
         this.pathGlobal = pathGlobal;
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
-            element.ConfiguraRotta(this.rotte, this.pathGlobal);
+            if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
+                element.ConfiguraRotta(this.rotte, this.pathGlobal);
+            }
+            //element.listaRotteGeneraChiavi=this.listaMetodiGeneraKey;
         }
     }
     CercaMetodoSeNoAggiungiMetodo(nome) {
         let terminale = this.listaMetodi.CercaConNomeRev(nome);
         if (terminale == undefined) /* se non c'è */ {
-            terminale = new terminale_metodo_1.TerminaleMetodo(nome, "", this.nome, 'bloccato'); // creo la funzione
+            terminale = new terminale_metodo_1.TerminaleMetodo(nome, "", this.nome); // creo la funzione
             this.listaMetodi.AggiungiElemento(terminale);
         }
         return terminale;

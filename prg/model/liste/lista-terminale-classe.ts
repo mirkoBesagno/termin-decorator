@@ -3,6 +3,7 @@ import chiedi from "prompts";
 
 export class ListaTerminaleClasse extends Array<TerminaleClasse> {
     static nomeMetadataKeyTarget = "ListaTerminaleClasse";
+    
     constructor() {
         super();
     }

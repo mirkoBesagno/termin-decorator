@@ -3,7 +3,11 @@ import { Router, Request, Response } from "express";
 
 import chiedi from "prompts";
 
-import { EPosizione, TerminaleParametro } from "../classi/terminale-parametro";
+import { TypePosizione, TerminaleParametro } from "../classi/terminale-parametro";
+
+export interface IParametri {
+    body: string, query: string, header: string
+}
 
 export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
     constructor() {
@@ -23,38 +27,42 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
                 const tmp2 = richiesta.query[element.nome];
                 ritorno.push(tmp2);
             }
+            else if (richiesta.headers[element.nome] != undefined) {
+                const tmp3 = richiesta.headers[element.nome];
+                ritorno.push(tmp3);
+            }
         }
         return ritorno;
 
     }
-    async SoddisfaParamtri() {
-        let body = '{';
+    async SoddisfaParamtri(): Promise<IParametri> {
+        let body = '';
         let primo = false;
+        console.log('Soddisfa il body:');
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
-            if (element.posizione == EPosizione.body) {
+            if (element.posizione == 'body') {
                 if (index != this.length - 1 && primo == true) {
                     body = body + ', ';
                 }
                 primo = true;
                 const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
                     + element.tipo + '|Inserire valore :';
-                const scelta = await chiedi({ message: messaggio, type: 'text', name: 'scelta' });
+                const gg = chiedi;
+                const scelta = await gg({ message: messaggio, type: 'text', name: 'scelta' });
                 body = body + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
             }
-
-            if (index == this.length - 1) {
-                body = body + ' }';
-            } 
         }
+        body = body + '';
 
-        let query = '{';
-        primo=false;
+        let query = '';
+        primo = false;
+        console.log('Soddisfa le query:');
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
-            if (element.posizione == EPosizione.query) {                
+            if (element.posizione == 'query') {
                 if (index != this.length - 1 && primo == true) {
-                    body = body + ', ';
+                    query = query + ', ';
                 }
                 primo = true;
                 const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
@@ -62,11 +70,27 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
                 const scelta = await chiedi({ message: messaggio, type: 'text', name: 'scelta' });
                 query = query + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
             }
-            if (index == this.length - 1) {
-                query = query + ' }';
+        }
+        query = query + '';
+
+
+        let header = '';
+        primo = false;
+        console.log("Soddisfa l'header:");
+        for (let index = 0; index < this.length; index++) {
+            const element = this[index];
+            if (element.posizione == 'header') {
+                if (index != this.length - 1 && primo == true) {
+                    header = header + ', ';
+                }
+                primo = true;
+                const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
+                    + element.tipo + '|Inserire valore :';
+                const scelta = await chiedi({ message: messaggio, type: 'text', name: 'scelta' });
+                header = header + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
             }
         }
-
-        return { body, query };
+        header = header + '';
+        return { body, query, header };
     }
 }

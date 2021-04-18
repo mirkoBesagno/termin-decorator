@@ -10,8 +10,6 @@ import { TerminaleMetodo } from "./terminale-metodo";
 export class TerminaleClasse implements IPrintabile {
     static nomeMetadataKeyTarget = "ClasseTerminaleTarget";
     listaMetodi: ListaTerminaleMetodo;
-    listaMetodiGeneraKey: ListaTerminaleMetodo;
-    listaMetodiValidaKey: ListaTerminaleMetodo;
     id: string;
     nome: string;
     path: string;
@@ -24,9 +22,7 @@ export class TerminaleClasse implements IPrintabile {
         this.id = Math.random().toString();
         this.rotte = Router();
         this.listaMetodi = new ListaTerminaleMetodo(this.rotte);
-        this.listaMetodiGeneraKey = new ListaTerminaleMetodo(this.rotte);        
-        this.listaMetodiValidaKey = new ListaTerminaleMetodo(this.rotte);
-        
+
         this.nome = nome;
         if (path) this.path = path;
         else this.path = nome;
@@ -73,7 +69,9 @@ export class TerminaleClasse implements IPrintabile {
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
             const tmp = index + 1;
-            console.log(tmp + ': ' + element.PrintStamp());
+            if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
+                console.log(tmp + ': ' + element.PrintStamp());
+            }
         }
         const scelta = await chiedi({ message: 'Scegli il metodo da eseguire: ', type: 'number', name: 'scelta' });
 
@@ -87,7 +85,7 @@ export class TerminaleClasse implements IPrintabile {
             if (risposta == undefined) {
                 console.log("Risposta undefined!");
             } else {
-                console.log(risposta.body)
+                console.log(risposta)
             }
 
             await this.PrintMenuClasse();
@@ -105,14 +103,17 @@ export class TerminaleClasse implements IPrintabile {
         this.pathGlobal = pathGlobal;
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
-            element.ConfiguraRotta(this.rotte, this.pathGlobal);
+            if (element.tipoInterazione=='rotta' || element.tipoInterazione=='ambo') {
+                element.ConfiguraRotta(this.rotte, this.pathGlobal);                
+            }
+            //element.listaRotteGeneraChiavi=this.listaMetodiGeneraKey;
         }
     }
     CercaMetodoSeNoAggiungiMetodo(nome: string) {
         let terminale = this.listaMetodi.CercaConNomeRev(nome)
 
         if (terminale == undefined)/* se non c'è */ {
-            terminale = new TerminaleMetodo(nome, "", this.nome, 'bloccato'); // creo la funzione
+            terminale = new TerminaleMetodo(nome, "", this.nome); // creo la funzione
             this.listaMetodi.AggiungiElemento(terminale);
         }
         return terminale;

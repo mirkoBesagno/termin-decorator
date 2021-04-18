@@ -1,5 +1,5 @@
 
-import { IPrintabile, IType, targetTerminale, TipoParametro } from "../tools";
+import { IDescrivibile, IPrintabile, targetTerminale, TipoParametro } from "../tools";
 import { CheckMetodoMetaData, TerminaleMetodo } from "./terminale-metodo";
 
 
@@ -8,22 +8,26 @@ import express from "express";
 import { CheckClasseMetaData, GetListaClasseMetaData, SalvaListaClasseMetaData } from "./terminale-classe";
 import { ListaTerminaleMetodo } from "../liste/lista-terminale-metodo";
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
-export enum EPosizione {
-    body, query
-}
-export type TypePosizione ="body"| "query";
+
+export type TypePosizione = "body" | "query" | 'header';
 
 
-export class TerminaleParametro {
+export class TerminaleParametro implements IDescrivibile {
     nome: string;
-    tipo: IType;
-    posizione: EPosizione;
+    tipo: TipoParametro;
+    posizione: TypePosizione;
     indexParameter: number;
-    constructor(nome: string, tipo: IType, posizione: EPosizione, indexParameter: number) {
+
+    descrizione: string;
+    sommario: string;
+    constructor(nome: string, tipo: TipoParametro, posizione: TypePosizione, indexParameter: number) {
         this.nome = nome;
         this.tipo = tipo;
         this.posizione = posizione;
         this.indexParameter = indexParameter;
+
+        this.descrizione = "";
+        this.sommario = "";
     }
 
     PrintMenu() {
@@ -38,12 +42,18 @@ export class TerminaleParametro {
 }
 
 
-function decoratoreParametroGenerico(tipoParametro: TipoParametro, nomeParametro: string, posizione:TypePosizione) {
+function decoratoreParametroGenerico(nomeParametro: string, posizione: TypePosizione, tipoParametro?: TipoParametro, descrizione?: string, sommario?: string) {
     return function (target: any, propertyKey: string | symbol, parameterIndex: number) {
+        if (tipoParametro == undefined) tipoParametro = 'text';
+        if (descrizione == undefined) descrizione = '';
+        if (sommario == undefined) sommario = '';
+
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-        metodo.CercaParametroSeNoAggiungi(nomeParametro, IType[tipoParametro], parameterIndex, EPosizione[posizione]);
+        const paramestro = metodo.CercaParametroSeNoAggiungi(nomeParametro, parameterIndex, tipoParametro, posizione);
+        paramestro.descrizione = descrizione;
+        paramestro.sommario = sommario;
         SalvaListaClasseMetaData(list);
     }
 }
