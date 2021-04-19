@@ -131,22 +131,27 @@ let ClasseTest = class ClasseTest {
     }
 };
 __decorate([
-    terminale_metodo_1.mpMet('get', 'Valida', 'middleware'),
-    __param(0, terminale_parametro_1.mpPar('text', 'token', 'body')),
+    terminale_metodo_1.mpMet({ tipo: 'get', path: 'Valida', interazione: 'middleware' }),
+    __param(0, terminale_parametro_1.mpPar({ nomeParametro: 'token', posizione: 'body' })),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ClasseTest.prototype, "Valida", null);
 __decorate([
-    terminale_metodo_1.mpAddMiddle('valida'),
-    terminale_metodo_1.mpMet('post', 'SetNome'),
-    __param(0, terminale_parametro_1.mpPar('text', 'nomeFuturo', 'body')),
+    terminale_metodo_1.mpAddMiddle('Valida'),
+    terminale_metodo_1.mpMet({ tipo: 'post', path: 'SetNome' }),
+    __param(0, terminale_parametro_1.mpPar({
+        nomeParametro: 'nomeFuturo',
+        posizione: 'body',
+        tipoParametro: 'text',
+        descrizione: 'nome che perendere il posto del vecchio.'
+    })),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ClasseTest.prototype, "SetNome", null);
 __decorate([
-    terminale_metodo_1.mpMet('get', 'GetNome'),
+    terminale_metodo_1.mpMet({ tipo: 'get', path: 'GetNome' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
@@ -207,6 +212,9 @@ prompts_1.default({
         main.PrintMenu();
     }
     else if (item.scelta == 2) {
+        main.EsponiSwagger();
+    }
+    else if (item.scelta == 3) {
         main.StartExpress();
         main.PrintMenu();
     }

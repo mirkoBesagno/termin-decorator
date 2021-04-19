@@ -9,6 +9,8 @@ class TerminaleParametro {
         this.tipo = tipo;
         this.posizione = posizione;
         this.indexParameter = indexParameter;
+        this.descrizione = "";
+        this.sommario = "";
     }
     PrintMenu() {
         const t = Reflect.getMetadata('info', tools_1.targetTerminale);
@@ -19,14 +21,39 @@ class TerminaleParametro {
     PrintParametro() {
         return "tipo:" + this.tipo.toString() + ";" + "nome:" + this.nome;
     }
+    SettaSwagger() {
+        const ritorno = `{
+                        "name": "${this.nome}",
+                        "in": "${this.posizione}",
+                        "required": false,
+                        "type": "${this.tipo}",
+                        "description": "${this.descrizione}",
+                        "summary":"${this.sommario}"
+                    }
+        `;
+    }
 }
 exports.TerminaleParametro = TerminaleParametro;
-function decoratoreParametroGenerico(tipoParametro, nomeParametro, posizione) {
+function decoratoreParametroGenerico(parametri) {
     return function (target, propertyKey, parameterIndex) {
+        if (parametri.tipoParametro == undefined)
+            parametri.tipoParametro = 'text';
+        if (parametri.descrizione == undefined)
+            parametri.descrizione = '';
+        if (parametri.sommario == undefined)
+            parametri.sommario = '';
         const list = terminale_classe_1.GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-        metodo.CercaParametroSeNoAggiungi(nomeParametro, tools_1.IType[tipoParametro], parameterIndex, posizione);
+        const paramestro = metodo.CercaParametroSeNoAggiungi(parametri.nomeParametro, parameterIndex, parametri.tipoParametro, parametri.posizione);
+        if (parametri.descrizione != undefined)
+            paramestro.descrizione = parametri.descrizione;
+        else
+            paramestro.descrizione = '';
+        if (parametri.sommario != undefined)
+            paramestro.sommario = parametri.sommario;
+        else
+            paramestro.sommario = '';
         terminale_classe_1.SalvaListaClasseMetaData(list);
     };
 }

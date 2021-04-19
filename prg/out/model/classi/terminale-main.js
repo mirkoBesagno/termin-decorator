@@ -37,6 +37,7 @@ const prompts_1 = __importDefault(require("prompts"));
 const express_1 = __importDefault(require("express"));
 const lista_terminale_classe_1 = require("../liste/lista-terminale-classe");
 const bodyParser = __importStar(require("body-parser"));
+const swaggerUI = require('swagger-ui-express');
 /**
  *
  */
@@ -83,6 +84,43 @@ class Main {
             }));
             this.serverExpressDecorato.use(pathGlobal, element.rotte);
         }
+    }
+    EsponiSwagger() {
+        const swaggerJson = ``;
+        let tmp2 = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale);
+        let ritorno = `
+        {
+            "openapi": "3.0.0",
+            "servers": [
+                {
+                    "url": "https://staisicuro.medicaltech.it/",
+                    "variables": {},
+                    "description": "indirizzo principale"
+                },
+                {
+                    "url": "http://ss-test.medicaltech.it/",
+                    "description": "indirizzo secondario nel caso quello principale non dovesse funzionare."
+                }
+            ],
+            "info": {
+                "description": "Documentazione delle API con le quali interrogare il server dell'applicazione STAI sicuro, per il momento qui troverai solo le api con le quali interfacciarti alla parte relativa al paziente. \nSe vi sono problemi sollevare degli issues o problemi sulla pagina di github oppure scrivere direttamente una email.",
+                "version": "1.0.0",
+                "title": "STAI sicuro",
+                "termsOfService": "https://github.com/MedicaltechTM/STAI_sicuro"
+            },
+        `;
+        for (let index = 0; index < tmp2.length; index++) {
+            const element = tmp2[index];
+            element.SettaSwagger();
+            if (index == 0 && index + 1 != tmp2.length) {
+                ritorno = ritorno + ', ';
+            }
+            if (index + 1 == tmp2.length) {
+                ritorno = ritorno + ' }';
+            }
+        }
+        ritorno = ritorno + '}';
+        return ritorno;
     }
     PrintMenu() {
         return __awaiter(this, void 0, void 0, function* () {

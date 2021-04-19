@@ -39,21 +39,46 @@ export class TerminaleParametro implements IDescrivibile {
     PrintParametro() {
         return "tipo:" + this.tipo.toString() + ";" + "nome:" + this.nome;
     }
+    SettaSwagger() {
+        const ritorno =
+            `{
+                        "name": "${this.nome}",
+                        "in": "${this.posizione}",
+                        "required": false,
+                        "type": "${this.tipo}",
+                        "description": "${this.descrizione}",
+                        "summary":"${this.sommario}"
+                    }
+        `;
+        try {
+            JSON.parse(ritorno)
+        } catch (error) {
+            console.log(error);
+        }
+        return ritorno;
+    }
 }
 
+export interface IParametro {
+    nomeParametro: string, posizione: TypePosizione, tipoParametro?: TipoParametro, descrizione?: string, sommario?: string
+}
 
-function decoratoreParametroGenerico(nomeParametro: string, posizione: TypePosizione, tipoParametro?: TipoParametro, descrizione?: string, sommario?: string) {
+function decoratoreParametroGenerico(parametri: IParametro)/* (nomeParametro: string, posizione: TypePosizione, tipoParametro?: TipoParametro, descrizione?: string, sommario?: string) */ {
     return function (target: any, propertyKey: string | symbol, parameterIndex: number) {
-        if (tipoParametro == undefined) tipoParametro = 'text';
-        if (descrizione == undefined) descrizione = '';
-        if (sommario == undefined) sommario = '';
+        if (parametri.tipoParametro == undefined) parametri.tipoParametro = 'text';
+        if (parametri.descrizione == undefined) parametri.descrizione = '';
+        if (parametri.sommario == undefined) parametri.sommario = '';
 
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-        const paramestro = metodo.CercaParametroSeNoAggiungi(nomeParametro, parameterIndex, tipoParametro, posizione);
-        paramestro.descrizione = descrizione;
-        paramestro.sommario = sommario;
+        const paramestro = metodo.CercaParametroSeNoAggiungi(parametri.nomeParametro, parameterIndex, parametri.tipoParametro, parametri.posizione);
+        if (parametri.descrizione != undefined) paramestro.descrizione = parametri.descrizione;
+        else paramestro.descrizione = '';
+
+        if (parametri.sommario != undefined) paramestro.sommario = parametri.sommario;
+        else paramestro.sommario = '';
+
         SalvaListaClasseMetaData(list);
     }
 }

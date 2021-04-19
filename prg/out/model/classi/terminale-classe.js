@@ -87,7 +87,7 @@ class TerminaleClasse {
                     console.log("Risposta undefined!");
                 }
                 else {
-                    console.log(risposta.body);
+                    console.log(risposta);
                 }
                 yield this.PrintMenuClasse();
             }
@@ -109,6 +109,35 @@ class TerminaleClasse {
             }
             //element.listaRotteGeneraChiavi=this.listaMetodiGeneraKey;
         }
+    }
+    SettaSwagger() {
+        const swaggerJson = `
+        {
+            "tags": [
+                {
+                    "name": "admin",
+                    "description": "Racchiude tutti i percorsi che l'admin può visitare",
+                    "externalDocs": {
+                        "description": "",
+                        "url": "https://staisicuro.medicaltech.it/api/admin/"
+                    }
+                },
+            ],
+        }        
+        `;
+        let ritorno = '"paths": {';
+        for (let index = 0; index < this.listaMetodi.length; index++) {
+            const element = this.listaMetodi[index];
+            element.SettaSwagger();
+            if (index == 0 && index + 1 != this.listaMetodi.length) {
+                ritorno = ritorno + ', ';
+            }
+            if (index + 1 == this.listaMetodi.length) {
+                ritorno = ritorno + ' }';
+            }
+        }
+        ritorno = ritorno + '}';
+        return ritorno;
     }
     CercaMetodoSeNoAggiungiMetodo(nome) {
         let terminale = this.listaMetodi.CercaConNomeRev(nome);

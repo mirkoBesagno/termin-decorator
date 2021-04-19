@@ -49,8 +49,9 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
                 }
             }; */
 
-            @mpMet('get','Valida','middleware')
-            Valida(@mpPar('token', 'body') token: string){
+            
+            @mpMet({tipo:'get',path:'Valida',interazione:'middleware'})
+            Valida(@mpPar({nomeParametro:'token',posizione: 'body'}) token: string){
                 const tmp : IReturn={
                     body:{
                         "nome": this.nome
@@ -60,8 +61,15 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
             }
 
             @mpAddMiddle('Valida')
-            @mpMet('post','SetNome')
-            SetNome(@mpPar('nomeFuturo', 'body') nomeFuturo: string) {
+            @mpMet({tipo:'post',path:'SetNome'})
+            SetNome(
+                @mpPar({
+                        nomeParametro:'nomeFuturo',
+                        posizione: 'body',
+                        tipoParametro:'text',
+                        descrizione:'nome che perendere il posto del vecchio.'
+                    }) nomeFuturo: string
+                    ){
                 this.nome = nomeFuturo;
                 const tmp : IReturn={
                     body:{
@@ -71,7 +79,7 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
                 return tmp;
             }
 
-            @mpMet('get', 'GetNome')
+            @mpMet({tipo:'get', path:'GetNome'})
             GetNome(){
                 const tmp : IReturn={
                     body:{
@@ -182,7 +190,8 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
         console.log('Menu');
         console.log('0: express');
         console.log('1: superagent');
-        console.log('2: biss');
+        console.log('2: aggiungi swagger');
+        console.log('3: biss');
         
         chiedi({ 
             message: 'Scegli: ',
@@ -193,12 +202,18 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
                 main.StartExpress();                
             } else if(item.scelta==1){
                 main.PrintMenu();
-            }else if(item.scelta==2){
+            } else if(item.scelta==2){
+                const scelta = chiedi({
+                     message: 'Rotta dove renderli visibili: ', 
+                     type: 'text', name: 'scelta' }).then((ris)=>{
+                         main.AggiungiSwagger(ris.scelta);
+                         main.PrintMenu();
+                     })    
+            } else if(item.scelta==3){
                 main.StartExpress(); 
                 main.PrintMenu();
-            }else {
-                console.log('Ciao ciao ...');
-                
+            } else {
+                console.log('Ciao ciao ...');                
             }
 
         }).catch(err => {

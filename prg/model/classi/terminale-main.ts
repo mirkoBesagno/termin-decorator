@@ -6,6 +6,8 @@ import superagent from "superagent";
 import express from "express";
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import * as bodyParser from 'body-parser';
+import swaggerUI from "swagger-ui-express";
+//const swaggerUI = require('swagger-ui-express');
 
 /**
  * 
@@ -54,6 +56,55 @@ export class Main {
             }));
             this.serverExpressDecorato.use(pathGlobal, element.rotte);
         }
+    }
+    GetJSONSwagger() {
+        const swaggerJson = ``;
+
+        let tmp2: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
+        let ritorno = `
+        {
+            "openapi": "3.0.0",
+            "servers": [
+                {
+                    "url": "https://staisicuro.medicaltech.it/",
+                    "variables": {},
+                    "description": "indirizzo principale"
+                },
+                {
+                    "url": "http://ss-test.medicaltech.it/",
+                    "description": "indirizzo secondario nel caso quello principale non dovesse funzionare."
+                }
+            ],
+            "info": {
+                "description": "Documentazione delle API con le quali interrogare il server dell'applicazione STAI sicuro, per il momento qui troverai solo le api con le quali interfacciarti alla parte relativa al paziente. \nSe vi sono problemi sollevare degli issues o problemi sulla pagina di github oppure scrivere direttamente una email.",
+                "version": "1.0.0",
+                "title": "STAI sicuro",
+                "termsOfService": "https://github.com/MedicaltechTM/STAI_sicuro"
+            },
+        `;
+        for (let index = 0; index < tmp2.length; index++) {
+            const element = tmp2[index];
+            element.SettaSwagger();
+            if (index == 0 && index + 1 != tmp2.length) {
+                ritorno = ritorno + ', '
+            }
+            if (index + 1 == tmp2.length) {
+                ritorno = ritorno + ' }'
+            }
+        }
+        ritorno = ritorno + '}';
+
+        try {
+            JSON.parse(ritorno)
+        } catch (error) {
+            console.log(error);
+        }
+        return JSON.parse(ritorno);
+    }
+    AggiungiSwagger(path: string) {
+        const swaggerDocument = this.GetJSONSwagger();
+
+        this.serverExpressDecorato.use('/'+path, swaggerUI.serve, swaggerUI.setup(swaggerDocument));
     }
     async PrintMenu() {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);

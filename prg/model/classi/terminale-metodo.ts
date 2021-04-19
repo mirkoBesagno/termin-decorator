@@ -493,8 +493,9 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         }
     } */
     CercaParametroSeNoAggiungi(nome: string, parameterIndex: number, tipoParametro: TipoParametro, posizione: TypePosizione) {
-        const tmp = this.listaParametri.push(new TerminaleParametro(nome, tipoParametro, posizione, parameterIndex))//.lista.push({ propertyKey: propertyKey, Metodo: target });
-        return this.listaParametri[tmp];
+        const tmp = new TerminaleParametro(nome, tipoParametro, posizione, parameterIndex);
+        this.listaParametri.push(tmp);//.lista.push({ propertyKey: propertyKey, Metodo: target });
+        return tmp;
     }
     async Esegui(req: Request): Promise<IReturn> {
         console.log('Risposta a chiamata : ' + this.pathGlobal);
@@ -586,6 +587,40 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             }
         };
     }
+    SettaSwagger() {
+        let ritorno =
+            `"${this.pathGlobal}": {
+            "${this.tipo}": {
+                "summary": "${this.sommario}",
+                "description": "${this.descrizione}",                
+                "parameters": [`;
+        for (let index = 0; index < this.listaParametri.length; index++) {
+            const element = this.listaParametri[index];
+            const tt = element.SettaSwagger();
+            if (index == 0 && index + 1 != this.listaParametri.length) {
+                ritorno = ritorno + ', '
+            }
+            if (index + 1 == this.listaParametri.length) {
+                ritorno = ritorno + ' }'
+            }
+        }
+        ritorno = ritorno + ` 
+                ],
+                "responses": {
+                    "200":{
+                        "description":"ok"
+                    }
+                },
+            },
+        },`;
+        
+        try {
+            JSON.parse(ritorno)
+        } catch (error) {
+            console.log(error);
+        }
+        return ritorno;
+    }
 }
 
 export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse) {
@@ -603,7 +638,14 @@ export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse)
 
 export type TypeMetod = "get" | "put" | "post" | "patch" | "purge" | "delete";
 
-function decoratoreMetodo(tipo?: TypeMetod, path?: string, interazione?: TypeInterazone, descrizione?: string, sommario?: string
+export interface IMetodo {
+    tipo?: TypeMetod,
+    path?: string,
+    interazione?: TypeInterazone,
+    descrizione?: string,
+    sommario?: string
+}
+function decoratoreMetodo(parametri: IMetodo
 ): MethodDecorator {
     return function (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
@@ -613,23 +655,23 @@ function decoratoreMetodo(tipo?: TypeMetod, path?: string, interazione?: TypeInt
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.metodoAvviabile = descriptor.value;
 
-            if (tipo != undefined) metodo.tipo = tipo;
+            if (parametri.tipo != undefined) metodo.tipo = parametri.tipo;
             else metodo.tipo = 'get';
 
-            if (descrizione != undefined) metodo.descrizione = descrizione;
+            if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
             else metodo.descrizione = '';
 
-            if (sommario != undefined) metodo.sommario = sommario;
+            if (parametri.sommario != undefined) metodo.sommario = parametri.sommario;
             else metodo.sommario = '';
 
-            if (interazione != undefined) metodo.tipoInterazione = interazione;
+            if (parametri.interazione != undefined) metodo.tipoInterazione = parametri.interazione;
             else metodo.tipoInterazione = 'rotta';
 
-            if (path == undefined) metodo.path = propertyKey.toString();
-            else metodo.path = path;
+            if (parametri.path == undefined) metodo.path = propertyKey.toString();
+            else metodo.path = parametri.path;
 
 
-            if (interazione == 'middleware' || interazione == 'ambo') {
+            if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
 
                 const listaMidd = GetListaMiddlewareMetaData();
                 const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());

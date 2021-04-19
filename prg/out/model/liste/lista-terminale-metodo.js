@@ -46,11 +46,12 @@ class ListaTerminaleMiddleware extends Array {
         super();
     }
     CercaConNomeSeNoAggiungi(nome) {
-        this.forEach(element => {
+        for (let index = 0; index < this.length; index++) {
+            const element = this[index];
             if (element.nome == nome) {
                 return element;
             }
-        });
+        }
         return this.AggiungiElemento(new terminale_metodo_1.TerminaleMetodo(nome, '', ''));
     }
     AggiungiElemento(item) {

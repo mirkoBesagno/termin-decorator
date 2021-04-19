@@ -47,9 +47,8 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
                 }
                 primo = true;
                 const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
-                    + element.tipo + '|Inserire valore :';
-                const gg = chiedi;
-                const scelta = await gg({ message: messaggio, type: 'text', name: 'scelta' });
+                    + element.tipo + 'Descrizione : ' +element.descrizione+ '|Inserire valore :';
+                const scelta = await chiedi({ message: messaggio, type: 'text', name: 'scelta' });
                 body = body + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
             }
         }
@@ -66,7 +65,7 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
                 }
                 primo = true;
                 const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
-                    + element.tipo + '|Inserire valore :';
+                    + element.tipo +  'Descrizione : ' +element.descrizione+'|Inserire valore :';
                 const scelta = await chiedi({ message: messaggio, type: 'text', name: 'scelta' });
                 query = query + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
             }
@@ -85,7 +84,7 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
                 }
                 primo = true;
                 const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
-                    + element.tipo + '|Inserire valore :';
+                    + element.tipo + 'Descrizione : ' +element.descrizione+ '|Inserire valore :';
                 const scelta = await chiedi({ message: messaggio, type: 'text', name: 'scelta' });
                 header = header + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
             }

@@ -32,6 +32,8 @@ class TerminaleMetodo {
         this.tipo = 'get';
         this.pathGlobal = '';
         this.tipoInterazione = "rotta";
+        this.descrizione = "";
+        this.sommario = "";
         //this.listaRotteGeneraChiavi = [];
     }
     PrintMenu() {
@@ -231,136 +233,200 @@ class TerminaleMetodo {
     }
     ChiamaLaRotta(headerpath) {
         return __awaiter(this, void 0, void 0, function* () {
-            let body = "";
-            let query = "";
-            let header = "";
-            this.middleware.forEach((element) => __awaiter(this, void 0, void 0, function* () {
-                if (element instanceof TerminaleMetodo) {
-                    const listaMidd = lista_terminale_metodo_1.GetListaMiddlewareMetaData();
-                    const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
-                    const rit = yield midd.listaParametri.SoddisfaParamtri();
-                    if (rit.body != "") {
-                        if (body != "") {
-                            body = body + ", " + rit.body;
+            try {
+                let body = "";
+                let query = "";
+                let header = "";
+                for (let index = 0; index < this.middleware.length; index++) {
+                    const element = this.middleware[index];
+                    if (element instanceof TerminaleMetodo) {
+                        const listaMidd = lista_terminale_metodo_1.GetListaMiddlewareMetaData();
+                        const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
+                        const rit = yield midd.listaParametri.SoddisfaParamtri();
+                        if (rit.body != "") {
+                            if (body != "") {
+                                body = body + ", " + rit.body;
+                            }
+                            else {
+                                body = rit.body;
+                            }
                         }
-                        else {
-                            body = rit.body;
+                        if (rit.query != "") {
+                            if (query != "") {
+                                query = query + ", " + rit.query;
+                            }
+                            else
+                                query = rit.query;
                         }
-                    }
-                    if (rit.query != "") {
-                        if (query != "") {
-                            query = query + ", " + rit.query;
+                        if (rit.header != "") {
+                            if (header != "") {
+                                header = header + ", " + rit.header;
+                            }
+                            else
+                                header = rit.header;
                         }
-                        else
-                            query = rit.query;
-                    }
-                    if (rit.header != "") {
-                        if (header != "") {
-                            header = header + ", " + rit.header;
+                        if (index + 1 >= this.middleware.length) {
+                            const tmp = yield this.MetSpalla(body, query, header, headerpath);
+                            return tmp;
                         }
-                        else
-                            header = rit.header;
                     }
                 }
-            }));
-            if (headerpath == undefined)
-                headerpath = "http://localhost:3000";
-            console.log('chiamata per : ' + headerpath + this.pathGlobal + ' | Verbo: ' + this.tipo);
-            let parametri = yield this.listaParametri.SoddisfaParamtri();
-            if (parametri.body != "") {
-                if (body != "") {
-                    body = body + ", " + parametri.body;
+            }
+            catch (error) {
+                throw new Error("Errore :" + error);
+            }
+        });
+    }
+    MetSpalla(body, query, header, headerpath) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (headerpath == undefined)
+                    headerpath = "http://localhost:3000";
+                console.log('chiamata per : ' + headerpath + this.pathGlobal + ' | Verbo: ' + this.tipo);
+                let parametri = yield this.listaParametri.SoddisfaParamtri();
+                if (parametri.body != "") {
+                    if (body != "") {
+                        body = body + ", " + parametri.body;
+                    }
+                    else {
+                        body = parametri.body;
+                    }
+                }
+                if (parametri.query != "") {
+                    if (query != "") {
+                        query = query + ", " + parametri.query;
+                    }
+                    else
+                        query = parametri.query;
+                }
+                if (parametri.header != "") {
+                    if (header != "") {
+                        header = header + ", " + parametri.header;
+                    }
+                    else
+                        header = parametri.header;
+                }
+                let ritorno;
+                if (this.tipo) {
+                    switch (this.tipo) {
+                        case 'get':
+                            try {
+                                ritorno = yield superagent_1.default
+                                    .get(headerpath + this.pathGlobal)
+                                    .query(JSON.parse('{ ' + query + ' }'))
+                                    .send(JSON.parse('{ ' + body + ' }'))
+                                    .set(JSON.parse('{ ' + header + ' }'))
+                                    .set('accept', 'json');
+                                if (ritorno) {
+                                    return ritorno.body;
+                                }
+                                else {
+                                    return '';
+                                }
+                            }
+                            catch (error) {
+                                console.log(error);
+                                throw new Error("Errore:" + error);
+                            }
+                            break;
+                        case 'post':
+                            try {
+                                ritorno = yield superagent_1.default
+                                    .post(headerpath + this.pathGlobal)
+                                    .query(JSON.parse('{ ' + query + ' }'))
+                                    .send(JSON.parse('{ ' + body + ' }'))
+                                    .set(JSON.parse('{ ' + header + ' }'))
+                                    .set('accept', 'json');
+                                if (ritorno) {
+                                    return ritorno.body;
+                                }
+                                else {
+                                    return '';
+                                }
+                            }
+                            catch (error) {
+                                console.log(error);
+                                throw new Error("Errore:" + error);
+                            }
+                            break;
+                        case 'purge':
+                            try {
+                                ritorno = yield superagent_1.default
+                                    .purge(headerpath + this.pathGlobal)
+                                    .query(JSON.parse('{ ' + query + ' }'))
+                                    .send(JSON.parse('{ ' + body + ' }'))
+                                    .set(JSON.parse('{ ' + header + ' }'))
+                                    .set('accept', 'json');
+                                if (ritorno) {
+                                    return ritorno.body;
+                                }
+                                else {
+                                    return '';
+                                }
+                            }
+                            catch (error) {
+                                console.log(error);
+                                throw new Error("Errore:" + error);
+                            }
+                            break;
+                        case 'patch':
+                            try {
+                                ritorno = yield superagent_1.default
+                                    .patch(headerpath + this.pathGlobal)
+                                    .query(JSON.parse('{ ' + query + ' }'))
+                                    .send(JSON.parse('{ ' + body + ' }'))
+                                    .set(JSON.parse('{ ' + header + ' }'))
+                                    .set('accept', 'json');
+                                if (ritorno) {
+                                    return ritorno.body;
+                                }
+                                else {
+                                    return '';
+                                }
+                            }
+                            catch (error) {
+                                console.log(error);
+                                throw new Error("Errore:" + error);
+                            }
+                            break;
+                        case 'delete':
+                            try {
+                                ritorno = yield superagent_1.default
+                                    .delete(headerpath + this.pathGlobal)
+                                    .query(JSON.parse('{ ' + query + ' }'))
+                                    .send(JSON.parse('{ ' + body + ' }'))
+                                    .set(JSON.parse('{ ' + header + ' }'))
+                                    .set('accept', 'json');
+                                if (ritorno) {
+                                    return ritorno.body;
+                                }
+                                else {
+                                    return '';
+                                }
+                            }
+                            catch (error) {
+                                console.log(error);
+                                throw new Error("Errore:" + error);
+                            }
+                            break;
+                        default:
+                            return '';
+                            break;
+                    }
                 }
                 else {
-                    body = parametri.body;
+                    return '';
                 }
+                /* if (ritorno) {
+                    ritorno?.body;
+                    return ritorno.body;
+                } else {
+                    return undefined;
+                } */
             }
-            if (parametri.query != "") {
-                if (query != "") {
-                    query = query + ", " + parametri.query;
-                }
-                else
-                    query = parametri.query;
+            catch (error) {
+                throw new Error("Errore:" + error);
             }
-            if (parametri.header != "") {
-                if (header != "") {
-                    header = header + ", " + parametri.header;
-                }
-                else
-                    header = parametri.header;
-            }
-            let ritorno;
-            switch (this.tipo) {
-                case 'get':
-                    try {
-                        ritorno = yield superagent_1.default
-                            .get(headerpath + this.pathGlobal)
-                            .query(JSON.parse('{ ' + query + ' }'))
-                            .send(JSON.parse('{ ' + body + ' }'))
-                            .set(JSON.parse('{ ' + header + ' }'))
-                            .set('accept', 'json');
-                    }
-                    catch (error) {
-                        console.log(error);
-                    }
-                    break;
-                case 'post':
-                    try {
-                        ritorno = yield superagent_1.default
-                            .post(headerpath + this.pathGlobal)
-                            .query(JSON.parse('{ ' + query + ' }'))
-                            .send(JSON.parse('{ ' + body + ' }'))
-                            .set(JSON.parse('{ ' + header + ' }'))
-                            .set('accept', 'json');
-                    }
-                    catch (error) {
-                        console.log(error);
-                    }
-                    break;
-                case 'purge':
-                    try {
-                        ritorno = yield superagent_1.default
-                            .purge(headerpath + this.pathGlobal)
-                            .query(JSON.parse('{ ' + query + ' }'))
-                            .send(JSON.parse('{ ' + body + ' }'))
-                            .set(JSON.parse('{ ' + header + ' }'))
-                            .set('accept', 'json');
-                    }
-                    catch (error) {
-                        console.log(error);
-                    }
-                    break;
-                case 'patch':
-                    try {
-                        ritorno = yield superagent_1.default
-                            .patch(headerpath + this.pathGlobal)
-                            .query(JSON.parse('{ ' + query + ' }'))
-                            .send(JSON.parse('{ ' + body + ' }'))
-                            .set(JSON.parse('{ ' + header + ' }'))
-                            .set('accept', 'json');
-                    }
-                    catch (error) {
-                        console.log(error);
-                    }
-                    break;
-                case 'delete':
-                    try {
-                        ritorno = yield superagent_1.default
-                            .delete(headerpath + this.pathGlobal)
-                            .query(JSON.parse('{ ' + query + ' }'))
-                            .send(JSON.parse('{ ' + body + ' }'))
-                            .set(JSON.parse('{ ' + header + ' }'))
-                            .set('accept', 'json');
-                    }
-                    catch (error) {
-                        console.log(error);
-                    }
-                    break;
-                default:
-                    break;
-            }
-            ritorno === null || ritorno === void 0 ? void 0 : ritorno.body;
-            return ritorno;
         });
     }
     /* async RecuperaChiave(): Promise<IResponse> {
@@ -386,23 +452,27 @@ class TerminaleMetodo {
         }
     } */
     CercaParametroSeNoAggiungi(nome, parameterIndex, tipoParametro, posizione) {
-        this.listaParametri.push(new terminale_parametro_1.TerminaleParametro(nome, tipoParametro, posizione, parameterIndex)); //.lista.push({ propertyKey: propertyKey, Metodo: target });                                           
+        const tmp = new terminale_parametro_1.TerminaleParametro(nome, tipoParametro, posizione, parameterIndex);
+        this.listaParametri.push(tmp); //.lista.push({ propertyKey: propertyKey, Metodo: target });
+        return tmp;
     }
     Esegui(req) {
-        console.log('Risposta a chiamata : ' + this.pathGlobal);
-        const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-        let tmp;
-        try {
-            tmp = this.metodoAvviabile.apply(this, parametri);
-        }
-        catch (error) {
-            console.log("Errore : \n" + error);
-            tmp = {
-                body: { "Errore Interno filtrato ": 'internal error!!!!' },
-                stato: 500
-            };
-        }
-        return tmp;
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('Risposta a chiamata : ' + this.pathGlobal);
+            const parametri = this.listaParametri.EstraiParametriDaRequest(req);
+            let tmp;
+            try {
+                tmp = this.metodoAvviabile.apply(this, parametri);
+            }
+            catch (error) {
+                console.log("Errore : \n" + error);
+                tmp = {
+                    body: { "Errore Interno filtrato ": 'internal error!!!!' },
+                    stato: 500
+                };
+            }
+            return tmp;
+        });
     }
     InizializzaLogbaseIn(req, nomeMetodo) {
         console.log("Arrivato in : " + nomeMetodo + "\n"
@@ -464,8 +534,40 @@ class TerminaleMetodo {
     ConvertiInMiddleare() {
         return (req, res, nex) => __awaiter(this, void 0, void 0, function* () {
             const tmp = yield this.Esegui(req);
-            return nex;
+            if (tmp.stato >= 300) {
+                throw new Error("Errore : " + tmp.body);
+            }
+            else {
+                return nex;
+            }
         });
+    }
+    SettaSwagger() {
+        let ritorno = `"${this.pathGlobal}": {
+            "${this.tipo}": {
+                "summary": "${this.sommario}",
+                "description": "${this.descrizione}",                
+                "parameters": [`;
+        for (let index = 0; index < this.listaParametri.length; index++) {
+            const element = this.listaParametri[index];
+            const tt = element.SettaSwagger();
+            if (index == 0 && index + 1 != this.listaParametri.length) {
+                ritorno = ritorno + ', ';
+            }
+            if (index + 1 == this.listaParametri.length) {
+                ritorno = ritorno + ' }';
+            }
+        }
+        ritorno = ritorno + ` 
+                ],
+                "responses": {
+                    "200":{
+                        "description":"ok"
+                    }
+                },
+            },
+        },`;
+        return ritorno;
     }
 }
 exports.TerminaleMetodo = TerminaleMetodo;
@@ -483,23 +585,34 @@ function CheckMetodoMetaData(nomeMetodo, classe) {
     return terminale;
 }
 exports.CheckMetodoMetaData = CheckMetodoMetaData;
-function decoratoreMetodo(tipo, path, interazione) {
+function decoratoreMetodo(parametri) {
     return function (target, propertyKey, descriptor) {
         const list = terminale_classe_1.GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.metodoAvviabile = descriptor.value;
-            metodo.tipo = tipo;
-            if (interazione != undefined)
-                metodo.tipoInterazione = interazione;
+            if (parametri.tipo != undefined)
+                metodo.tipo = parametri.tipo;
+            else
+                metodo.tipo = 'get';
+            if (parametri.descrizione != undefined)
+                metodo.descrizione = parametri.descrizione;
+            else
+                metodo.descrizione = '';
+            if (parametri.sommario != undefined)
+                metodo.sommario = parametri.sommario;
+            else
+                metodo.sommario = '';
+            if (parametri.interazione != undefined)
+                metodo.tipoInterazione = parametri.interazione;
             else
                 metodo.tipoInterazione = 'rotta';
-            if (path == undefined)
+            if (parametri.path == undefined)
                 metodo.path = propertyKey.toString();
             else
-                metodo.path = path;
-            if (interazione == 'middleware' || interazione == 'ambo') {
+                metodo.path = parametri.path;
+            if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
                 const listaMidd = lista_terminale_metodo_1.GetListaMiddlewareMetaData();
                 const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());
                 midd.metodoAvviabile = descriptor.value;

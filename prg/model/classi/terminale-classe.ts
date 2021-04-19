@@ -103,11 +103,49 @@ export class TerminaleClasse implements IPrintabile {
         this.pathGlobal = pathGlobal;
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
-            if (element.tipoInterazione=='rotta' || element.tipoInterazione=='ambo') {
-                element.ConfiguraRotta(this.rotte, this.pathGlobal);                
+            if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
+                element.ConfiguraRotta(this.rotte, this.pathGlobal);
             }
             //element.listaRotteGeneraChiavi=this.listaMetodiGeneraKey;
         }
+    }
+    SettaSwagger() {
+
+        const swaggerJson = `
+        {
+            "tags": [
+                {
+                    "name": "admin",
+                    "description": "Racchiude tutti i percorsi che l'admin può visitare",
+                    "externalDocs": {
+                        "description": "",
+                        "url": "https://staisicuro.medicaltech.it/api/admin/"
+                    }
+                },
+            ],
+        }        
+        `;
+        let ritorno = '"paths": {';
+        for (let index = 0; index < this.listaMetodi.length; index++) {
+            const element = this.listaMetodi[index];
+            if (element.tipoInterazione != 'middleware') {
+                element.SettaSwagger();
+                if (index + 1 != this.listaMetodi.length) {
+                    ritorno = ritorno + ', '
+                }
+            }
+            if (index + 1 == this.listaMetodi.length) {
+                ritorno = ritorno + ' }'
+            }
+        }
+        ritorno = ritorno + '}';
+
+        try {
+            JSON.parse(ritorno)
+        } catch (error) {
+            console.log(error);
+        }
+        return ritorno;
     }
     CercaMetodoSeNoAggiungiMetodo(nome: string) {
         let terminale = this.listaMetodi.CercaConNomeRev(nome)

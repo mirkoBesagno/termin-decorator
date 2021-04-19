@@ -51,7 +51,7 @@ class ListaTerminaleParametro extends Array {
                     }
                     primo = true;
                     const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
-                        + element.tipo + '|Inserire valore :';
+                        + element.tipo + 'Descrizione : ' + element.descrizione + '|Inserire valore :';
                     const scelta = yield prompts_1.default({ message: messaggio, type: 'text', name: 'scelta' });
                     body = body + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
                 }
@@ -68,7 +68,7 @@ class ListaTerminaleParametro extends Array {
                     }
                     primo = true;
                     const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
-                        + element.tipo + '|Inserire valore :';
+                        + element.tipo + 'Descrizione : ' + element.descrizione + '|Inserire valore :';
                     const scelta = yield prompts_1.default({ message: messaggio, type: 'text', name: 'scelta' });
                     query = query + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
                 }
@@ -85,7 +85,7 @@ class ListaTerminaleParametro extends Array {
                     }
                     primo = true;
                     const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
-                        + element.tipo + '|Inserire valore :';
+                        + element.tipo + 'Descrizione : ' + element.descrizione + '|Inserire valore :';
                     const scelta = yield prompts_1.default({ message: messaggio, type: 'text', name: 'scelta' });
                     header = header + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
                 }
