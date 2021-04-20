@@ -587,24 +587,62 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             }
         };
     }
-    SettaSwagger() {
-        let ritorno =
-            `"${this.pathGlobal}": {
+    SettaSwagger(tipoInterazione: 'rotta' | 'middleware') {
+        let ritorno = '';
+        if (tipoInterazione == 'middleware') {
+            //questo deve restituire un oggetto
+            let tmp = {};
+            for (let index = 0; index < this.middleware.length; index++) {
+                const element = this.middleware[index];
+                if (element instanceof TerminaleMetodo) {
+                    const tt = element.SettaSwagger('middleware');
+                    ritorno = ritorno + tt;
+                    if (index == 0 && index + 1 != this.listaParametri.length) {
+                        ritorno = ritorno + ', ';
+                    }
+                }
+            }
+            for (let index = 0; index < this.listaParametri.length; index++) {
+                const element = this.listaParametri[index];
+                const tt = element.SettaSwagger();
+                ritorno = ritorno + tt;
+                if (index == 0 && index + 1 != this.listaParametri.length) {
+                    ritorno = ritorno + ', ';
+                }
+                /* if (index + 1 == this.listaParametri.length) {
+                    ritorno = ritorno + ' }'
+                } */
+            }
+        }
+        else {
+            ritorno =
+                `"${this.pathGlobal}": {
             "${this.tipo}": {
                 "summary": "${this.sommario}",
                 "description": "${this.descrizione}",                
                 "parameters": [`;
-        for (let index = 0; index < this.listaParametri.length; index++) {
-            const element = this.listaParametri[index];
-            const tt = element.SettaSwagger();
-            if (index == 0 && index + 1 != this.listaParametri.length) {
-                ritorno = ritorno + ', '
+            for (let index = 0; index < this.middleware.length; index++) {
+                const element = this.middleware[index];
+                if (element instanceof TerminaleMetodo) {
+                    const tt = element.SettaSwagger('middleware');
+                    ritorno = ritorno + tt;
+                    if (index == 0 && index + 1 != this.listaParametri.length) {
+                        ritorno = ritorno + ', ';
+                    }
+                }
             }
-            if (index + 1 == this.listaParametri.length) {
-                ritorno = ritorno + ' }'
+            for (let index = 0; index < this.listaParametri.length; index++) {
+                const element = this.listaParametri[index];
+                const tt = element.SettaSwagger();
+                ritorno = ritorno + tt;
+                if (index == 0 && index + 1 != this.listaParametri.length) {
+                    ritorno = ritorno + ', ';
+                }
+                /* if (index + 1 == this.listaParametri.length) {
+                    ritorno = ritorno + ' }'
+                } */
             }
-        }
-        ritorno = ritorno + ` 
+            ritorno = ritorno + ` 
                 ],
                 "responses": {
                     "200":{
@@ -613,7 +651,8 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                 },
             },
         },`;
-        
+        }
+
         try {
             JSON.parse(ritorno)
         } catch (error) {

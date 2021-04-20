@@ -40,7 +40,15 @@ export class TerminaleParametro implements IDescrivibile {
         return "tipo:" + this.tipo.toString() + ";" + "nome:" + this.nome;
     }
     SettaSwagger() {
-        const ritorno =
+        const tmp = {
+            name: this.nome,
+            in: this.posizione,
+            required: false,
+            type: this.tipo,
+            description: this.descrizione,
+            summary: this.sommario
+        };
+        /* const ritorno =
             `{
                         "name": "${this.nome}",
                         "in": "${this.posizione}",
@@ -54,8 +62,8 @@ export class TerminaleParametro implements IDescrivibile {
             JSON.parse(ritorno)
         } catch (error) {
             console.log(error);
-        }
-        return ritorno;
+        } */
+        return tmp;
     }
 }
 

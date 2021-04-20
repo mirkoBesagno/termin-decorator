@@ -129,7 +129,7 @@ export class TerminaleClasse implements IPrintabile {
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
             if (element.tipoInterazione != 'middleware') {
-                element.SettaSwagger();
+                element.SettaSwagger('rotta');
                 if (index + 1 != this.listaMetodi.length) {
                     ritorno = ritorno + ', '
                 }
