@@ -111,31 +111,34 @@ export class TerminaleClasse implements IPrintabile {
     }
     SettaSwagger() {
 
-        const swaggerJson = `
-        {
-            "tags": [
-                {
-                    "name": "admin",
-                    "description": "Racchiude tutti i percorsi che l'admin può visitare",
-                    "externalDocs": {
-                        "description": "",
-                        "url": "https://staisicuro.medicaltech.it/api/admin/"
-                    }
-                },
-            ],
-        }        
+        const swaggerJson = `"paths": {    
         `;
         let tmp3 = {};
+        let ritorno = '';
+        let primo: boolean = false;
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
             if (element.tipoInterazione != 'middleware') {
-                const pp = element.SettaSwagger('rotta');
-                tmp3 = { tmp3, pp };
+                const tt = element.SettaSwagger('rotta');
+                if (tt) {
+                    if (primo == false && tt != undefined) {
+                        primo = true;
+                        ritorno = tt + '';
+                    } else if (tt != undefined) {
+                        ritorno = ritorno + ',' + tt;
+                    }
+                }
             }
         }
-        let ritorno = { "paths": tmp3 };
+        const tmp = swaggerJson + ritorno + '}';
 
-        return ritorno;
+        try {
+            const hhh = tmp.toString();
+            JSON.parse(tmp)
+        } catch (error) {
+            console.log(error);
+        }
+        return tmp;
     }
     CercaMetodoSeNoAggiungiMetodo(nome: string) {
         let terminale = this.listaMetodi.CercaConNomeRev(nome)

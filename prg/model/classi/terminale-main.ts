@@ -62,13 +62,70 @@ export class Main {
         const swaggerJson = ``;
 
         let tmp2: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-        let ritorno = {};
-        let rr = {};
+        let ritorno = '';
+        let rr: object = {};
+        /* let rr: object = {
+            openapi: "3.0.0",
+            servers: [
+                {
+                    url: "https://staisicuro.medicaltech.it/",
+                    variables: {},
+                    description: "indirizzo principale"
+                },
+                {
+                    url: "http://ss-test.medicaltech.it/",
+                    description: "indirizzo secondario nel caso quello principale non dovesse funzionare."
+                }
+            ],
+            info: {
+                description: "Documentazione delle API con le quali interrogare il server dell'applicazione STAI sicuro, per il momento qui troverai solo le api con le quali interfacciarti alla parte relativa al paziente. \nSe vi sono problemi sollevare degli issues o problemi sulla pagina di github oppure scrivere direttamente una email.",
+                version: "1.0.0",
+                title: "STAI sicuro",
+                termsOfService: "https://github.com/MedicaltechTM/STAI_sicuro",
+                contact: {
+                    email: "mirkopizzini93@gmail.com",
+                    name: "mirko pizzini",
+                    url: "-"
+                },
+                license: {
+                    name: "MIT",
+                    url: "https://opensource.org/licenses/MIT"
+                }
+            }
+        }; */
+
         for (let index = 0; index < tmp2.length; index++) {
             const element: TerminaleClasse = tmp2[index];
-            const th = element.SettaSwagger();
-            rr = { rr, th };
+            const tt = element.SettaSwagger();
+            /* rr = { rr, th }; */
+            if (index == 0) ritorno = tt;
+            else ritorno = ritorno + ',' + tt;
         }
+
+        let tmp = `{
+        "openapi": "3.0.0",
+            "servers": [
+                {
+                    "url": "https://staisicuro.medicaltech.it/",
+                    "variables": {},
+                    "description": "indirizzo principale"
+                },
+                {
+                    "url": "http://ss-test.medicaltech.it/",
+                    "description": "indirizzo secondario nel caso quello principale non dovesse funzionare."
+                }
+            ],
+            "info": {
+                "description": "Documentazione delle API con le quali interrogare il server dell'applicazione STAI sicuro, per il momento qui troverai solo le api con le quali interfacciarti alla parte relativa al paziente. \nSe vi sono problemi sollevare degli issues o problemi sulla pagina di github oppure scrivere direttamente una email.",
+                "version": "1.0.0",
+                "title": "STAI sicuro",
+                "termsOfService": "https://github.com/MedicaltechTM/STAI_sicuro"
+            },
+            "tags": [
+
+            ],   
+        `+ ritorno +
+            '}}';
 
         let gg = {
             "openapi": "3.0.0",
@@ -88,15 +145,26 @@ export class Main {
                 "version": "1.0.0",
                 "title": "STAI sicuro",
                 "termsOfService": "https://github.com/MedicaltechTM/STAI_sicuro"
+            },
+            "tags": [
+
+            ],
+            paths: {
+
             }
         };
-        ritorno = { gg, rr };
-        return ritorno;
+        try {
+            const hhh = tmp.toString();
+            JSON.parse(tmp)
+        } catch (error) {
+            console.log(error);
+        }
+        return tmp;
     }
     AggiungiSwagger(path: string) {
-        const swaggerDocument: object = this.GetJSONSwagger();
+        const swaggerDocument = this.GetJSONSwagger();
 
-        this.serverExpressDecorato.use('/' + path, swaggerUI.serve, swaggerUI.setup(swaggerDocument));
+        this.serverExpressDecorato.use('/' + path, swaggerUI.serve, swaggerUI.setup(JSON.parse(swaggerDocument)));
     }
     async PrintMenu() {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);

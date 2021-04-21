@@ -190,8 +190,9 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
         console.log('Menu');
         console.log('0: express');
         console.log('1: superagent');
-        console.log('2: aggiungi swagger');
-        console.log('3: biss');
+        console.log('2: aggiungi swagger');        
+        console.log('3: express + superagent');
+        console.log('4: todo');
         
         chiedi({ 
             message: 'Scegli: ',
@@ -207,14 +208,13 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
                      message: 'Rotta dove renderli visibili: ', 
                      type: 'text', name: 'scelta' }).then((ris)=>{
                          main.AggiungiSwagger(ris.scelta);
-                         main.PrintMenu();
+                main.StartExpress();   
                      })    
             } else if(item.scelta==3){
                 main.StartExpress(); 
                 chiedi({
                     message: 'Rotta dove renderli visibili: ', 
                     type: 'text', name: 'scelta' }).then((ris)=>{
-                        main.AggiungiSwagger(ris.scelta);
                         main.PrintMenu();
                     })    
             } else {
