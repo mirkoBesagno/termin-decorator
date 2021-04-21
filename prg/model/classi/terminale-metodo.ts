@@ -588,77 +588,52 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         };
     }
     SettaSwagger(tipoInterazione: 'rotta' | 'middleware') {
-        let ritorno = '';
+
         if (tipoInterazione == 'middleware') {
             //questo deve restituire un oggetto
-            let tmp = {};
+            let tmp: any[] = [];
             for (let index = 0; index < this.middleware.length; index++) {
                 const element = this.middleware[index];
                 if (element instanceof TerminaleMetodo) {
                     const tt = element.SettaSwagger('middleware');
-                    ritorno = ritorno + tt;
-                    if (index == 0 && index + 1 != this.listaParametri.length) {
-                        ritorno = ritorno + ', ';
-                    }
+                    tmp.push(tt);
                 }
             }
             for (let index = 0; index < this.listaParametri.length; index++) {
                 const element = this.listaParametri[index];
                 const tt = element.SettaSwagger();
-                ritorno = ritorno + tt;
-                if (index == 0 && index + 1 != this.listaParametri.length) {
-                    ritorno = ritorno + ', ';
-                }
-                /* if (index + 1 == this.listaParametri.length) {
-                    ritorno = ritorno + ' }'
-                } */
+                tmp.push(tt);
             }
+            return tmp;
         }
         else {
-            ritorno =
-                `"${this.pathGlobal}": {
-            "${this.tipo}": {
-                "summary": "${this.sommario}",
-                "description": "${this.descrizione}",                
-                "parameters": [`;
+            let tmp2: any[] = [];
+            const gg = this.pathGlobal;
+            
             for (let index = 0; index < this.middleware.length; index++) {
                 const element = this.middleware[index];
                 if (element instanceof TerminaleMetodo) {
                     const tt = element.SettaSwagger('middleware');
-                    ritorno = ritorno + tt;
-                    if (index == 0 && index + 1 != this.listaParametri.length) {
-                        ritorno = ritorno + ', ';
-                    }
+                    tmp2.push(tt);
                 }
             }
             for (let index = 0; index < this.listaParametri.length; index++) {
                 const element = this.listaParametri[index];
                 const tt = element.SettaSwagger();
-                ritorno = ritorno + tt;
-                if (index == 0 && index + 1 != this.listaParametri.length) {
-                    ritorno = ritorno + ', ';
-                }
+                tmp2.push(tt);
                 /* if (index + 1 == this.listaParametri.length) {
                     ritorno = ritorno + ' }'
                 } */
             }
-            ritorno = ritorno + ` 
-                ],
-                "responses": {
-                    "200":{
-                        "description":"ok"
-                    }
-                },
-            },
-        },`;
+            let tmp = {
+                gg: {
+                    "summary": this.sommario,
+                    "description": this.descrizione,
+                    "parameters": tmp2
+                }
+            };
+            return tmp;
         }
-
-        try {
-            JSON.parse(ritorno)
-        } catch (error) {
-            console.log(error);
-        }
-        return ritorno;
     }
 }
 

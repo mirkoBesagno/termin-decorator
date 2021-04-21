@@ -125,26 +125,16 @@ export class TerminaleClasse implements IPrintabile {
             ],
         }        
         `;
-        let ritorno = '"paths": {';
+        let tmp3 = {};
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
             if (element.tipoInterazione != 'middleware') {
-                element.SettaSwagger('rotta');
-                if (index + 1 != this.listaMetodi.length) {
-                    ritorno = ritorno + ', '
-                }
-            }
-            if (index + 1 == this.listaMetodi.length) {
-                ritorno = ritorno + ' }'
+                const pp = element.SettaSwagger('rotta');
+                tmp3 = { tmp3, pp };
             }
         }
-        ritorno = ritorno + '}';
+        let ritorno = { "paths": tmp3 };
 
-        try {
-            JSON.parse(ritorno)
-        } catch (error) {
-            console.log(error);
-        }
         return ritorno;
     }
     CercaMetodoSeNoAggiungiMetodo(nome: string) {

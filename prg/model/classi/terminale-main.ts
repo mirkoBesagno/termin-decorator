@@ -7,6 +7,7 @@ import express from "express";
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import * as bodyParser from 'body-parser';
 import swaggerUI from "swagger-ui-express";
+import { TerminaleClasse } from "./terminale-classe";
 //const swaggerUI = require('swagger-ui-express');
 
 /**
@@ -61,8 +62,15 @@ export class Main {
         const swaggerJson = ``;
 
         let tmp2: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-        let ritorno = `
-        {
+        let ritorno = {};
+        let rr = {};
+        for (let index = 0; index < tmp2.length; index++) {
+            const element: TerminaleClasse = tmp2[index];
+            const th = element.SettaSwagger();
+            rr = { rr, th };
+        }
+
+        let gg = {
             "openapi": "3.0.0",
             "servers": [
                 {
@@ -80,31 +88,15 @@ export class Main {
                 "version": "1.0.0",
                 "title": "STAI sicuro",
                 "termsOfService": "https://github.com/MedicaltechTM/STAI_sicuro"
-            },
-        `;
-        for (let index = 0; index < tmp2.length; index++) {
-            const element = tmp2[index];
-            element.SettaSwagger();
-            if (index == 0 && index + 1 != tmp2.length) {
-                ritorno = ritorno + ', '
             }
-            if (index + 1 == tmp2.length) {
-                ritorno = ritorno + ' }'
-            }
-        }
-        ritorno = ritorno + '}';
-
-        try {
-            JSON.parse(ritorno)
-        } catch (error) {
-            console.log(error);
-        }
-        return JSON.parse(ritorno);
+        };
+        ritorno = { gg, rr };
+        return ritorno;
     }
     AggiungiSwagger(path: string) {
-        const swaggerDocument = this.GetJSONSwagger();
+        const swaggerDocument: object = this.GetJSONSwagger();
 
-        this.serverExpressDecorato.use('/'+path, swaggerUI.serve, swaggerUI.setup(swaggerDocument));
+        this.serverExpressDecorato.use('/' + path, swaggerUI.serve, swaggerUI.setup(swaggerDocument));
     }
     async PrintMenu() {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);

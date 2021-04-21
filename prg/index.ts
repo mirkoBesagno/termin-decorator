@@ -211,7 +211,12 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
                      })    
             } else if(item.scelta==3){
                 main.StartExpress(); 
-                main.PrintMenu();
+                chiedi({
+                    message: 'Rotta dove renderli visibili: ', 
+                    type: 'text', name: 'scelta' }).then((ris)=>{
+                        main.AggiungiSwagger(ris.scelta);
+                        main.PrintMenu();
+                    })    
             } else {
                 console.log('Ciao ciao ...');                
             }
