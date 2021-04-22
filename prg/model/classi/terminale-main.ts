@@ -125,7 +125,7 @@ export class Main {
 
             ],   
         `+ ritorno +
-            '}}';
+            '}';
 
         let gg = {
             "openapi": "3.0.0",
@@ -155,6 +155,8 @@ export class Main {
         };
         try {
             const hhh = tmp.toString();
+            console.log(hhh);
+            
             JSON.parse(tmp)
         } catch (error) {
             console.log(error);

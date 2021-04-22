@@ -149,6 +149,14 @@ export class TerminaleClasse implements IPrintabile {
         }
         return terminale;
     }
+    SettaHTML() {
+        const tmp: any[] = [];
+        for (let index = 0; index < this.listaMetodi.length; index++) {
+            const element = this.listaMetodi[index];
+            tmp.push(element.Se);
+        }
+        return tmp;
+    }
 }
 
 /**

@@ -693,6 +693,89 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             return ritorno;
         }
     }
+
+    SettaHTML(tipoInterazione: 'rotta' | 'middleware') {
+
+        if (tipoInterazione == 'middleware') {
+            //questo deve restituire un oggetto
+            let tmp: any[] = [];
+            for (let index = 0; index < this.middleware.length; index++) {
+                const element = this.middleware[index];
+                
+            }
+            for (let index = 0; index < this.listaParametri.length; index++) {
+                const element = this.listaParametri[index];
+                
+            }
+            rito
+        }
+        else {
+            let primo: boolean = false;
+            let ritornoTesta = `"${this.pathGlobal}" : { 
+                "${this.tipo}" : 
+                {
+                    "tags": [
+                    ],
+                    "summary": "${this.sommario}",
+                    "description": "${this.descrizione}",
+                    "parameters": [ `;
+            let ritornoCoda = `
+                ]
+            }
+        }
+`;
+            let ritorno = '';
+            let tmp2: any[] = [];
+            const gg = this.pathGlobal;
+
+            for (let index = 0; index < this.middleware.length; index++) {
+                const element = this.middleware[index];
+                if (element instanceof TerminaleMetodo) {
+                    const tt = element.SettaSwagger('middleware');
+                    /* tmp2.push(tt); */
+                    if (primo == false && tt != undefined) {
+                        primo = true;
+                        ritorno = tt + '';
+                    } else if (tt != undefined) {
+                        ritorno = ritorno + ',' + tt;
+                    }
+                }
+            }
+            for (let index = 0; index < this.listaParametri.length; index++) {
+                const element = this.listaParametri[index];
+                const tt = element.SettaSwagger();
+                /* tmp2.push(tt); */
+                if (index == 0)
+                    if (primo == false) ritorno = tt;
+                    else ritorno = ritorno + ',' + tt;
+                else ritorno = ritorno + ',' + tt;
+                if (primo == false) primo = true;
+            }
+            ritorno = ritornoTesta + ritorno + ritornoCoda;
+            try {
+                JSON.parse('{' + ritorno + '}')
+            } catch (error) {
+                console.log(error);
+            }
+            let tmp = {
+                gg: {
+                    "summary": this.sommario,
+                    "description": this.descrizione,
+                    "parameters": tmp2
+                }
+            };
+
+            let tmp3 = `${gg}: {
+                "summary": ${this.sommario},
+                "description": ${this.descrizione},
+                "parameters": [${tmp2}]
+            }`;
+            /* if (primo) return undefined;
+            else return ritorno; */
+
+            return ritorno;
+        }
+    }
 }
 
 export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse) {
