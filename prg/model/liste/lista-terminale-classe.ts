@@ -46,6 +46,15 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
         //throw new Error("Errore mio !");
 
     }
+    CercaConPath(path: string | Symbol): TerminaleClasse | undefined {
+        for (let index = 0; index < this.length; index++) {
+            const element = this[index];
+            if (element.path == path) return element;
+        }
+        return undefined;
+        //throw new Error("Errore mio !");
+
+    }
     CercaConNomeSeNoAggiungi(nome: string) {
         /* poi la cerco */
         let classe = this.CercaConNome(nome);

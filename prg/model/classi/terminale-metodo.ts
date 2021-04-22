@@ -40,6 +40,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
     descrizione: string;
     sommario: string;
+    nomiClassiDiRiferimento: string[] = [];
 
     constructor(nome: string, path: string, classePath: string) {
         this.listaParametri = new ListaTerminaleParametro();
@@ -52,6 +53,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
         this.descrizione = "";
         this.sommario = "";
+        this.nomiClassiDiRiferimento = [];
         //this.listaRotteGeneraChiavi = [];
     }
 
@@ -83,7 +85,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             const element = this.listaParametri[index];
             parametri = parametri + element.PrintParametro();
         }
-        const tmp = this.nome + ' | ' + '/' + this.pathGlobal + '/' + this.path + '  |  ' + parametri;
+        const tmp = this.nome + ' | ' + this.pathGlobal + '/' + this.path + '  |  ' + parametri;
         //console.log(tmp);
         return tmp;
     }
@@ -326,7 +328,6 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
     }
     async MetSpalla(body: string, query: string, header: string, headerpath?: string): Promise<string> {
         try {
-
             if (headerpath == undefined) headerpath = "http://localhost:3000"
             console.log('chiamata per : ' + headerpath + this.pathGlobal + ' | Verbo: ' + this.tipo);
             let parametri = await this.listaParametri.SoddisfaParamtri();
@@ -470,28 +471,6 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
         }
     }
-    /* async RecuperaChiave(): Promise<IResponse> {
-        try {
-            console.log("La rotta è protetta, sono state trovate delle funzioni che potrebbero sbloccarla, scegli:");
-            for (let index = 0; index < this.listaRotteGeneraChiavi.length; index++) {
-                const element = this.listaRotteGeneraChiavi[index];
-                console.log(index + ': ' + element.nome);
-            }
-            const tmp = await chiedi({
-                message: 'Scegli: ',
-                type: 'number',
-                name: 'scelta'
-            });
-            const ritorno = await this.listaRotteGeneraChiavi[tmp.scelta].ChiamaLaRotta();
-            let tmp2: IResponse = { body: '' };
-            if (ritorno) {
-                tmp2.body = ritorno.body;
-            }
-            return tmp2;
-        } catch (error) {
-            return { body: '' };
-        }
-    } */
     CercaParametroSeNoAggiungi(nome: string, parameterIndex: number, tipoParametro: TipoParametro, posizione: TypePosizione) {
         const tmp = new TerminaleParametro(nome, tipoParametro, posizione, parameterIndex);
         this.listaParametri.push(tmp);//.lista.push({ propertyKey: propertyKey, Metodo: target });
@@ -701,13 +680,12 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             let tmp: any[] = [];
             for (let index = 0; index < this.middleware.length; index++) {
                 const element = this.middleware[index];
-                
+
             }
             for (let index = 0; index < this.listaParametri.length; index++) {
                 const element = this.listaParametri[index];
-                
+
             }
-            rito
         }
         else {
             let primo: boolean = false;
@@ -799,14 +777,62 @@ export interface IMetodo {
     interazione?: TypeInterazone,
     descrizione?: string,
     sommario?: string
+    nomiClasseRiferimento?: string[]
 }
 function decoratoreMetodo(parametri: IMetodo
 ): MethodDecorator {
     return function (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
-        const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
-        const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+        let classe: TerminaleClasse;
+        const classeCampione = list.CercaConNomeSeNoAggiungi(target.constructor.name);
+        if (parametri.nomiClasseRiferimento != undefined && parametri.nomiClasseRiferimento.length > 0) {
+            for (let index = 0; index < parametri.nomiClasseRiferimento.length; index++) {
+                const element = parametri.nomiClasseRiferimento[index];
+                classe = list.CercaConNomeSeNoAggiungi(element);
+                const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+                const metodo2 = classeCampione.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+                for (let index = 0; index < metodo2.listaParametri.length; index++) {
+                    const element = metodo2.listaParametri[index];
+                    metodo.CercaParametroSeNoAggiungi(element.nome, element.indexParameter, element.tipo, element.posizione);
+                }
+                if (metodo != undefined && list != undefined && classe != undefined) {
+                    metodo.metodoAvviabile = descriptor.value;
 
+                    if (parametri.tipo != undefined) metodo.tipo = parametri.tipo;
+                    else metodo.tipo = 'get';
+
+                    if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
+                    else metodo.descrizione = '';
+
+                    if (parametri.sommario != undefined) metodo.sommario = parametri.sommario;
+                    else metodo.sommario = '';
+
+                    if (parametri.interazione != undefined) metodo.tipoInterazione = parametri.interazione;
+                    else metodo.tipoInterazione = 'rotta';
+
+                    if (parametri.path == undefined) metodo.path = propertyKey.toString();
+                    else metodo.path = parametri.path;
+
+
+                    if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
+
+                        const listaMidd = GetListaMiddlewareMetaData();
+                        const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());
+                        midd.metodoAvviabile = descriptor.value;
+                        midd.listaParametri = metodo.listaParametri;
+                        SalvaListaMiddlewareMetaData(listaMidd);
+                    }
+                    SalvaListaClasseMetaData(list);
+                }
+                else {
+                    console.log("Errore mio!");
+                }
+            }
+        }
+        classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
+        const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+        if (parametri.nomiClasseRiferimento != undefined)
+            metodo.nomiClassiDiRiferimento = parametri.nomiClasseRiferimento;
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.metodoAvviabile = descriptor.value;
 
@@ -851,14 +877,26 @@ export function mpAddCors(cors: any): MethodDecorator {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-
+        if (metodo != undefined && list != undefined && classe != undefined && metodo.nomiClassiDiRiferimento.length > 0) {
+            for (let index = 0; index < metodo.nomiClassiDiRiferimento.length; index++) {
+                const element = metodo.nomiClassiDiRiferimento[index];
+                const classe2 = list.CercaConNomeSeNoAggiungi(element);
+                const metodo2 = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+                if (metodo2 != undefined && list != undefined && classe2 != undefined) {
+                    metodo2.cors = cors;
+                }
+                else {
+                    console.log("Errore mio!");
+                }
+            }
+        }
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.cors = cors;
-            SalvaListaClasseMetaData(list);
         }
         else {
             console.log("Errore mio!");
         }
+        SalvaListaClasseMetaData(list);
     }
 }
 export function mpAddHelmet(helmet: any): MethodDecorator {
@@ -870,14 +908,26 @@ export function mpAddHelmet(helmet: any): MethodDecorator {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-
+        if (metodo != undefined && list != undefined && classe != undefined && metodo.nomiClassiDiRiferimento.length > 0) {
+            for (let index = 0; index < metodo.nomiClassiDiRiferimento.length; index++) {
+                const element = metodo.nomiClassiDiRiferimento[index];
+                const classe2 = list.CercaConNomeSeNoAggiungi(element);
+                const metodo2 = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+                if (metodo2 != undefined && list != undefined && classe2 != undefined) {
+                    metodo.helmet = helmet;
+                }
+                else {
+                    console.log("Errore mio!");
+                }
+            }
+        }
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.helmet = helmet;
-            SalvaListaClasseMetaData(list);
         }
         else {
             console.log("Errore mio!");
         }
+        SalvaListaClasseMetaData(list);
     }
 }
 export function mpAddMiddle(item: any): MethodDecorator {
