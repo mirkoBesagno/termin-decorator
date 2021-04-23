@@ -50,7 +50,7 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
             }; */
 
             
-            @mpMet({tipo:'get',path:'Valida',interazione:'middleware'})
+            /* @mpMet({tipo:'get',path:'Valida',interazione:'middleware'})
             Valida(@mpPar({nomeParametro:'token',posizione: 'body'}) token: string){
                 const tmp : IReturn={
                     body:{
@@ -60,7 +60,7 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
                 return tmp;
             }
 
-            @mpAddMiddle('Valida')
+            @mpAddMiddle('Valida') */
             @mpMet({tipo:'post',path:'SetNome'})
             SetNome(
                 @mpPar({
@@ -189,7 +189,7 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
             message: 'Quale porta usare?(default=3000) : ',
             type: 'number', name: 'scelta'
         }).then((scelta2)=>{
-        main.Inizializza("http://localhost:", scelta2.scelta);
+        main.Inizializza("http://localhost:", scelta2.scelta, true);
         console.log('..... Inizializzazione fine.');
         console.log('Menu');
         console.log('0: express');

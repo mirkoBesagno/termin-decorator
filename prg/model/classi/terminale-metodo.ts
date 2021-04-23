@@ -1,4 +1,4 @@
-import { IDescrivibile, IPrintabile, targetTerminale, TipoParametro } from "../tools";
+import { IDescrivibile, InizializzaLogbaseIn, InizializzaLogbaseOut, IPrintabile, targetTerminale, TipoParametro } from "../tools";
 import { CheckClasseMetaData, GetListaClasseMetaData, SalvaListaClasseMetaData, TerminaleClasse } from "./terminale-classe";
 import { TypePosizione, TerminaleParametro } from "./terminale-parametro";
 import chiedi from "prompts";
@@ -94,10 +94,10 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         return tmp;
     }
     ConfiguraRotta(rotte: Router, percorsi: IRaccoltaPercorsi): Router {
-        this.percorsi.patheader= percorsi.patheader ;
-        this.percorsi.porta= percorsi.porta;
+        this.percorsi.patheader = percorsi.patheader;
+        this.percorsi.porta = percorsi.porta;
         const pathGlobal = percorsi.pathGlobal + '/' + this.path;
-        this.percorsi.pathGlobal= pathGlobal;
+        this.percorsi.pathGlobal = pathGlobal;
         const middlew: any[] = [];
         this.middleware.forEach(element => {
 
@@ -143,10 +143,10 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         middlew,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            this.InizializzaLogbaseIn(req, this.nome.toString());
+                            InizializzaLogbaseIn(req, this.nome.toString());
                             const tmp = await this.Esegui(req);
                             res.status(tmp.stato).send(tmp.body);
-                            this.InizializzaLogbaseOut(res, this.nome.toString());
+                            InizializzaLogbaseOut(res, this.nome.toString());
                             return res;
                         });
                     break;
@@ -169,10 +169,10 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            this.InizializzaLogbaseIn(req, this.nome.toString());
+                            InizializzaLogbaseIn(req, this.nome.toString());
                             const tmp = await this.Esegui(req);
                             res.status(tmp.stato).send(tmp.body);
-                            this.InizializzaLogbaseOut(res, this.nome.toString());
+                            InizializzaLogbaseOut(res, this.nome.toString());
                             return res;
                         });
                     break;
@@ -195,10 +195,10 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            this.InizializzaLogbaseIn(req, this.nome.toString());
+                            InizializzaLogbaseIn(req, this.nome.toString());
                             const tmp = await this.Esegui(req);
                             res.status(tmp.stato).send(tmp.body);
-                            this.InizializzaLogbaseOut(res, this.nome.toString());
+                            InizializzaLogbaseOut(res, this.nome.toString());
                             return res;
                         });
                     break;
@@ -221,10 +221,10 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            this.InizializzaLogbaseIn(req, this.nome.toString());
+                            InizializzaLogbaseIn(req, this.nome.toString());
                             const tmp = await this.Esegui(req);
                             res.status(tmp.stato).send(tmp.body);
-                            this.InizializzaLogbaseOut(res, this.nome.toString());
+                            InizializzaLogbaseOut(res, this.nome.toString());
                             return res;
                         });
                     break;
@@ -247,10 +247,10 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            this.InizializzaLogbaseIn(req, this.nome.toString());
+                            InizializzaLogbaseIn(req, this.nome.toString());
                             const tmp = await this.Esegui(req);
                             res.status(tmp.stato).send(tmp.body);
-                            this.InizializzaLogbaseOut(res, this.nome.toString());
+                            InizializzaLogbaseOut(res, this.nome.toString());
                             return res;
                         });
                     break;
@@ -273,10 +273,10 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            this.InizializzaLogbaseIn(req, this.nome.toString());
+                            InizializzaLogbaseIn(req, this.nome.toString());
                             const tmp = await this.Esegui(req);
                             res.status(tmp.stato).send(tmp.body);
-                            this.InizializzaLogbaseOut(res, this.nome.toString());
+                            InizializzaLogbaseOut(res, this.nome.toString());
                             return res;
                         });
                     break;
@@ -336,7 +336,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
     async MetSpalla(body: string, query: string, header: string, headerpath?: string): Promise<string> {
         try {
             if (headerpath == undefined) headerpath = "http://localhost:3000";
-            console.log('chiamata per : ' + headerpath + this.percorsi.pathGlobal + ' | Verbo: ' + this.tipo);
+            console.log('chiamata per : '+ this.percorsi.pathGlobal + ' | Verbo: ' + this.tipo);
             let parametri = await this.listaParametri.SoddisfaParamtri();
 
             if (parametri.body != "") {
@@ -386,7 +386,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     case 'post':
                         try {
                             ritorno = await superagent
-                                .post(headerpath + this.percorsi.pathGlobal)
+                                .post(this.percorsi.pathGlobal)
                                 .query(JSON.parse('{ ' + query + ' }'))
                                 .send(JSON.parse('{ ' + body + ' }'))
                                 .set(JSON.parse('{ ' + header + ' }'))
@@ -405,7 +405,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     case 'purge':
                         try {
                             ritorno = await superagent
-                                .purge(headerpath + this.percorsi.pathGlobal)
+                                .purge(this.percorsi.pathGlobal)
                                 .query(JSON.parse('{ ' + query + ' }'))
                                 .send(JSON.parse('{ ' + body + ' }'))
                                 .set(JSON.parse('{ ' + header + ' }'))
@@ -424,7 +424,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     case 'patch':
                         try {
                             ritorno = await superagent
-                                .patch(headerpath + this.percorsi.pathGlobal)
+                                .patch(this.percorsi.pathGlobal)
                                 .query(JSON.parse('{ ' + query + ' }'))
                                 .send(JSON.parse('{ ' + body + ' }'))
                                 .set(JSON.parse('{ ' + header + ' }'))
@@ -443,7 +443,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     case 'delete':
                         try {
                             ritorno = await superagent
-                                .delete(headerpath + this.percorsi.pathGlobal)
+                                .delete(this.percorsi.pathGlobal)
                                 .query(JSON.parse('{ ' + query + ' }'))
                                 .send(JSON.parse('{ ' + body + ' }'))
                                 .set(JSON.parse('{ ' + header + ' }'))
@@ -499,69 +499,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         return tmp;
     }
 
-    InizializzaLogbaseIn(req: Request, nomeMetodo?: string): string {
-        console.log("Arrivato in : " + nomeMetodo + "\n"
-            + "Data : " + new Date(Date.now()) + "\n"
-            + "url : " + req.originalUrl + "\n"
-            + "query : " + JSON.stringify(req.query) + "\n"
-            + "body : " + JSON.stringify(req.body) + "\n"
-            + "header : " + JSON.stringify(req.headers) + "\n"
-            + "soket : " + "\n"
-            + "local : " + req.socket.localAddress + " : " + req.socket.localPort + "\n"
-            + "remote : " + req.socket.remoteAddress + " : " + req.socket.remotePort + "\n"
-        );
-        const body = req.body;
-        const data = new Date(Date.now());
-        const header = JSON.parse(JSON.stringify(req.headers));
-        const local = req.socket.localAddress + " : " + req.socket.localPort;
-        const remote = req.socket.remoteAddress + " : " + req.socket.remotePort;
-        const url = req.originalUrl;
 
-        const tmp = "Arrivato in : " + nomeMetodo + "\n"
-            + "Data : " + new Date(Date.now()) + "\n"
-            + "url : " + req.originalUrl + "\n"
-            + "query : " + JSON.stringify(req.query) + "\n"
-            + "body : " + JSON.stringify(req.body) + "\n"
-            + "header : " + JSON.stringify(req.headers) + "\n"
-            + "soket : " + "\n"
-            + "local : " + req.socket.localAddress + " : " + req.socket.localPort + "\n"
-            + "remote : " + req.socket.remoteAddress + " : " + req.socket.remotePort + "\n";
-        return tmp;
-    }
-    InizializzaLogbaseOut(req: Response, nomeMetodo?: string): string {
-
-        var t1 = '', t2 = '';
-        if (req.socket != undefined) {
-            t1 = req.socket.localAddress + " : " + req.socket.localPort;
-            t2 = req.socket.remoteAddress + " : " + req.socket.remotePort;
-        }
-        console.log("Arrivato in : " + nomeMetodo + "\n"
-            + "Data : " + new Date(Date.now()) + "\n"
-            + "headersSent : " + req.headersSent + "\n"
-            // + "json : " + req.json + "\n"
-            // + "send : " + req.send + "\n"
-            + "sendDate : " + req.sendDate + "\n"
-            + "statusCode : " + req.statusCode + '\n'
-            + "statuMessage : " + req.statusMessage + '\n'
-            + "soket : " + "\n"
-            + "local : " + t1 + "\n"
-            + "remote : " + t2 + "\n"
-        );
-
-
-        const tmp = "Arrivato in : " + nomeMetodo + "\n"
-            + "Data : " + new Date(Date.now()) + "\n"
-            + "headersSent : " + req.headersSent + "\n"
-            + "json : " + req.json + "\n"
-            + "send : " + req.send + "\n"
-            + "sendDate : " + req.sendDate + "\n"
-            + "statusCode : " + req.statusCode + '\n'
-            + "statuMessage : " + req.statusMessage + '\n'
-            + "soket : " + "\n"
-            + "local : " + t1 + "\n"
-            + "remote : " + t2 + "\n";
-        return tmp;
-    }
     ConvertiInMiddleare() {
         return async (req: Request, res: Response, nex: NextFunction) => {
             const tmp = await this.Esegui(req);
@@ -839,75 +777,75 @@ function decoratoreMetodo(parametri: IMetodo
         /* Caso base */
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-        if (parametri.nomiClasseRiferimento != undefined)
-            if (metodo != undefined && list != undefined && classe != undefined) {
-                metodo.metodoAvviabile = descriptor.value;
+        if (metodo != undefined && list != undefined && classe != undefined) {
+            metodo.metodoAvviabile = descriptor.value;
+            if (parametri.nomiClasseRiferimento != undefined)
                 metodo.nomiClassiDiRiferimento = parametri.nomiClasseRiferimento;
 
-                if (parametri.tipo != undefined) metodo.tipo = parametri.tipo;
-                else metodo.tipo = 'get';
+            if (parametri.tipo != undefined) metodo.tipo = parametri.tipo;
+            else metodo.tipo = 'get';
 
-                if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
-                else metodo.descrizione = '';
+            if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
+            else metodo.descrizione = '';
 
-                if (parametri.sommario != undefined) metodo.sommario = parametri.sommario;
-                else metodo.sommario = '';
+            if (parametri.sommario != undefined) metodo.sommario = parametri.sommario;
+            else metodo.sommario = '';
 
-                if (parametri.interazione != undefined) metodo.tipoInterazione = parametri.interazione;
-                else metodo.tipoInterazione = 'rotta';
+            if (parametri.interazione != undefined) metodo.tipoInterazione = parametri.interazione;
+            else metodo.tipoInterazione = 'rotta';
 
-                if (parametri.path == undefined) metodo.path = propertyKey.toString();
-                else metodo.path = parametri.path;
+            if (parametri.path == undefined) metodo.path = propertyKey.toString();
+            else metodo.path = parametri.path;
 
 
-                if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
+            if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
 
-                    const listaMidd = GetListaMiddlewareMetaData();
-                    const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());
-                    midd.metodoAvviabile = descriptor.value;
-                    midd.listaParametri = metodo.listaParametri;
-                    SalvaListaMiddlewareMetaData(listaMidd);
-                }
-                if (parametri.nomiClasseRiferimento != undefined && parametri.nomiClasseRiferimento.length > 0) {
-                    for (let index = 0; index < parametri.nomiClasseRiferimento.length; index++) {
-                        const element = parametri.nomiClasseRiferimento[index];
-                        const classeTmp = list.CercaConNomeSeNoAggiungi(element);
-                        const metodoTmp = classeTmp.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-                        for (let index = 0; index < metodo.listaParametri.length; index++) {
-                            const element = metodo.listaParametri[index];
-                            /* configuro i parametri */
-                            const paramestro = metodoTmp.CercaParametroSeNoAggiungi(element.nome, element.indexParameter,
-                                element.tipo, element.posizione);
-                            if (parametri.descrizione != undefined) paramestro.descrizione = element.descrizione;
-                            else paramestro.descrizione = '';
+                const listaMidd = GetListaMiddlewareMetaData();
+                const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());
+                midd.metodoAvviabile = descriptor.value;
+                midd.listaParametri = metodo.listaParametri;
+                SalvaListaMiddlewareMetaData(listaMidd);
+            }
+            if (parametri.nomiClasseRiferimento != undefined && parametri.nomiClasseRiferimento.length > 0) {
+                for (let index = 0; index < parametri.nomiClasseRiferimento.length; index++) {
+                    const element = parametri.nomiClasseRiferimento[index];
+                    const classeTmp = list.CercaConNomeSeNoAggiungi(element);
+                    const metodoTmp = classeTmp.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+                    for (let index = 0; index < metodo.listaParametri.length; index++) {
+                        const element = metodo.listaParametri[index];
+                        /* configuro i parametri */
+                        const paramestro = metodoTmp.CercaParametroSeNoAggiungi(element.nome, element.indexParameter,
+                            element.tipo, element.posizione);
+                        if (parametri.descrizione != undefined) paramestro.descrizione = element.descrizione;
+                        else paramestro.descrizione = '';
 
-                            if (parametri.sommario != undefined) paramestro.sommario = element.sommario;
-                            else paramestro.sommario = '';
-                            /* configuro il metodo */
-                            metodoTmp.metodoAvviabile = descriptor.value;
+                        if (parametri.sommario != undefined) paramestro.sommario = element.sommario;
+                        else paramestro.sommario = '';
+                        /* configuro il metodo */
+                        metodoTmp.metodoAvviabile = descriptor.value;
 
-                            if (parametri.tipo != undefined) metodoTmp.tipo = parametri.tipo;
-                            else metodoTmp.tipo = 'get';
+                        if (parametri.tipo != undefined) metodoTmp.tipo = parametri.tipo;
+                        else metodoTmp.tipo = 'get';
 
-                            if (parametri.descrizione != undefined) metodoTmp.descrizione = parametri.descrizione;
-                            else metodoTmp.descrizione = '';
+                        if (parametri.descrizione != undefined) metodoTmp.descrizione = parametri.descrizione;
+                        else metodoTmp.descrizione = '';
 
-                            if (parametri.sommario != undefined) metodoTmp.sommario = parametri.sommario;
-                            else metodoTmp.sommario = '';
+                        if (parametri.sommario != undefined) metodoTmp.sommario = parametri.sommario;
+                        else metodoTmp.sommario = '';
 
-                            if (parametri.interazione != undefined) metodoTmp.tipoInterazione = parametri.interazione;
-                            else metodoTmp.tipoInterazione = 'rotta';
+                        if (parametri.interazione != undefined) metodoTmp.tipoInterazione = parametri.interazione;
+                        else metodoTmp.tipoInterazione = 'rotta';
 
-                            if (parametri.path == undefined) metodoTmp.path = propertyKey.toString();
-                            else metodoTmp.path = parametri.path;
-                        }
+                        if (parametri.path == undefined) metodoTmp.path = propertyKey.toString();
+                        else metodoTmp.path = parametri.path;
                     }
                 }
-                SalvaListaClasseMetaData(list);
             }
-            else {
-                console.log("Errore mio!");
-            }
+            SalvaListaClasseMetaData(list);
+        }
+        else {
+            console.log("Errore mio!");
+        }
     }
 }
 

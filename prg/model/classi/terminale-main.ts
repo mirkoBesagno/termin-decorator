@@ -1,9 +1,10 @@
-import { IPrintabile, targetTerminale } from "../tools";
+import { InizializzaLogbaseIn, InizializzaLogbaseOut, IPrintabile, targetTerminale } from "../tools";
 import chiedi from "prompts";
 
 
 import superagent from "superagent";
 import express from "express";
+import { Request, Response } from "express";
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import * as bodyParser from 'body-parser';
 import swaggerUI from "swagger-ui-express";
@@ -48,11 +49,11 @@ export class Main {
         this.listaTerminaleClassi = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
     }
 
-    Inizializza(patheader: string, porta: number) {
+    Inizializza(patheader: string, porta: number, rottaBase: boolean) {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         this.percorsi.patheader = patheader;
         this.percorsi.porta = porta;
-        const pathGlobal = this.percorsi.patheader + this.percorsi.porta+'/' + this.path;
+        const pathGlobal = this.percorsi.patheader + this.percorsi.porta + '/' + this.path;
         this.percorsi.pathGlobal = pathGlobal;
         for (let index = 0; index < tmp.length; index++) {
             const element = tmp[index];
@@ -64,6 +65,14 @@ export class Main {
                 }
             }));
             this.serverExpressDecorato.use(pathGlobal, element.rotte);
+            if (rottaBase)
+                this.serverExpressDecorato.all('/*', (res: Response, req: Request) => {
+                    console.log('Risposta a chiamata : ' + '/*');
+                    InizializzaLogbaseIn(req, 'IN_GENERICA');
+                    res.status(555).send('No found');
+                    InizializzaLogbaseOut(res, 'OUT_GENERICA');
+                    return res;
+                });
         }
         SalvaListaClasseMetaData(tmp);
     }

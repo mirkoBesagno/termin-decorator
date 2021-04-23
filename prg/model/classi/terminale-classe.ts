@@ -16,7 +16,19 @@ export class TerminaleClasse implements IPrintabile {
     nome: string;
     rotte: Router;
 
-    path: string;
+    private path: string;
+
+    public get GetPath(): string {
+        return this.path;
+    }
+
+    public set SetPath(v: string) {
+        this.path = v;
+        const pathGlobal = '/' + this.path;
+        this.percorsi.pathGlobal = pathGlobal;
+    }
+
+
 
     percorsi: IRaccoltaPercorsi;
 
@@ -81,16 +93,18 @@ export class TerminaleClasse implements IPrintabile {
             console.log("Saluti dalla classe : " + this.nome);
 
         } else {
-            console.log('Richiamo la rotta');
-
-            const risposta = await this.listaMetodi[scelta.scelta - 1].ChiamaLaRotta(this.percorsi.patheader + this.percorsi.porta);
-            if (risposta == undefined) {
-                console.log("Risposta undefined!");
-            } else {
-                console.log(risposta)
+            try {
+                console.log('Richiamo la rotta');
+                const risposta = await this.listaMetodi[scelta.scelta - 1].ChiamaLaRotta(this.percorsi.patheader + this.percorsi.porta);
+                if (risposta == undefined) {
+                    console.log("Risposta undefined!");
+                } else {
+                    console.log(risposta)
+                }
+                await this.PrintMenuClasse();
+            } catch (error) {
+                await this.PrintMenuClasse();
             }
-
-            await this.PrintMenuClasse();
         }
     }
 
@@ -174,16 +188,15 @@ function decoratoreClasse(percorso: string): any {
     return (ctr: Function) => {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         const classe = CheckClasseMetaData(ctr.name);
-        classe.path = percorso;
-        Reflect.defineMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, tmp, targetTerminale); //e lo vado a salvare nel meta data
-        Reflect.defineMetadata(TerminaleClasse.nomeMetadataKeyTarget, classe, targetTerminale); //e lo vado a salvare nel meta data
+        classe.SetPath = percorso;
+        SalvaListaClasseMetaData(tmp);
     }
 }
 function decoratoreClasseeRev(percorso: string): any {
     return (ctr: Function) => {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(ctr.name);
-        classe.path = percorso;
+        classe.SetPath = percorso;
         SalvaListaClasseMetaData(list);
     }
 }

@@ -49,7 +49,7 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
     CercaConPath(path: string | Symbol): TerminaleClasse | undefined {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
-            if (element.path == path) return element;
+            if (element.GetPath == path) return element;
         }
         return undefined;
         //throw new Error("Errore mio !");
