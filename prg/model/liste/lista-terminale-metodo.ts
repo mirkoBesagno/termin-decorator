@@ -9,16 +9,7 @@ export class ListaTerminaleMetodo extends Array<TerminaleMetodo> {
         super();
         this.rotte = rotte;
     }
-    CercaConNome(nome: string | Symbol, classePath: string): TerminaleMetodo | undefined {
-        for (let index = 0; index < this.length; index++) {
-            const element = this[index];
-            if (element.nome == nome && element.classePath == classePath) return element;
-        }
-        return undefined;
-        //throw new Error("Errore mio !");
-
-    }
-    CercaConNomeRev(nome: string): TerminaleMetodo | undefined {
+    CercaConNome(nome: string): TerminaleMetodo | undefined {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
             if (element.nome == nome) return element;
@@ -30,12 +21,12 @@ export class ListaTerminaleMetodo extends Array<TerminaleMetodo> {
             const element = this[index];
             if (element.nome == item.nome && element.classePath == item.classePath) {
                 this[index] = item;
-                this.rotte = item.ConfiguraRotta(this.rotte, '');
+                this.rotte = item.ConfiguraRotta(this.rotte, { porta: 0, pathGlobal: '', patheader: '' });
                 return item;
             }
         }
         this.push(item);
-        this.rotte = item.ConfiguraRotta(this.rotte, '');
+        this.rotte = item.ConfiguraRotta(this.rotte, { porta: 0, pathGlobal: '', patheader: '' });
         return item;
     }
 }
@@ -45,7 +36,7 @@ export class ListaTerminaleMiddleware extends Array<TerminaleMetodo> {
     constructor() {
         super();
     }
-    
+
     CercaConNomeSeNoAggiungi(nome: string) {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
@@ -54,7 +45,7 @@ export class ListaTerminaleMiddleware extends Array<TerminaleMetodo> {
             }
         }
         return this.AggiungiElemento(new TerminaleMetodo(nome, '', ''))
-        
+
     }
     AggiungiElemento(item: TerminaleMetodo) {
         for (let index = 0; index < this.length; index++) {
@@ -78,7 +69,7 @@ export function GetListaMiddlewareMetaData() {
     }
     return terminale; */
 
-    
+
     let tmp: ListaTerminaleMiddleware = Reflect.getMetadata(ListaTerminaleMiddleware.nomeMetadataKeyTarget, targetTerminale);
     if (tmp == undefined) {
         tmp = new ListaTerminaleMiddleware();

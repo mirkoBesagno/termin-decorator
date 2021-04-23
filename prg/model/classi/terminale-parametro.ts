@@ -79,7 +79,8 @@ function decoratoreParametroGenerico(parametri: IParametro)/* (nomeParametro: st
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-        const paramestro = metodo.CercaParametroSeNoAggiungi(parametri.nomeParametro, parameterIndex, parametri.tipoParametro, parametri.posizione);
+        const paramestro = metodo.CercaParametroSeNoAggiungi(parametri.nomeParametro, parameterIndex, 
+            parametri.tipoParametro, parametri.posizione);
         if (parametri.descrizione != undefined) paramestro.descrizione = parametri.descrizione;
         else paramestro.descrizione = '';
 

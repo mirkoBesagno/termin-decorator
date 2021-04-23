@@ -10,6 +10,8 @@ import { GetListaMiddlewareMetaData, ListaTerminaleMetodo, ListaTerminaleMiddlew
 import { ListaTerminaleParametro } from "../liste/lista-terminale-parametro";
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import cors from 'cors';
+import { IRaccoltaPercorsi } from "./terminale-main";
+import { textChangeRangeIsUnchanged } from "typescript";
 
 export type TypeInterazone = "rotta" | "middleware" | 'ambo';
 
@@ -24,6 +26,8 @@ export interface IResponse {
 export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
     static nomeMetadataKeyTarget = "MetodoTerminaleTarget";
+
+    percorsi: IRaccoltaPercorsi;
     classePath = '';
     listaParametri: ListaTerminaleParametro;
     tipo: TypeMetod;
@@ -31,7 +35,6 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
     nome: string | Symbol;
     metodoAvviabile: any;
     path: string;
-    pathGlobal: string;
 
     cors: any;
     helmet: any;
@@ -48,12 +51,13 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         this.path = path;
         this.classePath = classePath;
         this.tipo = 'get';
-        this.pathGlobal = '';
         this.tipoInterazione = "rotta";
 
         this.descrizione = "";
         this.sommario = "";
         this.nomiClassiDiRiferimento = [];
+
+        this.percorsi = { pathGlobal: '', patheader: '', porta: 0 };
         //this.listaRotteGeneraChiavi = [];
     }
 
@@ -75,7 +79,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         }
         if (pathRoot != undefined) console.log(tab + this.nome + ' | ' + '/' + pathRoot + '/' + this.path + '  |  ' + parametri);
         else console.log(tab + this.nome + ' | ' + "/" + this.path + '  |  ' + parametri);
-        console.log(this.pathGlobal);
+        console.log(this.percorsi.pathGlobal);
 
 
     }
@@ -85,12 +89,14 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             const element = this.listaParametri[index];
             parametri = parametri + element.PrintParametro();
         }
-        const tmp = this.nome + ' | ' + this.pathGlobal + '/' + this.path + '  |  ' + parametri;
+        const tmp = this.nome + ' | ' + this.percorsi.pathGlobal + '/' + this.path + '  |  ' + parametri;
         //console.log(tmp);
         return tmp;
     }
-    ConfiguraRotta(rotte: Router, pathglobal: string): Router {
-        this.pathGlobal = pathglobal + '/' + this.path;
+    ConfiguraRotta(rotte: Router, percorsi: IRaccoltaPercorsi): Router {
+        this.percorsi.patheader= percorsi.patheader ;
+        this.percorsi.porta= percorsi.porta;
+        const pathGlobal = percorsi.pathGlobal + '/' + this.path;
         const middlew: any[] = [];
         this.middleware.forEach(element => {
 
@@ -135,7 +141,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         helmet(this.helmet),
                         middlew,
                         async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.pathGlobal);
+                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                             this.InizializzaLogbaseIn(req, this.nome.toString());
                             const tmp = await this.Esegui(req);
                             res.status(tmp.stato).send(tmp.body);
@@ -159,7 +165,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         helmet(this.helmet),
                         middlew,
                         async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.pathGlobal);
+                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
                             this.InizializzaLogbaseIn(req, this.nome.toString());
@@ -185,7 +191,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         helmet(this.helmet),
                         middlew,
                         async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.pathGlobal);
+                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
                             this.InizializzaLogbaseIn(req, this.nome.toString());
@@ -211,7 +217,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         helmet(this.helmet),
                         middlew,
                         async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.pathGlobal);
+                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
                             this.InizializzaLogbaseIn(req, this.nome.toString());
@@ -237,7 +243,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         helmet(this.helmet),
                         middlew,
                         async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.pathGlobal);
+                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
                             this.InizializzaLogbaseIn(req, this.nome.toString());
@@ -263,7 +269,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         helmet(this.helmet),
                         middlew,
                         async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.pathGlobal);
+                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                             /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
                             this.InizializzaLogbaseIn(req, this.nome.toString());
@@ -329,7 +335,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
     async MetSpalla(body: string, query: string, header: string, headerpath?: string): Promise<string> {
         try {
             if (headerpath == undefined) headerpath = "http://localhost:3000";
-            console.log('chiamata per : ' + headerpath + this.pathGlobal + ' | Verbo: ' + this.tipo);
+            console.log('chiamata per : ' + headerpath + this.percorsi.pathGlobal + ' | Verbo: ' + this.tipo);
             let parametri = await this.listaParametri.SoddisfaParamtri();
 
             if (parametri.body != "") {
@@ -359,7 +365,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     case 'get':
                         try {
                             ritorno = await superagent
-                                .get(headerpath + this.pathGlobal)
+                                .get(headerpath + this.percorsi.pathGlobal)
                                 .query(JSON.parse('{ ' + query + ' }'))
                                 .send(JSON.parse('{ ' + body + ' }'))
                                 .set(JSON.parse('{ ' + header + ' }'))
@@ -379,7 +385,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     case 'post':
                         try {
                             ritorno = await superagent
-                                .post(headerpath + this.pathGlobal)
+                                .post(headerpath + this.percorsi.pathGlobal)
                                 .query(JSON.parse('{ ' + query + ' }'))
                                 .send(JSON.parse('{ ' + body + ' }'))
                                 .set(JSON.parse('{ ' + header + ' }'))
@@ -398,7 +404,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     case 'purge':
                         try {
                             ritorno = await superagent
-                                .purge(headerpath + this.pathGlobal)
+                                .purge(headerpath + this.percorsi.pathGlobal)
                                 .query(JSON.parse('{ ' + query + ' }'))
                                 .send(JSON.parse('{ ' + body + ' }'))
                                 .set(JSON.parse('{ ' + header + ' }'))
@@ -417,7 +423,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     case 'patch':
                         try {
                             ritorno = await superagent
-                                .patch(headerpath + this.pathGlobal)
+                                .patch(headerpath + this.percorsi.pathGlobal)
                                 .query(JSON.parse('{ ' + query + ' }'))
                                 .send(JSON.parse('{ ' + body + ' }'))
                                 .set(JSON.parse('{ ' + header + ' }'))
@@ -436,7 +442,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     case 'delete':
                         try {
                             ritorno = await superagent
-                                .delete(headerpath + this.pathGlobal)
+                                .delete(headerpath + this.percorsi.pathGlobal)
                                 .query(JSON.parse('{ ' + query + ' }'))
                                 .send(JSON.parse('{ ' + body + ' }'))
                                 .set(JSON.parse('{ ' + header + ' }'))
@@ -477,7 +483,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         return tmp;
     }
     async Esegui(req: Request): Promise<IReturn> {
-        console.log('Risposta a chiamata : ' + this.pathGlobal);
+        console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
         const parametri = this.listaParametri.EstraiParametriDaRequest(req);
         let tmp: IReturn;
         try {
@@ -607,7 +613,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         }
         else {
             let primo: boolean = false;
-            let ritornoTesta = `"${this.pathGlobal}" : { 
+            let ritornoTesta = `"${this.percorsi.pathGlobal}" : { 
                 "${this.tipo}" : 
                 {
                     "tags": [
@@ -622,7 +628,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 `;
             let ritorno = '';
             let tmp2: any[] = [];
-            const gg = this.pathGlobal;
+            const gg = this.percorsi.pathGlobal;
 
             for (let index = 0; index < this.middleware.length; index++) {
                 const element = this.middleware[index];
@@ -689,7 +695,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         }
         else {
             let primo: boolean = false;
-            let ritornoTesta = `"${this.pathGlobal}" : { 
+            let ritornoTesta = `"${this.percorsi.pathGlobal}" : { 
                 "${this.tipo}" : 
                 {
                     "tags": [
@@ -704,7 +710,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 `;
             let ritorno = '';
             let tmp2: any[] = [];
-            const gg = this.pathGlobal;
+            const gg = this.percorsi.pathGlobal;
 
             for (let index = 0; index < this.middleware.length; index++) {
                 const element = this.middleware[index];
@@ -762,7 +768,7 @@ export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse)
         tmp = new ListaTerminaleMetodo(classe.rotte);//lo creo
         Reflect.defineMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, tmp, targetTerminale);//e lo aggiungo a i metadata
     }
-    let terminale = tmp.CercaConNome(nomeMetodo, classe.path); //cerca la mia funzione
+    let terminale = tmp.CercaConNome(nomeMetodo); //cerca la mia funzione
     if (terminale == undefined)/* se non c'è */ {
         terminale = new TerminaleMetodo(nomeMetodo, "", classe.nome); // creo la funzione
     }
@@ -783,7 +789,7 @@ function decoratoreMetodo(parametri: IMetodo
 ): MethodDecorator {
     return function (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
-        let classe: TerminaleClasse;
+        /* let classe: TerminaleClasse;
         const classeCampione = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         if (parametri.nomiClasseRiferimento != undefined && parametri.nomiClasseRiferimento.length > 0) {
             for (let index = 0; index < parametri.nomiClasseRiferimento.length; index++) {
@@ -828,43 +834,79 @@ function decoratoreMetodo(parametri: IMetodo
                     console.log("Errore mio!");
                 }
             }
-        }
-        classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
+        } */
+        /* Caso base */
+        const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
         if (parametri.nomiClasseRiferimento != undefined)
-            metodo.nomiClassiDiRiferimento = parametri.nomiClasseRiferimento;
-        if (metodo != undefined && list != undefined && classe != undefined) {
-            metodo.metodoAvviabile = descriptor.value;
+            if (metodo != undefined && list != undefined && classe != undefined) {
+                metodo.metodoAvviabile = descriptor.value;
+                metodo.nomiClassiDiRiferimento = parametri.nomiClasseRiferimento;
 
-            if (parametri.tipo != undefined) metodo.tipo = parametri.tipo;
-            else metodo.tipo = 'get';
+                if (parametri.tipo != undefined) metodo.tipo = parametri.tipo;
+                else metodo.tipo = 'get';
 
-            if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
-            else metodo.descrizione = '';
+                if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
+                else metodo.descrizione = '';
 
-            if (parametri.sommario != undefined) metodo.sommario = parametri.sommario;
-            else metodo.sommario = '';
+                if (parametri.sommario != undefined) metodo.sommario = parametri.sommario;
+                else metodo.sommario = '';
 
-            if (parametri.interazione != undefined) metodo.tipoInterazione = parametri.interazione;
-            else metodo.tipoInterazione = 'rotta';
+                if (parametri.interazione != undefined) metodo.tipoInterazione = parametri.interazione;
+                else metodo.tipoInterazione = 'rotta';
 
-            if (parametri.path == undefined) metodo.path = propertyKey.toString();
-            else metodo.path = parametri.path;
+                if (parametri.path == undefined) metodo.path = propertyKey.toString();
+                else metodo.path = parametri.path;
 
 
-            if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
+                if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
 
-                const listaMidd = GetListaMiddlewareMetaData();
-                const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());
-                midd.metodoAvviabile = descriptor.value;
-                midd.listaParametri = metodo.listaParametri;
-                SalvaListaMiddlewareMetaData(listaMidd);
+                    const listaMidd = GetListaMiddlewareMetaData();
+                    const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());
+                    midd.metodoAvviabile = descriptor.value;
+                    midd.listaParametri = metodo.listaParametri;
+                    SalvaListaMiddlewareMetaData(listaMidd);
+                }
+                if (parametri.nomiClasseRiferimento != undefined && parametri.nomiClasseRiferimento.length > 0) {
+                    for (let index = 0; index < parametri.nomiClasseRiferimento.length; index++) {
+                        const element = parametri.nomiClasseRiferimento[index];
+                        const classeTmp = list.CercaConNomeSeNoAggiungi(element);
+                        const metodoTmp = classeTmp.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+                        for (let index = 0; index < metodo.listaParametri.length; index++) {
+                            const element = metodo.listaParametri[index];
+                            /* configuro i parametri */
+                            const paramestro = metodoTmp.CercaParametroSeNoAggiungi(element.nome, element.indexParameter,
+                                element.tipo, element.posizione);
+                            if (parametri.descrizione != undefined) paramestro.descrizione = element.descrizione;
+                            else paramestro.descrizione = '';
+
+                            if (parametri.sommario != undefined) paramestro.sommario = element.sommario;
+                            else paramestro.sommario = '';
+                            /* configuro il metodo */
+                            metodoTmp.metodoAvviabile = descriptor.value;
+
+                            if (parametri.tipo != undefined) metodoTmp.tipo = parametri.tipo;
+                            else metodoTmp.tipo = 'get';
+
+                            if (parametri.descrizione != undefined) metodoTmp.descrizione = parametri.descrizione;
+                            else metodoTmp.descrizione = '';
+
+                            if (parametri.sommario != undefined) metodoTmp.sommario = parametri.sommario;
+                            else metodoTmp.sommario = '';
+
+                            if (parametri.interazione != undefined) metodoTmp.tipoInterazione = parametri.interazione;
+                            else metodoTmp.tipoInterazione = 'rotta';
+
+                            if (parametri.path == undefined) metodoTmp.path = propertyKey.toString();
+                            else metodoTmp.path = parametri.path;
+                        }
+                    }
+                }
+                SalvaListaClasseMetaData(list);
             }
-            SalvaListaClasseMetaData(list);
-        }
-        else {
-            console.log("Errore mio!");
-        }
+            else {
+                console.log("Errore mio!");
+            }
     }
 }
 

@@ -20,8 +20,8 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
             const tmp = index + 1;
-            ritorno.push(element.pathGlobal);
-            console.log(tmp + ': ' + element.pathGlobal);
+            ritorno.push(element.percorsi.pathGlobal);
+            console.log(tmp + ': ' + element.percorsi.pathGlobal);
         }
         return ritorno;
     }

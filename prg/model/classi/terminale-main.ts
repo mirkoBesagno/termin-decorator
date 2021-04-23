@@ -7,7 +7,7 @@ import express from "express";
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import * as bodyParser from 'body-parser';
 import swaggerUI from "swagger-ui-express";
-import { TerminaleClasse } from "./terminale-classe";
+import { SalvaListaClasseMetaData, TerminaleClasse } from "./terminale-classe";
 //const swaggerUI = require('swagger-ui-express');
 
 /**
@@ -32,14 +32,17 @@ export function mpMain(path: string) {
         }; */
     }
 }
+export interface IRaccoltaPercorsi {
+    pathGlobal: string, patheader: string, porta: number
+}
 export class Main {
-    porta = 0;
-    pathRoot = "";
+    percorsi: IRaccoltaPercorsi;
     path: string;
     serverExpressDecorato: express.Express;
     listaTerminaleClassi: ListaTerminaleClasse;
     constructor(path: string, server?: express.Express) {
         this.path = path;
+        this.percorsi = { pathGlobal: "", patheader: "", porta: 0 };
         if (server == undefined) this.serverExpressDecorato = express();
         else this.serverExpressDecorato = server;
         this.listaTerminaleClassi = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
@@ -47,10 +50,13 @@ export class Main {
 
     Inizializza(patheader: string, porta: number) {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
+        this.percorsi.patheader = patheader;
+        this.percorsi.porta = porta;
+        const pathGlobal = '/' + this.path;
+        this.percorsi.pathGlobal = pathGlobal;
         for (let index = 0; index < tmp.length; index++) {
             const element = tmp[index];
-            const pathGlobal = '/' + this.path + '/' + element.path;
-            element.SettaPathRoot_e_Global(this.path, pathGlobal, patheader, porta);
+            element.SettaPathRoot_e_Global(this.path, this.percorsi);
             this.serverExpressDecorato.use(bodyParser.json({
                 limit: '50mb',
                 verify(req: any, res, buf, encoding) {
@@ -59,6 +65,7 @@ export class Main {
             }));
             this.serverExpressDecorato.use(pathGlobal, element.rotte);
         }
+        SalvaListaClasseMetaData(tmp);
     }
     GetJSONSwagger() {
         const swaggerJson = ``;
@@ -206,6 +213,6 @@ export class Main {
         }
     };
     StartExpress() {
-        this.serverExpressDecorato.listen(this.porta);
+        this.serverExpressDecorato.listen(this.percorsi.porta);
     }
 }
