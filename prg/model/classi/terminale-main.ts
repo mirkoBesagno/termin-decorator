@@ -33,6 +33,8 @@ export function mpMain(path: string) {
     }
 }
 export class Main {
+    porta = 0;
+    pathRoot = "";
     path: string;
     serverExpressDecorato: express.Express;
     listaTerminaleClassi: ListaTerminaleClasse;
@@ -43,12 +45,12 @@ export class Main {
         this.listaTerminaleClassi = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
     }
 
-    Inizializza(patheader: string) {
+    Inizializza(patheader: string, porta: number) {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         for (let index = 0; index < tmp.length; index++) {
             const element = tmp[index];
             const pathGlobal = '/' + this.path + '/' + element.path;
-            element.SettaPathRoot_e_Global(this.path, pathGlobal, patheader);
+            element.SettaPathRoot_e_Global(this.path, pathGlobal, patheader, porta);
             this.serverExpressDecorato.use(bodyParser.json({
                 limit: '50mb',
                 verify(req: any, res, buf, encoding) {
@@ -156,7 +158,7 @@ export class Main {
         try {
             const hhh = tmp.toString();
             console.log(hhh);
-            
+
             JSON.parse(tmp)
         } catch (error) {
             console.log(error);
@@ -204,6 +206,6 @@ export class Main {
         }
     };
     StartExpress() {
-        this.serverExpressDecorato.listen(3000);
+        this.serverExpressDecorato.listen(this.porta);
     }
 }

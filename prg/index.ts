@@ -185,7 +185,11 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
         const main = new Main("app");
         console.log('Inizializzazione inizio .....');
         
-        main.Inizializza("http://localhost:3000");
+        chiedi({
+            message: 'Quale porta usare?(default=3000) : ',
+            type: 'number', name: 'scelta'
+        }).then((scelta2)=>{
+        main.Inizializza("http://localhost:", scelta2.scelta);
         console.log('..... Inizializzazione fine.');
         console.log('Menu');
         console.log('0: express');
@@ -207,16 +211,16 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
                 const scelta = chiedi({
                      message: 'Rotta dove renderli visibili: ', 
                      type: 'text', name: 'scelta' }).then((ris)=>{
-                         main.AggiungiSwagger(ris.scelta);
-                main.StartExpress();   
+                        main.AggiungiSwagger(ris.scelta);
+                        main.StartExpress();   
                      })    
             } else if(item.scelta==3){
-                main.StartExpress(); 
+                main.StartExpress();                 
                 chiedi({
                     message: 'Rotta dove renderli visibili: ', 
                     type: 'text', name: 'scelta' }).then((ris)=>{
                         main.PrintMenu();
-                    })    
+                    }) 
             } else {
                 console.log('Ciao ciao ...');                
             }
@@ -225,6 +229,8 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
             console.log(err);
             
         });
+        })
+        
        
         //console.log('fineeeeeeeeeee');
         

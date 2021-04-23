@@ -9,16 +9,19 @@ import { TerminaleMetodo } from "./terminale-metodo";
 
 export class TerminaleClasse implements IPrintabile {
     static nomeMetadataKeyTarget = "ClasseTerminaleTarget";
+
     listaMetodi: ListaTerminaleMetodo;
     id: string;
     nome: string;
-    path: string;
-    private pathRoot: string;
     rotte: Router;
-    pathGlobal: string;
-    headerPath: string;
 
-    constructor(nome: string, path?: string, headerPath?: string) {
+    path: string;
+    pathGlobal: string;
+
+    headerPath: string;
+    port: number;
+
+    constructor(nome: string, path?: string, headerPath?: string, port?: number) {
         this.id = Math.random().toString();
         this.rotte = Router();
         this.listaMetodi = new ListaTerminaleMetodo(this.rotte);
@@ -26,15 +29,13 @@ export class TerminaleClasse implements IPrintabile {
         this.nome = nome;
         if (path) this.path = path;
         else this.path = nome;
-        this.pathRoot = "";
+
         this.pathGlobal = '';
 
-        if (headerPath == undefined) {
-            this.headerPath = "http://localhost:3000"
-        }
-        else {
-            this.headerPath = headerPath;
-        }
+        if (headerPath == undefined) this.headerPath = "http://localhost:";
+        else this.headerPath = headerPath;
+        if (port == undefined) this.port = 3000;
+        else this.port = port;
     }
     /* async PrintMenu() {
             console.log("Scegli un metodo:");
@@ -54,11 +55,11 @@ export class TerminaleClasse implements IPrintabile {
     async PrintMenu() {
         const tab = '\t\t';
         console.log(tab + 'TerminaleClasse' + '->' + 'PrintMenu');
-        console.log(tab + this.nome + ' | ' + this.id + ' | ' + '/' + this.pathRoot + '/' + this.path + ' ;');
+        console.log(tab + this.nome + ' | ' + this.id + ' | ' + '/' + this.pathGlobal + '/' + this.path + ' ;');
 
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
-            element.PrintCredenziali(this.pathRoot + '/' + this.path);
+            element.PrintCredenziali(this.pathGlobal + '/' + this.path);
         }
         const scelta = await chiedi({ message: 'Premi invio per continuare', type: 'number', name: 'scelta' });
 
@@ -81,7 +82,7 @@ export class TerminaleClasse implements IPrintabile {
         } else {
             console.log('Richiamo la rotta');
 
-            const risposta = await this.listaMetodi[scelta.scelta - 1].ChiamaLaRotta();
+            const risposta = await this.listaMetodi[scelta.scelta - 1].ChiamaLaRotta(this.headerPath + this.port);
             if (risposta == undefined) {
                 console.log("Risposta undefined!");
             } else {
@@ -98,9 +99,11 @@ export class TerminaleClasse implements IPrintabile {
             "listaMetodi.length:" + this.listaMetodi.length + ":;:";
         //console.log(tmp);
     }
-    SettaPathRoot_e_Global(item: string, pathGlobal: string, patheader: string) {
-        this.pathRoot = item;
+    SettaPathRoot_e_Global(item: string, pathGlobal: string, patheader: string, port: number) {
+        this.pathGlobal = item;
         this.pathGlobal = pathGlobal;
+        this.headerPath = patheader;
+        this.port = port;
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
             if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
@@ -113,9 +116,8 @@ export class TerminaleClasse implements IPrintabile {
 
         const swaggerJson = `"paths": {    
         `;
-        let tmp3 = {};
         let ritorno = '';
-        let primo: boolean = false;
+        let primo = false;
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
             if (element.tipoInterazione != 'middleware') {
@@ -144,7 +146,7 @@ export class TerminaleClasse implements IPrintabile {
         let terminale = this.listaMetodi.CercaConNomeRev(nome)
 
         if (terminale == undefined)/* se non c'è */ {
-            terminale = new TerminaleMetodo(nome, "", this.nome); // creo la funzione
+            terminale = new TerminaleMetodo(nome, nome, this.nome); // creo la funzione
             this.listaMetodi.AggiungiElemento(terminale);
         }
         return terminale;

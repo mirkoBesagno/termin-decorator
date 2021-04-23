@@ -328,7 +328,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
     }
     async MetSpalla(body: string, query: string, header: string, headerpath?: string): Promise<string> {
         try {
-            if (headerpath == undefined) headerpath = "http://localhost:3000"
+            if (headerpath == undefined) headerpath = "http://localhost:3000";
             console.log('chiamata per : ' + headerpath + this.pathGlobal + ' | Verbo: ' + this.tipo);
             let parametri = await this.listaParametri.SoddisfaParamtri();
 
