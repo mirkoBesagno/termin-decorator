@@ -52,7 +52,7 @@ export class Main {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         this.percorsi.patheader = patheader;
         this.percorsi.porta = porta;
-        const pathGlobal = '/' + this.path;
+        const pathGlobal = this.percorsi.patheader + this.percorsi.porta+'/' + this.path;
         this.percorsi.pathGlobal = pathGlobal;
         for (let index = 0; index < tmp.length; index++) {
             const element = tmp[index];

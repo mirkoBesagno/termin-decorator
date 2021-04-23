@@ -97,6 +97,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         this.percorsi.patheader= percorsi.patheader ;
         this.percorsi.porta= percorsi.porta;
         const pathGlobal = percorsi.pathGlobal + '/' + this.path;
+        this.percorsi.pathGlobal= pathGlobal;
         const middlew: any[] = [];
         this.middleware.forEach(element => {
 

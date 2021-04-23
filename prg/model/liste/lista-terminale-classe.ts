@@ -3,7 +3,7 @@ import chiedi from "prompts";
 
 export class ListaTerminaleClasse extends Array<TerminaleClasse> {
     static nomeMetadataKeyTarget = "ListaTerminaleClasse";
-    
+
     constructor() {
         super();
     }
@@ -21,7 +21,7 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
             const element = this[index];
             const tmp = index + 1;
             ritorno.push(element.percorsi.pathGlobal);
-            console.log(tmp + ': ' + element.percorsi.pathGlobal);
+            console.log(tmp + ': ' + element.nome + ' | ' + element.percorsi.pathGlobal);
         }
         return ritorno;
     }
