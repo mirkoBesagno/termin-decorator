@@ -73,7 +73,7 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
                 this.nome = nomeFuturo;
                 const tmp : IReturn={
                     body:{
-                        "nome": this.nome
+                        "nome": nomeFuturo+' sei un POST'
                     },
                     stato:200};
                 return tmp;
@@ -83,7 +83,7 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
             GetNome(){
                 const tmp : IReturn={
                     body:{
-                        "nome": this.nome
+                        "nome": this.nome +' sei un GET'
                     },
                     stato:200};
                 return tmp;
@@ -185,11 +185,16 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
         const main = new Main("app");
         console.log('Inizializzazione inizio .....');
         
-        chiedi({
-            message: 'Quale porta usare?(default=3000) : ',
-            type: 'number', name: 'scelta'
-        }).then((scelta2)=>{
-        main.Inizializza("http://localhost:", scelta2.scelta, true);
+        chiedi([{
+            message: 'Quale porta usare?(default=3030) : ',
+            type: 'number', name: 'porta'
+        },{
+            message: 'Quale indirizzo esporre?(http://localhost) : ',
+            type: 'text', name: 'header'
+        }]).then((scelta2)=>{
+            if(scelta2.porta == undefined || scelta2.porta == 0)scelta2.porta = 3030; 
+            if(scelta2.header == undefined || scelta2.header == 0) scelta2.header='http://localhost';
+        main.Inizializza(scelta2.header + ":", scelta2.porta, true);
         console.log('..... Inizializzazione fine.');
         console.log('Menu');
         console.log('0: express');

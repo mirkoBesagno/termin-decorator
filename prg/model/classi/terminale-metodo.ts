@@ -12,7 +12,7 @@ import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import cors from 'cors';
 import { IRaccoltaPercorsi } from "./terminale-main";
 import { textChangeRangeIsUnchanged } from "typescript";
-
+import axios from "axios";
 export type TypeInterazone = "rotta" | "middleware" | 'ambo';
 
 export interface IReturn {
@@ -109,7 +109,61 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         });
         if (this.metodoAvviabile != undefined) {
             var corsOptions = {
+                methods: this.tipo
             }
+            
+            if (this.helmet == undefined) {
+                this.helmet = helmet();
+            }
+            if (this.cors == undefined) {
+                this.cors == cors(corsOptions);
+            }
+            rotte.all("/" + this.percorsi.pathGlobal /* this.path */,
+            cors(this.cors),
+            /*helmet(this.helmet),
+            middlew, */
+            async (req: Request, res: Response) => {
+                console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                InizializzaLogbaseIn(req, this.nome.toString());
+                const tmp = await this.Esegui(req);
+                res.status(tmp.stato).send(tmp.body);
+                InizializzaLogbaseOut(res, this.nome.toString());
+                return res;
+            });
+        }
+        return rotte;
+    }
+    ScartoConfiguraRotta(rotte: Router, percorsi: IRaccoltaPercorsi): Router {
+        let corsOptions:any={}
+        this.percorsi.patheader = percorsi.patheader;
+        this.percorsi.porta = percorsi.porta;
+        const pathGlobal = percorsi.pathGlobal + '/' + this.path;
+        this.percorsi.pathGlobal = pathGlobal;
+        const middlew: any[] = [];
+        this.middleware.forEach(element => {
+
+            if (element instanceof TerminaleMetodo) {
+                const listaMidd = GetListaMiddlewareMetaData();
+                const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
+                middlew.push(midd.ConvertiInMiddleare());
+            }
+        });
+        if (this.metodoAvviabile != undefined) {
+            
+            rotte.get("/" + this.percorsi.pathGlobal /* this.path */,
+            /* cors(this.cors),
+            helmet(this.helmet),
+            middlew, */
+            async (req: Request, res: Response) => {
+                console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                InizializzaLogbaseIn(req, this.nome.toString());
+                const tmp = await this.Esegui(req);
+                res.status(tmp.stato).send(tmp.body);
+                InizializzaLogbaseOut(res, this.nome.toString());
+                return res;
+            });
+
+
             switch (this.tipo) {
                 case 'get':
                     (<IReturn>this.metodoAvviabile).body;
@@ -128,7 +182,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         preflightContinue: false,
                       }; */
 
-                    corsOptions = {
+                     corsOptions = {
                         methods: "GET"
                     }
                     if (this.helmet == undefined) {
@@ -136,11 +190,11 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     }
                     if (this.cors == undefined) {
                         this.cors == cors(corsOptions);
-                    }
-                    rotte.get("/" + this.path.toString(),
-                        cors(this.cors),
+                    } 
+                    rotte.get("/" + this.percorsi.pathGlobal /* this.path */,
+                        /* cors(this.cors),
                         helmet(this.helmet),
-                        middlew,
+                        middlew, */
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                             InizializzaLogbaseIn(req, this.nome.toString());
@@ -287,6 +341,238 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         }
         return rotte;
     }
+    ConfiguraRottaApplicazione(app: any, percorsi: IRaccoltaPercorsi) {
+        this.percorsi.patheader = percorsi.patheader;
+        this.percorsi.porta = percorsi.porta;
+        const pathGlobal = percorsi.pathGlobal + '/' + this.path;
+        this.percorsi.pathGlobal = pathGlobal;
+        const middlew: any[] = [];
+        this.middleware.forEach(element => {
+
+            if (element instanceof TerminaleMetodo) {
+                const listaMidd = GetListaMiddlewareMetaData();
+                const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
+                middlew.push(midd.ConvertiInMiddleare());
+            }
+        });
+        if (this.metodoAvviabile != undefined) {
+            var corsOptions = {
+                methods: this.tipo
+            }
+            
+            if (this.helmet == undefined) {
+                this.helmet = helmet();
+            }
+            if (this.cors == undefined) {
+                this.cors == cors(corsOptions);
+            }
+            app.all("/" + this.percorsi.pathGlobal /* this.path */,
+            cors(this.cors),
+            /*helmet(this.helmet),
+            middlew, */
+            async (req: Request, res: Response) => {
+                console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                InizializzaLogbaseIn(req, this.nome.toString());
+                const tmp = await this.Esegui(req);
+                res.status(tmp.stato).send(tmp.body);
+                InizializzaLogbaseOut(res, this.nome.toString());
+                return res;
+            });
+        }
+    }
+    ScartoConfiguraRottaApplicazione(app: any, percorsi: IRaccoltaPercorsi) {
+        this.percorsi.patheader = percorsi.patheader;
+        this.percorsi.porta = percorsi.porta;
+        const pathGlobal = percorsi.pathGlobal + '/' + this.path;
+        this.percorsi.pathGlobal = pathGlobal;
+        const middlew: any[] = [];
+        this.middleware.forEach(element => {
+
+            if (element instanceof TerminaleMetodo) {
+                const listaMidd = GetListaMiddlewareMetaData();
+                const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
+                middlew.push(midd.ConvertiInMiddleare());
+            }
+        });
+        if (this.metodoAvviabile != undefined) {
+            var corsOptions = {
+            }
+            switch (this.tipo) {
+                case 'get':
+                    (<IReturn>this.metodoAvviabile).body;
+
+                    /* const options: cors.CorsOptions = {
+                        allowedHeaders: [
+                          'Origin',
+                          'X-Requested-With',
+                          'Content-Type',
+                          'Accept',
+                          'X-Access-Token',
+                        ],
+                        credentials: true,
+                        methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
+                        origin: API_URL,
+                        preflightContinue: false,
+                      }; */
+
+                    /* corsOptions = {
+                        methods: "GET"
+                    }
+                    if (this.helmet == undefined) {
+                        this.helmet = helmet();
+                    }
+                    if (this.cors == undefined) {
+                        this.cors == cors(corsOptions);
+                    } */
+                    app.get(this.percorsi.pathGlobal /* this.path */,
+                        /* cors(this.cors),
+                        helmet(this.helmet),
+                        middlew, */
+                        async (req: Request, res: Response) => {
+                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                            InizializzaLogbaseIn(req, this.nome.toString());
+                            const tmp = await this.Esegui(req);
+                            res.status(tmp.stato).send(tmp.body);
+                            InizializzaLogbaseOut(res, this.nome.toString());
+                            return res;
+                        });
+                    break;
+                case 'post':
+                    corsOptions = {
+                        methods: "POST"
+                    };
+                    if (this.helmet == undefined) {
+                        this.helmet = helmet();
+                    }
+                    if (this.cors == undefined) {
+                        this.cors == cors(corsOptions);
+                    }
+                    (<IReturn>this.metodoAvviabile).body;
+                    app.post("/" + this.path.toString(),
+                        cors(this.cors),
+                        helmet(this.helmet),
+                        middlew,
+                        async (req: Request, res: Response) => {
+                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
+                            const tmp = this.metodoAvviabile.apply(this, parametri); */
+                            InizializzaLogbaseIn(req, this.nome.toString());
+                            const tmp = await this.Esegui(req);
+                            res.status(tmp.stato).send(tmp.body);
+                            InizializzaLogbaseOut(res, this.nome.toString());
+                            return res;
+                        });
+                    break;
+                case 'delete':
+                    (<IReturn>this.metodoAvviabile).body;
+                    corsOptions = {
+                        methods: "DELETE"
+                    }
+                    if (this.helmet == undefined) {
+                        this.helmet = helmet();
+                    }
+                    if (this.cors == undefined) {
+                        this.cors == cors(corsOptions);
+                    }
+                    app.delete("/" + this.path.toString(),
+                        cors(this.cors),
+                        helmet(this.helmet),
+                        middlew,
+                        async (req: Request, res: Response) => {
+                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
+                            const tmp = this.metodoAvviabile.apply(this, parametri); */
+                            InizializzaLogbaseIn(req, this.nome.toString());
+                            const tmp = await this.Esegui(req);
+                            res.status(tmp.stato).send(tmp.body);
+                            InizializzaLogbaseOut(res, this.nome.toString());
+                            return res;
+                        });
+                    break;
+                case 'patch':
+                    corsOptions = {
+                        methods: "PATCH"
+                    };
+                    if (this.helmet == undefined) {
+                        this.helmet = helmet();
+                    }
+                    if (this.cors == undefined) {
+                        this.cors == cors(corsOptions);
+                    }
+                    (<IReturn>this.metodoAvviabile).body;
+                    app.patch("/" + this.path.toString(),
+                        cors(this.cors),
+                        helmet(this.helmet),
+                        middlew,
+                        async (req: Request, res: Response) => {
+                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
+                            const tmp = this.metodoAvviabile.apply(this, parametri); */
+                            InizializzaLogbaseIn(req, this.nome.toString());
+                            const tmp = await this.Esegui(req);
+                            res.status(tmp.stato).send(tmp.body);
+                            InizializzaLogbaseOut(res, this.nome.toString());
+                            return res;
+                        });
+                    break;
+                case 'purge':
+                    corsOptions = {
+                        methods: "PURGE"
+                    };
+                    if (this.helmet == undefined) {
+                        this.helmet = helmet();
+                    }
+                    if (this.cors == undefined) {
+                        this.cors == cors(corsOptions);
+                    }
+                    (<IReturn>this.metodoAvviabile).body;
+                    app.purge("/" + this.path.toString(),
+                        cors(this.cors),
+                        helmet(this.helmet),
+                        middlew,
+                        async (req: Request, res: Response) => {
+                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
+                            const tmp = this.metodoAvviabile.apply(this, parametri); */
+                            InizializzaLogbaseIn(req, this.nome.toString());
+                            const tmp = await this.Esegui(req);
+                            res.status(tmp.stato).send(tmp.body);
+                            InizializzaLogbaseOut(res, this.nome.toString());
+                            return res;
+                        });
+                    break;
+                case 'put':
+                    corsOptions = {
+                        methods: "PUT"
+                    };
+                    if (this.helmet == undefined) {
+                        this.helmet = helmet();
+                    }
+                    if (this.cors == undefined) {
+                        this.cors == cors(corsOptions);
+                    }
+                    (<IReturn>this.metodoAvviabile).body;
+                    app.put("/" + this.path.toString(),
+                        cors(this.cors),
+                        helmet(this.helmet),
+                        middlew,
+                        async (req: Request, res: Response) => {
+                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
+                            const tmp = this.metodoAvviabile.apply(this, parametri); */
+                            InizializzaLogbaseIn(req, this.nome.toString());
+                            const tmp = await this.Esegui(req);
+                            res.status(tmp.stato).send(tmp.body);
+                            InizializzaLogbaseOut(res, this.nome.toString());
+                            return res;
+                        });
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
     async ChiamaLaRotta(headerpath?: string) {
         try {
 
@@ -320,23 +606,15 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         } else
                             header = rit.header;
                     }
-                    if (index + 1 >= this.middleware.length) {
-                        const tmp = await this.MetSpalla(body, query, header, headerpath);
-                        return tmp;
-                    }
                 }
 
             }
 
-        } catch (error) {
-            throw new Error("Errore :" + error);
+            //const tmp = await this.MetSpalla(body, query, header, headerpath);
+            //return tmp;
 
-        }
-    }
-    async MetSpalla(body: string, query: string, header: string, headerpath?: string): Promise<string> {
-        try {
             if (headerpath == undefined) headerpath = "http://localhost:3000";
-            console.log('chiamata per : '+ this.percorsi.pathGlobal + ' | Verbo: ' + this.tipo);
+            console.log('chiamata per : ' + this.percorsi.pathGlobal + ' | Verbo: ' + this.tipo);
             let parametri = await this.listaParametri.SoddisfaParamtri();
 
             if (parametri.body != "") {
@@ -360,12 +638,74 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             }
 
             let ritorno;
+            let gg = this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal
+            /*  */
+            ritorno = await axios({
+                method: this.tipo,
+                url: gg,
+                headers: header,
+                params: query,
+                data: body
+            });
+            if (ritorno) {
+                return ritorno.data;
+            } else {
+                return '';
+            };
+        } catch (error) {
+            throw new Error("Errore :" + error);
+        }
+    }
+    async MetSpalla(body: string, query: string, header: string, headerpath?: string): Promise<string> {
+        try {
+            if (headerpath == undefined) headerpath = "http://localhost:3000";
+            console.log('chiamata per : ' + this.percorsi.pathGlobal + ' | Verbo: ' + this.tipo);
+            let parametri = await this.listaParametri.SoddisfaParamtri();
+
+            if (parametri.body != "") {
+                if (body != "") {
+                    body = body + ", " + parametri.body;
+                } else {
+                    body = parametri.body;
+                }
+            }
+            if (parametri.query != "") {
+                if (query != "") {
+                    query = query + ", " + parametri.query;
+                } else
+                    query = parametri.query;
+            }
+            if (parametri.header != "") {
+                if (header != "") {
+                    header = header + ", " + parametri.header;
+                } else
+                    header = parametri.header;
+            }
+
+            let ritorno;
+            let gg = this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal
+            /*  */
+            ritorno = await axios({
+                method: this.tipo,
+                url: gg,
+                headers: header,
+                params: query,
+                data: body
+            });
+            if (ritorno) {
+                return ritorno.data;
+            } else {
+                return '';
+            };
+            /*  */
             if (this.tipo) {
 
                 switch (this.tipo) {
                     case 'get':
                         try {
-                            ritorno = await superagent
+                            // Send a POST request
+
+                            /* ritorno = await superagent
                                 .get(headerpath + this.percorsi.pathGlobal)
                                 .query(JSON.parse('{ ' + query + ' }'))
                                 .send(JSON.parse('{ ' + body + ' }'))
@@ -377,7 +717,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                                 return ritorno.body;
                             } else {
                                 return '';
-                            }
+                            } */
                         } catch (error) {
                             console.log(error);
                             throw new Error("Errore:" + error);

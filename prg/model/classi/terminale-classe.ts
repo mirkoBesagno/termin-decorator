@@ -114,10 +114,11 @@ export class TerminaleClasse implements IPrintabile {
             "listaMetodi.length:" + this.listaMetodi.length + ":;:";
         //console.log(tmp);
     }
-    SettaPathRoot_e_Global(item: string, percorsi: IRaccoltaPercorsi) {
+    SettaPathRoot_e_Global(item: string, percorsi: IRaccoltaPercorsi, app:any) {
 
         if (percorsi.patheader == undefined) this.percorsi.patheader = "http://localhost:";
         else this.percorsi.patheader = percorsi.patheader;
+
         if (percorsi.porta == undefined) this.percorsi.porta = 3000;
         else this.percorsi.porta = percorsi.porta;
 
@@ -126,7 +127,8 @@ export class TerminaleClasse implements IPrintabile {
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
             if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
-                element.ConfiguraRotta(this.rotte, this.percorsi);
+                //element.ConfiguraRotta(this.rotte, this.percorsi);
+                element.ConfiguraRottaApplicazione(app, this.percorsi);
             }
             //element.listaRotteGeneraChiavi=this.listaMetodiGeneraKey;
         }

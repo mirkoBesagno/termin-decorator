@@ -1,7 +1,6 @@
 import { InizializzaLogbaseIn, InizializzaLogbaseOut, IPrintabile, targetTerminale } from "../tools";
 import chiedi from "prompts";
 
-
 import superagent from "superagent";
 import express from "express";
 import { Request, Response } from "express";
@@ -53,27 +52,35 @@ export class Main {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         this.percorsi.patheader = patheader;
         this.percorsi.porta = porta;
-        const pathGlobal = this.percorsi.patheader + this.percorsi.porta + '/' + this.path;
+        const pathGlobal = /* this.percorsi.patheader + this.percorsi.porta + */ '/' + this.path;
         this.percorsi.pathGlobal = pathGlobal;
+
+        this.serverExpressDecorato.use(bodyParser.urlencoded({ 'extended': true })); // parse application/x-www-form-urlencoded
+        this.serverExpressDecorato.use(bodyParser.json()); // parse application/json
+        this.serverExpressDecorato.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
+
+        this.serverExpressDecorato.route
         for (let index = 0; index < tmp.length; index++) {
             const element = tmp[index];
-            element.SettaPathRoot_e_Global(this.path, this.percorsi);
-            this.serverExpressDecorato.use(bodyParser.json({
+            /* this.serverExpressDecorato.use(bodyParser.json({
                 limit: '50mb',
                 verify(req: any, res, buf, encoding) {
                     req.rawBody = buf;
                 }
-            }));
-            this.serverExpressDecorato.use(pathGlobal, element.rotte);
-            if (rottaBase)
-                this.serverExpressDecorato.all('/*', (res: Response, req: Request) => {
-                    console.log('Risposta a chiamata : ' + '/*');
-                    InizializzaLogbaseIn(req, 'IN_GENERICA');
-                    res.status(555).send('No found');
-                    InizializzaLogbaseOut(res, 'OUT_GENERICA');
-                    return res;
-                });
+            })); */
+            element.SettaPathRoot_e_Global(this.path, this.percorsi, this.serverExpressDecorato);
+
+            //this.serverExpressDecorato.use(element.GetPath, element.rotte);
         }
+        /* if (rottaBase)
+            this.serverExpressDecorato.all('/*', (req: Request, res: Response) => {
+                console.log('Risposta a chiamata : ' + '/*');
+                InizializzaLogbaseIn(req, 'IN_GENERICA');
+                res.status(555).send('No found');
+                InizializzaLogbaseOut(res, 'OUT_GENERICA');
+                return res;
+            }); */
+
         SalvaListaClasseMetaData(tmp);
     }
     GetJSONSwagger() {
@@ -222,6 +229,11 @@ export class Main {
         }
     };
     StartExpress() {
-        this.serverExpressDecorato.listen(this.percorsi.porta);
+
+        var httpServer = http.createServer(this.serverExpressDecorato);
+        httpServer.listen(this.percorsi.porta);
+        //this.serverExpressDecorato.listen(this.percorsi.porta);
     }
 }
+
+import * as http from 'http';
