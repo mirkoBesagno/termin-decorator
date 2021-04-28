@@ -22,15 +22,29 @@ class TerminaleParametro {
         return "tipo:" + this.tipo.toString() + ";" + "nome:" + this.nome;
     }
     SettaSwagger() {
+        /* const tmp = {
+            name: this.nome,
+            in: this.posizione,
+            required: false,
+            type: this.tipo,
+            description: this.descrizione,
+            summary: this.sommario
+        }; */
         const ritorno = `{
-                        "name": "${this.nome}",
-                        "in": "${this.posizione}",
-                        "required": false,
-                        "type": "${this.tipo}",
-                        "description": "${this.descrizione}",
-                        "summary":"${this.sommario}"
-                    }
-        `;
+                "name": "${this.nome}",
+                "in": "${this.posizione}",
+                "required": false,
+                "type": "${this.tipo}",
+                "description": "${this.descrizione}",
+                "summary":"${this.sommario}"
+            }`;
+        try {
+            JSON.parse(ritorno);
+        }
+        catch (error) {
+            console.log(error);
+        }
+        return ritorno;
     }
 }
 exports.TerminaleParametro = TerminaleParametro;

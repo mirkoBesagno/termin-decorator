@@ -20,7 +20,7 @@ const lista_terminale_classe_1 = require("../liste/lista-terminale-classe");
 const lista_terminale_metodo_1 = require("../liste/lista-terminale-metodo");
 const terminale_metodo_1 = require("./terminale-metodo");
 class TerminaleClasse {
-    constructor(nome, path, headerPath) {
+    constructor(nome, path, headerPath, port) {
         this.id = Math.random().toString();
         this.rotte = express_1.Router();
         this.listaMetodi = new lista_terminale_metodo_1.ListaTerminaleMetodo(this.rotte);
@@ -29,14 +29,25 @@ class TerminaleClasse {
             this.path = path;
         else
             this.path = nome;
-        this.pathRoot = "";
-        this.pathGlobal = '';
-        if (headerPath == undefined) {
-            this.headerPath = "http://localhost:3000";
-        }
-        else {
-            this.headerPath = headerPath;
-        }
+        this.percorsi = { pathGlobal: '', patheader: '', porta: 0 };
+        if (headerPath == undefined)
+            this.percorsi.patheader = "http://localhost:";
+        else
+            this.percorsi.patheader = headerPath;
+        if (port == undefined)
+            this.percorsi.porta = 3000;
+        else
+            this.percorsi.porta = port;
+        const pathGlobal = '/' + this.path;
+        this.percorsi.pathGlobal = pathGlobal;
+    }
+    get GetPath() {
+        return this.path;
+    }
+    set SetPath(v) {
+        this.path = v;
+        const pathGlobal = '/' + this.path;
+        this.percorsi.pathGlobal = pathGlobal;
     }
     /* async PrintMenu() {
             console.log("Scegli un metodo:");
@@ -57,10 +68,10 @@ class TerminaleClasse {
         return __awaiter(this, void 0, void 0, function* () {
             const tab = '\t\t';
             console.log(tab + 'TerminaleClasse' + '->' + 'PrintMenu');
-            console.log(tab + this.nome + ' | ' + this.id + ' | ' + '/' + this.pathRoot + '/' + this.path + ' ;');
+            console.log(tab + this.nome + ' | ' + this.id + ' | ' + '/' + this.percorsi.pathGlobal + '/' + this.path + ' ;');
             for (let index = 0; index < this.listaMetodi.length; index++) {
                 const element = this.listaMetodi[index];
-                element.PrintCredenziali(this.pathRoot + '/' + this.path);
+                element.PrintCredenziali(this.percorsi.pathGlobal + '/' + this.path);
             }
             const scelta = yield prompts_1.default({ message: 'Premi invio per continuare', type: 'number', name: 'scelta' });
         });
@@ -81,15 +92,20 @@ class TerminaleClasse {
                 console.log("Saluti dalla classe : " + this.nome);
             }
             else {
-                console.log('Richiamo la rotta');
-                const risposta = yield this.listaMetodi[scelta.scelta - 1].ChiamaLaRotta();
-                if (risposta == undefined) {
-                    console.log("Risposta undefined!");
+                try {
+                    console.log('Richiamo la rotta');
+                    const risposta = yield this.listaMetodi[scelta.scelta - 1].ChiamaLaRotta(this.percorsi.patheader + this.percorsi.porta);
+                    if (risposta == undefined) {
+                        console.log("Risposta undefined!");
+                    }
+                    else {
+                        console.log(risposta);
+                    }
+                    yield this.PrintMenuClasse();
                 }
-                else {
-                    console.log(risposta);
+                catch (error) {
+                    yield this.PrintMenuClasse();
                 }
-                yield this.PrintMenuClasse();
             }
         });
     }
@@ -99,50 +115,60 @@ class TerminaleClasse {
             "listaMetodi.length:" + this.listaMetodi.length + ":;:";
         //console.log(tmp);
     }
-    SettaPathRoot_e_Global(item, pathGlobal, patheader) {
-        this.pathRoot = item;
-        this.pathGlobal = pathGlobal;
+    SettaPathRoot_e_Global(item, percorsi, app) {
+        if (percorsi.patheader == undefined)
+            this.percorsi.patheader = "http://localhost:";
+        else
+            this.percorsi.patheader = percorsi.patheader;
+        if (percorsi.porta == undefined)
+            this.percorsi.porta = 3000;
+        else
+            this.percorsi.porta = percorsi.porta;
+        const pathGlobal = percorsi.pathGlobal + '/' + this.path;
+        this.percorsi.pathGlobal = pathGlobal;
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
             if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
-                element.ConfiguraRotta(this.rotte, this.pathGlobal);
+                //element.ConfiguraRotta(this.rotte, this.percorsi);
+                element.ConfiguraRottaApplicazione(app, this.percorsi);
             }
             //element.listaRotteGeneraChiavi=this.listaMetodiGeneraKey;
         }
     }
     SettaSwagger() {
-        const swaggerJson = `
-        {
-            "tags": [
-                {
-                    "name": "admin",
-                    "description": "Racchiude tutti i percorsi che l'admin può visitare",
-                    "externalDocs": {
-                        "description": "",
-                        "url": "https://staisicuro.medicaltech.it/api/admin/"
-                    }
-                },
-            ],
-        }        
+        const swaggerJson = `"paths": {    
         `;
-        let ritorno = '"paths": {';
+        let ritorno = '';
+        let primo = false;
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
-            element.SettaSwagger();
-            if (index == 0 && index + 1 != this.listaMetodi.length) {
-                ritorno = ritorno + ', ';
-            }
-            if (index + 1 == this.listaMetodi.length) {
-                ritorno = ritorno + ' }';
+            if (element.tipoInterazione != 'middleware') {
+                const tt = element.SettaSwagger('rotta');
+                if (tt) {
+                    if (primo == false && tt != undefined) {
+                        primo = true;
+                        ritorno = tt + '';
+                    }
+                    else if (tt != undefined) {
+                        ritorno = ritorno + ',' + tt;
+                    }
+                }
             }
         }
-        ritorno = ritorno + '}';
-        return ritorno;
+        const tmp = swaggerJson + ritorno + '}';
+        try {
+            const hhh = tmp.toString();
+            JSON.parse(tmp);
+        }
+        catch (error) {
+            console.log(error);
+        }
+        return tmp;
     }
     CercaMetodoSeNoAggiungiMetodo(nome) {
-        let terminale = this.listaMetodi.CercaConNomeRev(nome);
+        let terminale = this.listaMetodi.CercaConNome(nome);
         if (terminale == undefined) /* se non c'è */ {
-            terminale = new terminale_metodo_1.TerminaleMetodo(nome, "", this.nome); // creo la funzione
+            terminale = new terminale_metodo_1.TerminaleMetodo(nome, nome, this.nome); // creo la funzione
             this.listaMetodi.AggiungiElemento(terminale);
         }
         return terminale;
@@ -158,9 +184,8 @@ function decoratoreClasse(percorso) {
     return (ctr) => {
         let tmp = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale);
         const classe = CheckClasseMetaData(ctr.name);
-        classe.path = percorso;
-        Reflect.defineMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tmp, tools_1.targetTerminale); //e lo vado a salvare nel meta data
-        Reflect.defineMetadata(TerminaleClasse.nomeMetadataKeyTarget, classe, tools_1.targetTerminale); //e lo vado a salvare nel meta data
+        classe.SetPath = percorso;
+        SalvaListaClasseMetaData(tmp);
     };
 }
 exports.mpClas = decoratoreClasse;
@@ -179,7 +204,7 @@ function decoratoreClasseeRev(percorso) {
     return (ctr) => {
         const list = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(ctr.name);
-        classe.path = percorso;
+        classe.SetPath = percorso;
         SalvaListaClasseMetaData(list);
     };
 }
@@ -197,6 +222,28 @@ function CheckClasseMetaData(nome) {
         Reflect.defineMetadata(TerminaleClasse.nomeMetadataKeyTarget, classe, tools_1.targetTerminale); //e lo vado a salvare nel meta data
     }
     return classe;
+    /* let classePath = listClasse.CercaConPath(path);
+    if (classe == undefined && classePath == undefined) {
+        classe = new TerminaleClasse(nome); //se il metodo non c'è lo creo
+        listClasse.AggiungiElemento(classe);
+        Reflect.defineMetadata(TerminaleClasse.nomeMetadataKeyTarget, classe, targetTerminale); //e lo vado a salvare nel meta data
+    }
+    else {
+        if (classePath != undefined && classe != undefined) {
+            for (let index = 0; index < classePath.listaMetodi.length; index++) {
+                const element = classePath.listaMetodi[index];
+                classe.listaMetodi.AggiungiElemento(element);
+            }
+            return classe;
+        }
+        else if(classePath != undefined && classe == undefined){
+            return classePath;
+        }
+        else if(){
+            
+        }
+        return classe;
+    } */
 }
 exports.CheckClasseMetaData = CheckClasseMetaData;
 function SalvaListaClasseMetaData(tmp) {

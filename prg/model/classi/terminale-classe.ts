@@ -27,9 +27,7 @@ export class TerminaleClasse implements IPrintabile {
         const pathGlobal = '/' + this.path;
         this.percorsi.pathGlobal = pathGlobal;
     }
-
-
-
+    
     percorsi: IRaccoltaPercorsi;
 
     constructor(nome: string, path?: string, headerPath?: string, port?: number) {

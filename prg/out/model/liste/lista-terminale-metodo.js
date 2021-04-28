@@ -8,16 +8,7 @@ class ListaTerminaleMetodo extends Array {
         super();
         this.rotte = rotte;
     }
-    CercaConNome(nome, classePath) {
-        for (let index = 0; index < this.length; index++) {
-            const element = this[index];
-            if (element.nome == nome && element.classePath == classePath)
-                return element;
-        }
-        return undefined;
-        //throw new Error("Errore mio !");
-    }
-    CercaConNomeRev(nome) {
+    CercaConNome(nome) {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
             if (element.nome == nome)
@@ -30,12 +21,12 @@ class ListaTerminaleMetodo extends Array {
             const element = this[index];
             if (element.nome == item.nome && element.classePath == item.classePath) {
                 this[index] = item;
-                this.rotte = item.ConfiguraRotta(this.rotte, '');
+                this.rotte = item.ConfiguraRotta(this.rotte, { porta: 0, pathGlobal: '', patheader: '' });
                 return item;
             }
         }
         this.push(item);
-        this.rotte = item.ConfiguraRotta(this.rotte, '');
+        this.rotte = item.ConfiguraRotta(this.rotte, { porta: 0, pathGlobal: '', patheader: '' });
         return item;
     }
 }

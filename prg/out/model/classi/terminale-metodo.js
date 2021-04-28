@@ -25,15 +25,17 @@ class TerminaleMetodo {
     constructor(nome, path, classePath) {
         this.classePath = '';
         this.middleware = [];
+        this.nomiClassiDiRiferimento = [];
         this.listaParametri = new lista_terminale_parametro_1.ListaTerminaleParametro();
         this.nome = nome;
         this.path = path;
         this.classePath = classePath;
         this.tipo = 'get';
-        this.pathGlobal = '';
         this.tipoInterazione = "rotta";
         this.descrizione = "";
         this.sommario = "";
+        this.nomiClassiDiRiferimento = [];
+        this.percorsi = { pathGlobal: '', patheader: '', porta: 0 };
         //this.listaRotteGeneraChiavi = [];
     }
     PrintMenu() {
@@ -57,7 +59,7 @@ class TerminaleMetodo {
             console.log(tab + this.nome + ' | ' + '/' + pathRoot + '/' + this.path + '  |  ' + parametri);
         else
             console.log(tab + this.nome + ' | ' + "/" + this.path + '  |  ' + parametri);
-        console.log(this.pathGlobal);
+        console.log(this.percorsi.pathGlobal);
     }
     PrintStamp() {
         let parametri = "";
@@ -65,12 +67,52 @@ class TerminaleMetodo {
             const element = this.listaParametri[index];
             parametri = parametri + element.PrintParametro();
         }
-        const tmp = this.nome + ' | ' + '/' + this.pathGlobal + '/' + this.path + '  |  ' + parametri;
+        const tmp = this.nome + ' | ' + this.percorsi.pathGlobal + '/' + this.path + '  |  ' + parametri;
         //console.log(tmp);
         return tmp;
     }
-    ConfiguraRotta(rotte, pathglobal) {
-        this.pathGlobal = pathglobal + '/' + this.path;
+    ConfiguraRotta(rotte, percorsi) {
+        this.percorsi.patheader = percorsi.patheader;
+        this.percorsi.porta = percorsi.porta;
+        const pathGlobal = percorsi.pathGlobal + '/' + this.path;
+        this.percorsi.pathGlobal = pathGlobal;
+        const middlew = [];
+        this.middleware.forEach(element => {
+            if (element instanceof TerminaleMetodo) {
+                const listaMidd = lista_terminale_metodo_1.GetListaMiddlewareMetaData();
+                const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
+                middlew.push(midd.ConvertiInMiddleare());
+            }
+        });
+        if (this.metodoAvviabile != undefined) {
+            var corsOptions = {
+                methods: this.tipo
+            };
+            if (this.helmet == undefined) {
+                this.helmet = helmet_1.default();
+            }
+            if (this.cors == undefined) {
+                this.cors == cors_1.default(corsOptions);
+            }
+            rotte.all("/" + this.percorsi.pathGlobal /* this.path */, cors_1.default(this.cors), 
+            /*helmet(this.helmet),
+            middlew, */
+            (req, res) => __awaiter(this, void 0, void 0, function* () {
+                console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                tools_1.InizializzaLogbaseIn(req, this.nome.toString());
+                const tmp = yield this.Esegui(req);
+                res.status(tmp.stato).send(tmp.body);
+                tools_1.InizializzaLogbaseOut(res, this.nome.toString());
+                return res;
+            }));
+        }
+        return rotte;
+    }
+    ConfiguraRottaApplicazione(app, percorsi) {
+        this.percorsi.patheader = percorsi.patheader;
+        this.percorsi.porta = percorsi.porta;
+        const pathGlobal = percorsi.pathGlobal + '/' + this.path;
+        this.percorsi.pathGlobal = pathGlobal;
         const middlew = [];
         this.middleware.forEach(element => {
             if (element instanceof TerminaleMetodo) {
@@ -81,6 +123,29 @@ class TerminaleMetodo {
         });
         if (this.metodoAvviabile != undefined) {
             var corsOptions = {};
+            /* var corsOptions = {
+                methods: this.tipo
+            }
+
+            if (this.helmet == undefined) {
+                this.helmet = helmet();
+            }
+            if (this.cors == undefined) {
+                this.cors = cors(corsOptions);
+            }
+            app.all("/" + this.percorsi.pathGlobal,
+                cors(this.cors),
+                //helmet(this.helmet),
+                //middlew,
+                async (req: Request, res: Response) => {
+                    console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                    InizializzaLogbaseIn(req, this.nome.toString());
+                    const tmp = await this.Esegui(req);
+                    res.status(tmp.stato).send(tmp.body);
+                    InizializzaLogbaseOut(res, this.nome.toString());
+                    return res;
+                }); */
+            /*  */
             switch (this.tipo) {
                 case 'get':
                     this.metodoAvviabile.body;
@@ -100,18 +165,18 @@ class TerminaleMetodo {
                     corsOptions = {
                         methods: "GET"
                     };
+                    if (this.cors == undefined) {
+                        this.cors = cors_1.default(corsOptions);
+                    }
                     if (this.helmet == undefined) {
                         this.helmet = helmet_1.default();
                     }
-                    if (this.cors == undefined) {
-                        this.cors == cors_1.default(corsOptions);
-                    }
-                    rotte.get("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        console.log('Risposta a chiamata : ' + this.pathGlobal);
-                        this.InizializzaLogbaseIn(req, this.nome.toString());
+                    app.get(this.percorsi.pathGlobal /* this.path */, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
+                        console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                        tools_1.InizializzaLogbaseIn(req, this.nome.toString());
                         const tmp = yield this.Esegui(req);
+                        tools_1.InizializzaLogbaseOut(res, this.nome.toString());
                         res.status(tmp.stato).send(tmp.body);
-                        this.InizializzaLogbaseOut(res, this.nome.toString());
                         return res;
                     }));
                     break;
@@ -123,17 +188,17 @@ class TerminaleMetodo {
                         this.helmet = helmet_1.default();
                     }
                     if (this.cors == undefined) {
-                        this.cors == cors_1.default(corsOptions);
+                        this.cors = cors_1.default(corsOptions);
                     }
                     this.metodoAvviabile.body;
-                    rotte.post("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        console.log('Risposta a chiamata : ' + this.pathGlobal);
+                    app.post(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
+                        console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
-                        this.InizializzaLogbaseIn(req, this.nome.toString());
+                        tools_1.InizializzaLogbaseIn(req, this.nome.toString());
                         const tmp = yield this.Esegui(req);
+                        tools_1.InizializzaLogbaseOut(res, this.nome.toString());
                         res.status(tmp.stato).send(tmp.body);
-                        this.InizializzaLogbaseOut(res, this.nome.toString());
                         return res;
                     }));
                     break;
@@ -146,16 +211,16 @@ class TerminaleMetodo {
                         this.helmet = helmet_1.default();
                     }
                     if (this.cors == undefined) {
-                        this.cors == cors_1.default(corsOptions);
+                        this.cors = cors_1.default(corsOptions);
                     }
-                    rotte.delete("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        console.log('Risposta a chiamata : ' + this.pathGlobal);
+                    app.delete(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
+                        console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
-                        this.InizializzaLogbaseIn(req, this.nome.toString());
+                        tools_1.InizializzaLogbaseIn(req, this.nome.toString());
                         const tmp = yield this.Esegui(req);
+                        tools_1.InizializzaLogbaseOut(res, this.nome.toString());
                         res.status(tmp.stato).send(tmp.body);
-                        this.InizializzaLogbaseOut(res, this.nome.toString());
                         return res;
                     }));
                     break;
@@ -167,17 +232,17 @@ class TerminaleMetodo {
                         this.helmet = helmet_1.default();
                     }
                     if (this.cors == undefined) {
-                        this.cors == cors_1.default(corsOptions);
+                        this.cors = cors_1.default(corsOptions);
                     }
                     this.metodoAvviabile.body;
-                    rotte.patch("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        console.log('Risposta a chiamata : ' + this.pathGlobal);
+                    app.patch(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
+                        console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
-                        this.InizializzaLogbaseIn(req, this.nome.toString());
+                        tools_1.InizializzaLogbaseIn(req, this.nome.toString());
                         const tmp = yield this.Esegui(req);
+                        tools_1.InizializzaLogbaseOut(res, this.nome.toString());
                         res.status(tmp.stato).send(tmp.body);
-                        this.InizializzaLogbaseOut(res, this.nome.toString());
                         return res;
                     }));
                     break;
@@ -189,17 +254,17 @@ class TerminaleMetodo {
                         this.helmet = helmet_1.default();
                     }
                     if (this.cors == undefined) {
-                        this.cors == cors_1.default(corsOptions);
+                        this.cors = cors_1.default(corsOptions);
                     }
                     this.metodoAvviabile.body;
-                    rotte.purge("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        console.log('Risposta a chiamata : ' + this.pathGlobal);
+                    app.purge(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
+                        console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                         /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
                         const tmp = this.metodoAvviabile.apply(this, parametri); */
-                        this.InizializzaLogbaseIn(req, this.nome.toString());
+                        tools_1.InizializzaLogbaseIn(req, this.nome.toString());
                         const tmp = yield this.Esegui(req);
+                        tools_1.InizializzaLogbaseOut(res, this.nome.toString());
                         res.status(tmp.stato).send(tmp.body);
-                        this.InizializzaLogbaseOut(res, this.nome.toString());
                         return res;
                     }));
                     break;
@@ -209,27 +274,25 @@ class TerminaleMetodo {
                     };
                     if (this.helmet == undefined) {
                         this.helmet = helmet_1.default();
+                        if (this.cors == undefined) {
+                            this.cors = cors_1.default(corsOptions);
+                        }
+                        this.metodoAvviabile.body;
+                        app.put(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
+                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
+                            const tmp = this.metodoAvviabile.apply(this, parametri); */
+                            tools_1.InizializzaLogbaseIn(req, this.nome.toString());
+                            const tmp = yield this.Esegui(req);
+                            tools_1.InizializzaLogbaseOut(res, this.nome.toString());
+                            res.status(tmp.stato).send(tmp.body);
+                            return res;
+                        }));
+                        break;
+                        /*  */
                     }
-                    if (this.cors == undefined) {
-                        this.cors == cors_1.default(corsOptions);
-                    }
-                    this.metodoAvviabile.body;
-                    rotte.put("/" + this.path.toString(), cors_1.default(this.cors), helmet_1.default(this.helmet), middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        console.log('Risposta a chiamata : ' + this.pathGlobal);
-                        /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                        const tmp = this.metodoAvviabile.apply(this, parametri); */
-                        this.InizializzaLogbaseIn(req, this.nome.toString());
-                        const tmp = yield this.Esegui(req);
-                        res.status(tmp.stato).send(tmp.body);
-                        this.InizializzaLogbaseOut(res, this.nome.toString());
-                        return res;
-                    }));
-                    break;
-                default:
-                    break;
             }
         }
-        return rotte;
     }
     ChiamaLaRotta(headerpath) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -265,24 +328,11 @@ class TerminaleMetodo {
                             else
                                 header = rit.header;
                         }
-                        if (index + 1 >= this.middleware.length) {
-                            const tmp = yield this.MetSpalla(body, query, header, headerpath);
-                            return tmp;
-                        }
                     }
                 }
-            }
-            catch (error) {
-                throw new Error("Errore :" + error);
-            }
-        });
-    }
-    MetSpalla(body, query, header, headerpath) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
                 if (headerpath == undefined)
                     headerpath = "http://localhost:3000";
-                console.log('chiamata per : ' + headerpath + this.pathGlobal + ' | Verbo: ' + this.tipo);
+                console.log('chiamata per : ' + this.percorsi.pathGlobal + ' | Verbo: ' + this.tipo);
                 let parametri = yield this.listaParametri.SoddisfaParamtri();
                 if (parametri.body != "") {
                     if (body != "") {
@@ -307,150 +357,106 @@ class TerminaleMetodo {
                         header = parametri.header;
                 }
                 let ritorno;
-                if (this.tipo) {
-                    switch (this.tipo) {
-                        case 'get':
-                            try {
-                                ritorno = yield superagent_1.default
-                                    .get(headerpath + this.pathGlobal)
-                                    .query(JSON.parse('{ ' + query + ' }'))
-                                    .send(JSON.parse('{ ' + body + ' }'))
-                                    .set(JSON.parse('{ ' + header + ' }'))
-                                    .set('accept', 'json');
-                                if (ritorno) {
-                                    return ritorno.body;
-                                }
-                                else {
-                                    return '';
-                                }
-                            }
-                            catch (error) {
-                                console.log(error);
-                                throw new Error("Errore:" + error);
-                            }
-                            break;
-                        case 'post':
-                            try {
-                                ritorno = yield superagent_1.default
-                                    .post(headerpath + this.pathGlobal)
-                                    .query(JSON.parse('{ ' + query + ' }'))
-                                    .send(JSON.parse('{ ' + body + ' }'))
-                                    .set(JSON.parse('{ ' + header + ' }'))
-                                    .set('accept', 'json');
-                                if (ritorno) {
-                                    return ritorno.body;
-                                }
-                                else {
-                                    return '';
-                                }
-                            }
-                            catch (error) {
-                                console.log(error);
-                                throw new Error("Errore:" + error);
-                            }
-                            break;
-                        case 'purge':
-                            try {
-                                ritorno = yield superagent_1.default
-                                    .purge(headerpath + this.pathGlobal)
-                                    .query(JSON.parse('{ ' + query + ' }'))
-                                    .send(JSON.parse('{ ' + body + ' }'))
-                                    .set(JSON.parse('{ ' + header + ' }'))
-                                    .set('accept', 'json');
-                                if (ritorno) {
-                                    return ritorno.body;
-                                }
-                                else {
-                                    return '';
-                                }
-                            }
-                            catch (error) {
-                                console.log(error);
-                                throw new Error("Errore:" + error);
-                            }
-                            break;
-                        case 'patch':
-                            try {
-                                ritorno = yield superagent_1.default
-                                    .patch(headerpath + this.pathGlobal)
-                                    .query(JSON.parse('{ ' + query + ' }'))
-                                    .send(JSON.parse('{ ' + body + ' }'))
-                                    .set(JSON.parse('{ ' + header + ' }'))
-                                    .set('accept', 'json');
-                                if (ritorno) {
-                                    return ritorno.body;
-                                }
-                                else {
-                                    return '';
-                                }
-                            }
-                            catch (error) {
-                                console.log(error);
-                                throw new Error("Errore:" + error);
-                            }
-                            break;
-                        case 'delete':
-                            try {
-                                ritorno = yield superagent_1.default
-                                    .delete(headerpath + this.pathGlobal)
-                                    .query(JSON.parse('{ ' + query + ' }'))
-                                    .send(JSON.parse('{ ' + body + ' }'))
-                                    .set(JSON.parse('{ ' + header + ' }'))
-                                    .set('accept', 'json');
-                                if (ritorno) {
-                                    return ritorno.body;
-                                }
-                                else {
-                                    return '';
-                                }
-                            }
-                            catch (error) {
-                                console.log(error);
-                                throw new Error("Errore:" + error);
-                            }
-                            break;
-                        default:
-                            return '';
-                            break;
-                    }
+                let gg = this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal;
+                /*  */
+                /* ritorno = await axios({
+                    method: this.tipo,
+                    url: gg,
+                    headers: header,
+                    params: query,
+                    data: '{' + body + '}'
+                }); */
+                /*  */
+                switch (this.tipo) {
+                    case 'get':
+                        try {
+                            // Send a POST request
+                            ritorno = yield superagent_1.default
+                                .get(this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal)
+                                .query(JSON.parse('{ ' + query + ' }'))
+                                .send(JSON.parse('{ ' + body + ' }'))
+                                .set(JSON.parse('{ ' + header + ' }'))
+                                .set('accept', 'json');
+                        }
+                        catch (error) {
+                            console.log(error);
+                            throw new Error("Errore:" + error);
+                        }
+                        break;
+                    case 'post':
+                        try {
+                            ritorno = yield superagent_1.default
+                                .post(this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal)
+                                .query(JSON.parse('{ ' + query + ' }'))
+                                .send(JSON.parse('{ ' + body + ' }'))
+                                .set(JSON.parse('{ ' + header + ' }'))
+                                .set('accept', 'json');
+                        }
+                        catch (error) {
+                            console.log(error);
+                            throw new Error("Errore:" + error);
+                        }
+                        break;
+                    case 'purge':
+                        try {
+                            ritorno = yield superagent_1.default
+                                .purge(this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal)
+                                .query(JSON.parse('{ ' + query + ' }'))
+                                .send(JSON.parse('{ ' + body + ' }'))
+                                .set(JSON.parse('{ ' + header + ' }'))
+                                .set('accept', 'json');
+                        }
+                        catch (error) {
+                            console.log(error);
+                            throw new Error("Errore:" + error);
+                        }
+                        break;
+                    case 'patch':
+                        try {
+                            ritorno = yield superagent_1.default
+                                .patch(this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal)
+                                .query(JSON.parse('{ ' + query + ' }'))
+                                .send(JSON.parse('{ ' + body + ' }'))
+                                .set(JSON.parse('{ ' + header + ' }'))
+                                .set('accept', 'json');
+                        }
+                        catch (error) {
+                            console.log(error);
+                            throw new Error("Errore:" + error);
+                        }
+                        break;
+                    case 'delete':
+                        try {
+                            ritorno = yield superagent_1.default
+                                .delete(this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal)
+                                .query(JSON.parse('{ ' + query + ' }'))
+                                .send(JSON.parse('{ ' + body + ' }'))
+                                .set(JSON.parse('{ ' + header + ' }'))
+                                .set('accept', 'json');
+                        }
+                        catch (error) {
+                            console.log(error);
+                            throw new Error("Errore:" + error);
+                        }
+                        break;
+                    default:
+                        return '';
+                        break;
+                }
+                if (ritorno) {
+                    return ritorno.body;
                 }
                 else {
                     return '';
                 }
-                /* if (ritorno) {
-                    ritorno?.body;
-                    return ritorno.body;
-                } else {
-                    return undefined;
-                } */
+                ;
+                /*  */
             }
             catch (error) {
-                throw new Error("Errore:" + error);
+                throw new Error("Errore :" + error);
             }
         });
     }
-    /* async RecuperaChiave(): Promise<IResponse> {
-        try {
-            console.log("La rotta è protetta, sono state trovate delle funzioni che potrebbero sbloccarla, scegli:");
-            for (let index = 0; index < this.listaRotteGeneraChiavi.length; index++) {
-                const element = this.listaRotteGeneraChiavi[index];
-                console.log(index + ': ' + element.nome);
-            }
-            const tmp = await chiedi({
-                message: 'Scegli: ',
-                type: 'number',
-                name: 'scelta'
-            });
-            const ritorno = await this.listaRotteGeneraChiavi[tmp.scelta].ChiamaLaRotta();
-            let tmp2: IResponse = { body: '' };
-            if (ritorno) {
-                tmp2.body = ritorno.body;
-            }
-            return tmp2;
-        } catch (error) {
-            return { body: '' };
-        }
-    } */
     CercaParametroSeNoAggiungi(nome, parameterIndex, tipoParametro, posizione) {
         const tmp = new terminale_parametro_1.TerminaleParametro(nome, tipoParametro, posizione, parameterIndex);
         this.listaParametri.push(tmp); //.lista.push({ propertyKey: propertyKey, Metodo: target });
@@ -458,7 +464,7 @@ class TerminaleMetodo {
     }
     Esegui(req) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('Risposta a chiamata : ' + this.pathGlobal);
+            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
             const parametri = this.listaParametri.EstraiParametriDaRequest(req);
             let tmp;
             try {
@@ -474,63 +480,6 @@ class TerminaleMetodo {
             return tmp;
         });
     }
-    InizializzaLogbaseIn(req, nomeMetodo) {
-        console.log("Arrivato in : " + nomeMetodo + "\n"
-            + "Data : " + new Date(Date.now()) + "\n"
-            + "url : " + req.originalUrl + "\n"
-            + "query : " + JSON.stringify(req.query) + "\n"
-            + "body : " + JSON.stringify(req.body) + "\n"
-            + "header : " + JSON.stringify(req.headers) + "\n"
-            + "soket : " + "\n"
-            + "local : " + req.socket.localAddress + " : " + req.socket.localPort + "\n"
-            + "remote : " + req.socket.remoteAddress + " : " + req.socket.remotePort + "\n");
-        const body = req.body;
-        const data = new Date(Date.now());
-        const header = JSON.parse(JSON.stringify(req.headers));
-        const local = req.socket.localAddress + " : " + req.socket.localPort;
-        const remote = req.socket.remoteAddress + " : " + req.socket.remotePort;
-        const url = req.originalUrl;
-        const tmp = "Arrivato in : " + nomeMetodo + "\n"
-            + "Data : " + new Date(Date.now()) + "\n"
-            + "url : " + req.originalUrl + "\n"
-            + "query : " + JSON.stringify(req.query) + "\n"
-            + "body : " + JSON.stringify(req.body) + "\n"
-            + "header : " + JSON.stringify(req.headers) + "\n"
-            + "soket : " + "\n"
-            + "local : " + req.socket.localAddress + " : " + req.socket.localPort + "\n"
-            + "remote : " + req.socket.remoteAddress + " : " + req.socket.remotePort + "\n";
-        return tmp;
-    }
-    InizializzaLogbaseOut(req, nomeMetodo) {
-        var t1 = '', t2 = '';
-        if (req.socket != undefined) {
-            t1 = req.socket.localAddress + " : " + req.socket.localPort;
-            t2 = req.socket.remoteAddress + " : " + req.socket.remotePort;
-        }
-        console.log("Arrivato in : " + nomeMetodo + "\n"
-            + "Data : " + new Date(Date.now()) + "\n"
-            + "headersSent : " + req.headersSent + "\n"
-            // + "json : " + req.json + "\n"
-            // + "send : " + req.send + "\n"
-            + "sendDate : " + req.sendDate + "\n"
-            + "statusCode : " + req.statusCode + '\n'
-            + "statuMessage : " + req.statusMessage + '\n'
-            + "soket : " + "\n"
-            + "local : " + t1 + "\n"
-            + "remote : " + t2 + "\n");
-        const tmp = "Arrivato in : " + nomeMetodo + "\n"
-            + "Data : " + new Date(Date.now()) + "\n"
-            + "headersSent : " + req.headersSent + "\n"
-            + "json : " + req.json + "\n"
-            + "send : " + req.send + "\n"
-            + "sendDate : " + req.sendDate + "\n"
-            + "statusCode : " + req.statusCode + '\n'
-            + "statuMessage : " + req.statusMessage + '\n'
-            + "soket : " + "\n"
-            + "local : " + t1 + "\n"
-            + "remote : " + t2 + "\n";
-        return tmp;
-    }
     ConvertiInMiddleare() {
         return (req, res, nex) => __awaiter(this, void 0, void 0, function* () {
             const tmp = yield this.Esegui(req);
@@ -542,32 +491,202 @@ class TerminaleMetodo {
             }
         });
     }
-    SettaSwagger() {
-        let ritorno = `"${this.pathGlobal}": {
-            "${this.tipo}": {
-                "summary": "${this.sommario}",
-                "description": "${this.descrizione}",                
-                "parameters": [`;
-        for (let index = 0; index < this.listaParametri.length; index++) {
-            const element = this.listaParametri[index];
-            const tt = element.SettaSwagger();
-            if (index == 0 && index + 1 != this.listaParametri.length) {
-                ritorno = ritorno + ', ';
+    SettaSwagger(tipoInterazione) {
+        if (tipoInterazione == 'middleware') {
+            //questo deve restituire un oggetto
+            let tmp = [];
+            let primo = false;
+            let ritorno = '';
+            for (let index = 0; index < this.middleware.length; index++) {
+                const element = this.middleware[index];
+                if (element instanceof TerminaleMetodo) {
+                    const tt = element.SettaSwagger('middleware');
+                    /* tmp.push(tt); */
+                    if (primo == false && tt != undefined) {
+                        primo = true;
+                        ritorno = tt + '';
+                    }
+                    else if (tt != undefined) {
+                        ritorno = ritorno + ',' + tt;
+                    }
+                }
             }
-            if (index + 1 == this.listaParametri.length) {
-                ritorno = ritorno + ' }';
+            for (let index = 0; index < this.listaParametri.length; index++) {
+                const element = this.listaParametri[index];
+                const tt = element.SettaSwagger();
+                /* tmp.push(tt); */
+                if (index == 0)
+                    if (primo == false)
+                        ritorno = tt;
+                    else
+                        ritorno = ritorno + ',' + tt;
+                else
+                    ritorno = ritorno + ',' + tt;
+                if (primo == false)
+                    primo = true;
+            }
+            ritorno = ritorno;
+            try {
+                JSON.parse(ritorno);
+            }
+            catch (error) {
+                console.log(error);
+            }
+            if (primo)
+                return undefined;
+            else
+                return ritorno;
+        }
+        else {
+            let primo = false;
+            let ritornoTesta = `"${this.percorsi.pathGlobal}" : { 
+                "${this.tipo}" : 
+                {
+                    "tags": [
+                    ],
+                    "summary": "${this.sommario}",
+                    "description": "${this.descrizione}",
+                    "parameters": [ `;
+            let ritornoCoda = `
+                ]
             }
         }
-        ritorno = ritorno + ` 
-                ],
-                "responses": {
-                    "200":{
-                        "description":"ok"
+`;
+            let ritorno = '';
+            let tmp2 = [];
+            const gg = this.percorsi.pathGlobal;
+            for (let index = 0; index < this.middleware.length; index++) {
+                const element = this.middleware[index];
+                if (element instanceof TerminaleMetodo) {
+                    const tt = element.SettaSwagger('middleware');
+                    /* tmp2.push(tt); */
+                    if (primo == false && tt != undefined) {
+                        primo = true;
+                        ritorno = tt + '';
                     }
-                },
-            },
-        },`;
-        return ritorno;
+                    else if (tt != undefined) {
+                        ritorno = ritorno + ',' + tt;
+                    }
+                }
+            }
+            for (let index = 0; index < this.listaParametri.length; index++) {
+                const element = this.listaParametri[index];
+                const tt = element.SettaSwagger();
+                /* tmp2.push(tt); */
+                if (index == 0)
+                    if (primo == false)
+                        ritorno = tt;
+                    else
+                        ritorno = ritorno + ',' + tt;
+                else
+                    ritorno = ritorno + ',' + tt;
+                if (primo == false)
+                    primo = true;
+            }
+            ritorno = ritornoTesta + ritorno + ritornoCoda;
+            try {
+                JSON.parse('{' + ritorno + '}');
+            }
+            catch (error) {
+                console.log(error);
+            }
+            let tmp = {
+                gg: {
+                    "summary": this.sommario,
+                    "description": this.descrizione,
+                    "parameters": tmp2
+                }
+            };
+            let tmp3 = `${gg}: {
+                "summary": ${this.sommario},
+                "description": ${this.descrizione},
+                "parameters": [${tmp2}]
+            }`;
+            /* if (primo) return undefined;
+            else return ritorno; */
+            return ritorno;
+        }
+    }
+    SettaHTML(tipoInterazione) {
+        if (tipoInterazione == 'middleware') {
+            //questo deve restituire un oggetto
+            let tmp = [];
+            for (let index = 0; index < this.middleware.length; index++) {
+                const element = this.middleware[index];
+            }
+            for (let index = 0; index < this.listaParametri.length; index++) {
+                const element = this.listaParametri[index];
+            }
+        }
+        else {
+            let primo = false;
+            let ritornoTesta = `"${this.percorsi.pathGlobal}" : { 
+                "${this.tipo}" : 
+                {
+                    "tags": [
+                    ],
+                    "summary": "${this.sommario}",
+                    "description": "${this.descrizione}",
+                    "parameters": [ `;
+            let ritornoCoda = `
+                ]
+            }
+        }
+`;
+            let ritorno = '';
+            let tmp2 = [];
+            const gg = this.percorsi.pathGlobal;
+            for (let index = 0; index < this.middleware.length; index++) {
+                const element = this.middleware[index];
+                if (element instanceof TerminaleMetodo) {
+                    const tt = element.SettaSwagger('middleware');
+                    /* tmp2.push(tt); */
+                    if (primo == false && tt != undefined) {
+                        primo = true;
+                        ritorno = tt + '';
+                    }
+                    else if (tt != undefined) {
+                        ritorno = ritorno + ',' + tt;
+                    }
+                }
+            }
+            for (let index = 0; index < this.listaParametri.length; index++) {
+                const element = this.listaParametri[index];
+                const tt = element.SettaSwagger();
+                /* tmp2.push(tt); */
+                if (index == 0)
+                    if (primo == false)
+                        ritorno = tt;
+                    else
+                        ritorno = ritorno + ',' + tt;
+                else
+                    ritorno = ritorno + ',' + tt;
+                if (primo == false)
+                    primo = true;
+            }
+            ritorno = ritornoTesta + ritorno + ritornoCoda;
+            try {
+                JSON.parse('{' + ritorno + '}');
+            }
+            catch (error) {
+                console.log(error);
+            }
+            let tmp = {
+                gg: {
+                    "summary": this.sommario,
+                    "description": this.descrizione,
+                    "parameters": tmp2
+                }
+            };
+            let tmp3 = `${gg}: {
+                "summary": ${this.sommario},
+                "description": ${this.descrizione},
+                "parameters": [${tmp2}]
+            }`;
+            /* if (primo) return undefined;
+            else return ritorno; */
+            return ritorno;
+        }
     }
 }
 exports.TerminaleMetodo = TerminaleMetodo;
@@ -578,7 +697,7 @@ function CheckMetodoMetaData(nomeMetodo, classe) {
         tmp = new lista_terminale_metodo_1.ListaTerminaleMetodo(classe.rotte); //lo creo
         Reflect.defineMetadata(lista_terminale_metodo_1.ListaTerminaleMetodo.nomeMetadataKeyTarget, tmp, tools_1.targetTerminale); //e lo aggiungo a i metadata
     }
-    let terminale = tmp.CercaConNome(nomeMetodo, classe.path); //cerca la mia funzione
+    let terminale = tmp.CercaConNome(nomeMetodo); //cerca la mia funzione
     if (terminale == undefined) /* se non c'è */ {
         terminale = new TerminaleMetodo(nomeMetodo, "", classe.nome); // creo la funzione
     }
@@ -588,10 +707,59 @@ exports.CheckMetodoMetaData = CheckMetodoMetaData;
 function decoratoreMetodo(parametri) {
     return function (target, propertyKey, descriptor) {
         const list = terminale_classe_1.GetListaClasseMetaData();
+        /* let classe: TerminaleClasse;
+        const classeCampione = list.CercaConNomeSeNoAggiungi(target.constructor.name);
+        if (parametri.nomiClasseRiferimento != undefined && parametri.nomiClasseRiferimento.length > 0) {
+            for (let index = 0; index < parametri.nomiClasseRiferimento.length; index++) {
+                const element = parametri.nomiClasseRiferimento[index];
+                classe = list.CercaConNomeSeNoAggiungi(element);
+                const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+                const metodo2 = classeCampione.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+                for (let index = 0; index < metodo2.listaParametri.length; index++) {
+                    const element = metodo2.listaParametri[index];
+                    metodo.CercaParametroSeNoAggiungi(element.nome, element.indexParameter, element.tipo, element.posizione);
+                }
+                if (metodo != undefined && list != undefined && classe != undefined) {
+                    metodo.metodoAvviabile = descriptor.value;
+ 
+                    if (parametri.tipo != undefined) metodo.tipo = parametri.tipo;
+                    else metodo.tipo = 'get';
+ 
+                    if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
+                    else metodo.descrizione = '';
+ 
+                    if (parametri.sommario != undefined) metodo.sommario = parametri.sommario;
+                    else metodo.sommario = '';
+ 
+                    if (parametri.interazione != undefined) metodo.tipoInterazione = parametri.interazione;
+                    else metodo.tipoInterazione = 'rotta';
+ 
+                    if (parametri.path == undefined) metodo.path = propertyKey.toString();
+                    else metodo.path = parametri.path;
+ 
+ 
+                    if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
+ 
+                        const listaMidd = GetListaMiddlewareMetaData();
+                        const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());
+                        midd.metodoAvviabile = descriptor.value;
+                        midd.listaParametri = metodo.listaParametri;
+                        SalvaListaMiddlewareMetaData(listaMidd);
+                    }
+                    SalvaListaClasseMetaData(list);
+                }
+                else {
+                    console.log("Errore mio!");
+                }
+            }
+        } */
+        /* Caso base */
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.metodoAvviabile = descriptor.value;
+            if (parametri.nomiClasseRiferimento != undefined)
+                metodo.nomiClassiDiRiferimento = parametri.nomiClasseRiferimento;
             if (parametri.tipo != undefined)
                 metodo.tipo = parametri.tipo;
             else
@@ -619,6 +787,48 @@ function decoratoreMetodo(parametri) {
                 midd.listaParametri = metodo.listaParametri;
                 lista_terminale_metodo_1.SalvaListaMiddlewareMetaData(listaMidd);
             }
+            if (parametri.nomiClasseRiferimento != undefined && parametri.nomiClasseRiferimento.length > 0) {
+                for (let index = 0; index < parametri.nomiClasseRiferimento.length; index++) {
+                    const element = parametri.nomiClasseRiferimento[index];
+                    const classeTmp = list.CercaConNomeSeNoAggiungi(element);
+                    const metodoTmp = classeTmp.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+                    for (let index = 0; index < metodo.listaParametri.length; index++) {
+                        const element = metodo.listaParametri[index];
+                        /* configuro i parametri */
+                        const paramestro = metodoTmp.CercaParametroSeNoAggiungi(element.nome, element.indexParameter, element.tipo, element.posizione);
+                        if (parametri.descrizione != undefined)
+                            paramestro.descrizione = element.descrizione;
+                        else
+                            paramestro.descrizione = '';
+                        if (parametri.sommario != undefined)
+                            paramestro.sommario = element.sommario;
+                        else
+                            paramestro.sommario = '';
+                        /* configuro il metodo */
+                        metodoTmp.metodoAvviabile = descriptor.value;
+                        if (parametri.tipo != undefined)
+                            metodoTmp.tipo = parametri.tipo;
+                        else
+                            metodoTmp.tipo = 'get';
+                        if (parametri.descrizione != undefined)
+                            metodoTmp.descrizione = parametri.descrizione;
+                        else
+                            metodoTmp.descrizione = '';
+                        if (parametri.sommario != undefined)
+                            metodoTmp.sommario = parametri.sommario;
+                        else
+                            metodoTmp.sommario = '';
+                        if (parametri.interazione != undefined)
+                            metodoTmp.tipoInterazione = parametri.interazione;
+                        else
+                            metodoTmp.tipoInterazione = 'rotta';
+                        if (parametri.path == undefined)
+                            metodoTmp.path = propertyKey.toString();
+                        else
+                            metodoTmp.path = parametri.path;
+                    }
+                }
+            }
             terminale_classe_1.SalvaListaClasseMetaData(list);
         }
         else {
@@ -644,13 +854,26 @@ function mpAddCors(cors) {
         const list = terminale_classe_1.GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+        if (metodo != undefined && list != undefined && classe != undefined && metodo.nomiClassiDiRiferimento.length > 0) {
+            for (let index = 0; index < metodo.nomiClassiDiRiferimento.length; index++) {
+                const element = metodo.nomiClassiDiRiferimento[index];
+                const classe2 = list.CercaConNomeSeNoAggiungi(element);
+                const metodo2 = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+                if (metodo2 != undefined && list != undefined && classe2 != undefined) {
+                    metodo2.cors = cors;
+                }
+                else {
+                    console.log("Errore mio!");
+                }
+            }
+        }
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.cors = cors;
-            terminale_classe_1.SalvaListaClasseMetaData(list);
         }
         else {
             console.log("Errore mio!");
         }
+        terminale_classe_1.SalvaListaClasseMetaData(list);
     };
 }
 exports.mpAddCors = mpAddCors;
@@ -659,13 +882,26 @@ function mpAddHelmet(helmet) {
         const list = terminale_classe_1.GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+        if (metodo != undefined && list != undefined && classe != undefined && metodo.nomiClassiDiRiferimento.length > 0) {
+            for (let index = 0; index < metodo.nomiClassiDiRiferimento.length; index++) {
+                const element = metodo.nomiClassiDiRiferimento[index];
+                const classe2 = list.CercaConNomeSeNoAggiungi(element);
+                const metodo2 = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+                if (metodo2 != undefined && list != undefined && classe2 != undefined) {
+                    metodo.helmet = helmet;
+                }
+                else {
+                    console.log("Errore mio!");
+                }
+            }
+        }
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.helmet = helmet;
-            terminale_classe_1.SalvaListaClasseMetaData(list);
         }
         else {
             console.log("Errore mio!");
         }
+        terminale_classe_1.SalvaListaClasseMetaData(list);
     };
 }
 exports.mpAddHelmet = mpAddHelmet;

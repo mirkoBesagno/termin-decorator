@@ -48,20 +48,33 @@ let ClasseTest = class ClasseTest {
             return response.status(403).send("Errore : " + error);
         }
     }; */
-    Valida(token) {
+    /* @mpMet({tipo:'get',path:'Valida',interazione:'middleware'})
+    Valida(@mpPar({nomeParametro:'token',posizione: 'body'}) token: string){
+        const tmp : IReturn={
+            body:{
+                "nome": this.nome
+            },
+            stato:200};
+        return tmp;
+    }
+
+    @mpAddMiddle('Valida') */
+    SetNome(nomeFuturo, nomignolo) {
+        this.nome = nomeFuturo;
         const tmp = {
             body: {
-                "nome": this.nome
+                "nome": nomeFuturo + ' sei un POST',
+                "nomignolo": nomignolo + ' sei un nomigolo!'
             },
             stato: 200
         };
         return tmp;
     }
-    SetNome(nomeFuturo) {
+    SetNomeConMiddleware(nomeFuturo) {
         this.nome = nomeFuturo;
         const tmp = {
             body: {
-                "nome": this.nome
+                "nome": nomeFuturo + ' sei un POST'
             },
             stato: 200
         };
@@ -70,7 +83,7 @@ let ClasseTest = class ClasseTest {
     GetNome() {
         const tmp = {
             body: {
-                "nome": this.nome
+                "nome": this.nome + ' sei un GET'
             },
             stato: 200
         };
@@ -131,15 +144,22 @@ let ClasseTest = class ClasseTest {
     }
 };
 __decorate([
-    terminale_metodo_1.mpMet({ tipo: 'get', path: 'Valida', interazione: 'middleware' }),
-    __param(0, terminale_parametro_1.mpPar({ nomeParametro: 'token', posizione: 'body' })),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ClasseTest.prototype, "Valida", null);
-__decorate([
-    terminale_metodo_1.mpAddMiddle('Valida'),
     terminale_metodo_1.mpMet({ tipo: 'post', path: 'SetNome' }),
+    __param(0, terminale_parametro_1.mpPar({ nomeParametro: 'nomeFuturo',
+        posizione: 'body',
+        tipoParametro: 'text',
+        descrizione: 'nome che perendere il posto del vecchio.' })),
+    __param(1, terminale_parametro_1.mpPar({
+        nomeParametro: 'nomignolo',
+        posizione: 'query',
+        descrizione: 'Nomiglolo passato per query',
+        tipoParametro: 'text'
+    })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], ClasseTest.prototype, "SetNome", null);
+__decorate([
     __param(0, terminale_parametro_1.mpPar({
         nomeParametro: 'nomeFuturo',
         posizione: 'body',
@@ -149,7 +169,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
-], ClasseTest.prototype, "SetNome", null);
+], ClasseTest.prototype, "SetNomeConMiddleware", null);
 __decorate([
     terminale_metodo_1.mpMet({ tipo: 'get', path: 'GetNome' }),
     __metadata("design:type", Function),
@@ -194,35 +214,60 @@ const classecosi = new ClasseTest("prima classe!!", 'cognome prima classe?!??!')
 classecosi.MetodoPrint();
 const main = new terminale_main_1.Main("app");
 console.log('Inizializzazione inizio .....');
-main.Inizializza("http://localhost:3000");
-console.log('..... Inizializzazione fine.');
-console.log('Menu');
-console.log('0: express');
-console.log('1: superagent');
-console.log('2: biss');
-prompts_1.default({
-    message: 'Scegli: ',
-    type: 'number',
-    name: 'scelta'
-}).then((item) => {
-    if (item.scelta == 0) {
-        main.StartExpress();
-    }
-    else if (item.scelta == 1) {
-        main.PrintMenu();
-    }
-    else if (item.scelta == 2) {
-        main.EsponiSwagger();
-    }
-    else if (item.scelta == 3) {
-        main.StartExpress();
-        main.PrintMenu();
-    }
-    else {
-        console.log('Ciao ciao ...');
-    }
-}).catch(err => {
-    console.log(err);
+prompts_1.default([{
+        message: 'Quale porta usare?(default=3030) : ',
+        type: 'number', name: 'porta'
+    }, {
+        message: 'Quale indirizzo esporre?(http://localhost) : ',
+        type: 'text', name: 'header'
+    }]).then((scelta2) => {
+    if (scelta2.porta == undefined || scelta2.porta == 0)
+        scelta2.porta = 3030;
+    if (scelta2.header == undefined || scelta2.header == 0)
+        scelta2.header = 'http://localhost';
+    main.Inizializza(scelta2.header + ":", scelta2.porta, true);
+    console.log('..... Inizializzazione fine.');
+    console.log('Menu');
+    console.log('0: express');
+    console.log('1: superagent');
+    console.log('2: aggiungi swagger');
+    console.log('3: express + superagent');
+    console.log('4: todo');
+    prompts_1.default({
+        message: 'Scegli: ',
+        type: 'number',
+        name: 'scelta'
+    }).then((item) => {
+        if (item.scelta == 0) {
+            main.StartExpress();
+        }
+        else if (item.scelta == 1) {
+            main.PrintMenu();
+        }
+        else if (item.scelta == 2) {
+            const scelta = prompts_1.default({
+                message: 'Rotta dove renderli visibili: ',
+                type: 'text', name: 'scelta'
+            }).then((ris) => {
+                main.AggiungiSwagger(ris.scelta);
+                main.StartExpress();
+            });
+        }
+        else if (item.scelta == 3) {
+            main.StartExpress();
+            prompts_1.default({
+                message: 'Rotta dove renderli visibili: ',
+                type: 'text', name: 'scelta'
+            }).then((ris) => {
+                main.PrintMenu();
+            });
+        }
+        else {
+            console.log('Ciao ciao ...');
+        }
+    }).catch(err => {
+        console.log(err);
+    });
 });
 //console.log('fineeeeeeeeeee');
 /* (<any>classecosi).Inizializza();

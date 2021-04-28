@@ -111,7 +111,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             var corsOptions = {
                 methods: this.tipo
             }
-            
+
             if (this.helmet == undefined) {
                 this.helmet = helmet();
             }
@@ -119,225 +119,17 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                 this.cors == cors(corsOptions);
             }
             rotte.all("/" + this.percorsi.pathGlobal /* this.path */,
-            cors(this.cors),
-            /*helmet(this.helmet),
-            middlew, */
-            async (req: Request, res: Response) => {
-                console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                InizializzaLogbaseIn(req, this.nome.toString());
-                const tmp = await this.Esegui(req);
-                res.status(tmp.stato).send(tmp.body);
-                InizializzaLogbaseOut(res, this.nome.toString());
-                return res;
-            });
-        }
-        return rotte;
-    }
-    ScartoConfiguraRotta(rotte: Router, percorsi: IRaccoltaPercorsi): Router {
-        let corsOptions:any={}
-        this.percorsi.patheader = percorsi.patheader;
-        this.percorsi.porta = percorsi.porta;
-        const pathGlobal = percorsi.pathGlobal + '/' + this.path;
-        this.percorsi.pathGlobal = pathGlobal;
-        const middlew: any[] = [];
-        this.middleware.forEach(element => {
-
-            if (element instanceof TerminaleMetodo) {
-                const listaMidd = GetListaMiddlewareMetaData();
-                const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
-                middlew.push(midd.ConvertiInMiddleare());
-            }
-        });
-        if (this.metodoAvviabile != undefined) {
-            
-            rotte.get("/" + this.percorsi.pathGlobal /* this.path */,
-            /* cors(this.cors),
-            helmet(this.helmet),
-            middlew, */
-            async (req: Request, res: Response) => {
-                console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                InizializzaLogbaseIn(req, this.nome.toString());
-                const tmp = await this.Esegui(req);
-                res.status(tmp.stato).send(tmp.body);
-                InizializzaLogbaseOut(res, this.nome.toString());
-                return res;
-            });
-
-
-            switch (this.tipo) {
-                case 'get':
-                    (<IReturn>this.metodoAvviabile).body;
-
-                    /* const options: cors.CorsOptions = {
-                        allowedHeaders: [
-                          'Origin',
-                          'X-Requested-With',
-                          'Content-Type',
-                          'Accept',
-                          'X-Access-Token',
-                        ],
-                        credentials: true,
-                        methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
-                        origin: API_URL,
-                        preflightContinue: false,
-                      }; */
-
-                     corsOptions = {
-                        methods: "GET"
-                    }
-                    if (this.helmet == undefined) {
-                        this.helmet = helmet();
-                    }
-                    if (this.cors == undefined) {
-                        this.cors == cors(corsOptions);
-                    } 
-                    rotte.get("/" + this.percorsi.pathGlobal /* this.path */,
-                        /* cors(this.cors),
-                        helmet(this.helmet),
-                        middlew, */
-                        async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            InizializzaLogbaseIn(req, this.nome.toString());
-                            const tmp = await this.Esegui(req);
-                            res.status(tmp.stato).send(tmp.body);
-                            InizializzaLogbaseOut(res, this.nome.toString());
-                            return res;
-                        });
-                    break;
-                case 'post':
-                    corsOptions = {
-                        methods: "POST"
-                    };
-                    if (this.helmet == undefined) {
-                        this.helmet = helmet();
-                    }
-                    if (this.cors == undefined) {
-                        this.cors == cors(corsOptions);
-                    }
-                    (<IReturn>this.metodoAvviabile).body;
-                    rotte.post("/" + this.path.toString(),
-                        cors(this.cors),
-                        helmet(this.helmet),
-                        middlew,
-                        async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                            const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            InizializzaLogbaseIn(req, this.nome.toString());
-                            const tmp = await this.Esegui(req);
-                            res.status(tmp.stato).send(tmp.body);
-                            InizializzaLogbaseOut(res, this.nome.toString());
-                            return res;
-                        });
-                    break;
-                case 'delete':
-                    (<IReturn>this.metodoAvviabile).body;
-                    corsOptions = {
-                        methods: "DELETE"
-                    }
-                    if (this.helmet == undefined) {
-                        this.helmet = helmet();
-                    }
-                    if (this.cors == undefined) {
-                        this.cors == cors(corsOptions);
-                    }
-                    rotte.delete("/" + this.path.toString(),
-                        cors(this.cors),
-                        helmet(this.helmet),
-                        middlew,
-                        async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                            const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            InizializzaLogbaseIn(req, this.nome.toString());
-                            const tmp = await this.Esegui(req);
-                            res.status(tmp.stato).send(tmp.body);
-                            InizializzaLogbaseOut(res, this.nome.toString());
-                            return res;
-                        });
-                    break;
-                case 'patch':
-                    corsOptions = {
-                        methods: "PATCH"
-                    };
-                    if (this.helmet == undefined) {
-                        this.helmet = helmet();
-                    }
-                    if (this.cors == undefined) {
-                        this.cors == cors(corsOptions);
-                    }
-                    (<IReturn>this.metodoAvviabile).body;
-                    rotte.patch("/" + this.path.toString(),
-                        cors(this.cors),
-                        helmet(this.helmet),
-                        middlew,
-                        async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                            const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            InizializzaLogbaseIn(req, this.nome.toString());
-                            const tmp = await this.Esegui(req);
-                            res.status(tmp.stato).send(tmp.body);
-                            InizializzaLogbaseOut(res, this.nome.toString());
-                            return res;
-                        });
-                    break;
-                case 'purge':
-                    corsOptions = {
-                        methods: "PURGE"
-                    };
-                    if (this.helmet == undefined) {
-                        this.helmet = helmet();
-                    }
-                    if (this.cors == undefined) {
-                        this.cors == cors(corsOptions);
-                    }
-                    (<IReturn>this.metodoAvviabile).body;
-                    rotte.purge("/" + this.path.toString(),
-                        cors(this.cors),
-                        helmet(this.helmet),
-                        middlew,
-                        async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                            const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            InizializzaLogbaseIn(req, this.nome.toString());
-                            const tmp = await this.Esegui(req);
-                            res.status(tmp.stato).send(tmp.body);
-                            InizializzaLogbaseOut(res, this.nome.toString());
-                            return res;
-                        });
-                    break;
-                case 'put':
-                    corsOptions = {
-                        methods: "PUT"
-                    };
-                    if (this.helmet == undefined) {
-                        this.helmet = helmet();
-                    }
-                    if (this.cors == undefined) {
-                        this.cors == cors(corsOptions);
-                    }
-                    (<IReturn>this.metodoAvviabile).body;
-                    rotte.put("/" + this.path.toString(),
-                        cors(this.cors),
-                        helmet(this.helmet),
-                        middlew,
-                        async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                            const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            InizializzaLogbaseIn(req, this.nome.toString());
-                            const tmp = await this.Esegui(req);
-                            res.status(tmp.stato).send(tmp.body);
-                            InizializzaLogbaseOut(res, this.nome.toString());
-                            return res;
-                        });
-                    break;
-
-                default:
-                    break;
-            }
+                cors(this.cors),
+                /*helmet(this.helmet),
+                middlew, */
+                async (req: Request, res: Response) => {
+                    console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                    InizializzaLogbaseIn(req, this.nome.toString());
+                    const tmp = await this.Esegui(req);
+                    res.status(tmp.stato).send(tmp.body);
+                    InizializzaLogbaseOut(res, this.nome.toString());
+                    return res;
+                });
         }
         return rotte;
     }
@@ -356,51 +148,34 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             }
         });
         if (this.metodoAvviabile != undefined) {
-            var corsOptions = {
+            var corsOptions = {};
+            /* var corsOptions = {
                 methods: this.tipo
             }
-            
+
             if (this.helmet == undefined) {
                 this.helmet = helmet();
             }
             if (this.cors == undefined) {
-                this.cors == cors(corsOptions);
+                this.cors = cors(corsOptions);
             }
-            app.all("/" + this.percorsi.pathGlobal /* this.path */,
-            cors(this.cors),
-            /*helmet(this.helmet),
-            middlew, */
-            async (req: Request, res: Response) => {
-                console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                InizializzaLogbaseIn(req, this.nome.toString());
-                const tmp = await this.Esegui(req);
-                res.status(tmp.stato).send(tmp.body);
-                InizializzaLogbaseOut(res, this.nome.toString());
-                return res;
-            });
-        }
-    }
-    ScartoConfiguraRottaApplicazione(app: any, percorsi: IRaccoltaPercorsi) {
-        this.percorsi.patheader = percorsi.patheader;
-        this.percorsi.porta = percorsi.porta;
-        const pathGlobal = percorsi.pathGlobal + '/' + this.path;
-        this.percorsi.pathGlobal = pathGlobal;
-        const middlew: any[] = [];
-        this.middleware.forEach(element => {
+            app.all("/" + this.percorsi.pathGlobal,
+                cors(this.cors),
+                //helmet(this.helmet),
+                //middlew,
+                async (req: Request, res: Response) => {
+                    console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                    InizializzaLogbaseIn(req, this.nome.toString());
+                    const tmp = await this.Esegui(req);
+                    res.status(tmp.stato).send(tmp.body);
+                    InizializzaLogbaseOut(res, this.nome.toString());
+                    return res;
+                }); */
 
-            if (element instanceof TerminaleMetodo) {
-                const listaMidd = GetListaMiddlewareMetaData();
-                const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
-                middlew.push(midd.ConvertiInMiddleare());
-            }
-        });
-        if (this.metodoAvviabile != undefined) {
-            var corsOptions = {
-            }
+            /*  */
             switch (this.tipo) {
                 case 'get':
                     (<IReturn>this.metodoAvviabile).body;
-
                     /* const options: cors.CorsOptions = {
                         allowedHeaders: [
                           'Origin',
@@ -414,26 +189,25 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         origin: API_URL,
                         preflightContinue: false,
                       }; */
-
-                    /* corsOptions = {
+                    corsOptions = {
                         methods: "GET"
+                    }
+                    if (this.cors == undefined) {
+                        this.cors = cors(corsOptions);
                     }
                     if (this.helmet == undefined) {
                         this.helmet = helmet();
                     }
-                    if (this.cors == undefined) {
-                        this.cors == cors(corsOptions);
-                    } */
                     app.get(this.percorsi.pathGlobal /* this.path */,
-                        /* cors(this.cors),
-                        helmet(this.helmet),
-                        middlew, */
+                        this.cors,
+                        this.helmet,
+                        middlew,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                             InizializzaLogbaseIn(req, this.nome.toString());
                             const tmp = await this.Esegui(req);
-                            res.status(tmp.stato).send(tmp.body);
                             InizializzaLogbaseOut(res, this.nome.toString());
+                            res.status(tmp.stato).send(tmp.body);
                             return res;
                         });
                     break;
@@ -445,12 +219,12 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet = helmet();
                     }
                     if (this.cors == undefined) {
-                        this.cors == cors(corsOptions);
+                        this.cors = cors(corsOptions);
                     }
                     (<IReturn>this.metodoAvviabile).body;
-                    app.post("/" + this.path.toString(),
-                        cors(this.cors),
-                        helmet(this.helmet),
+                    app.post(this.percorsi.pathGlobal,
+                        this.cors,
+                        this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
@@ -458,8 +232,8 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
                             InizializzaLogbaseIn(req, this.nome.toString());
                             const tmp = await this.Esegui(req);
-                            res.status(tmp.stato).send(tmp.body);
                             InizializzaLogbaseOut(res, this.nome.toString());
+                            res.status(tmp.stato).send(tmp.body);
                             return res;
                         });
                     break;
@@ -472,11 +246,11 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet = helmet();
                     }
                     if (this.cors == undefined) {
-                        this.cors == cors(corsOptions);
+                        this.cors = cors(corsOptions);
                     }
-                    app.delete("/" + this.path.toString(),
-                        cors(this.cors),
-                        helmet(this.helmet),
+                    app.delete(this.percorsi.pathGlobal,
+                        this.cors,
+                        this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
@@ -484,8 +258,8 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
                             InizializzaLogbaseIn(req, this.nome.toString());
                             const tmp = await this.Esegui(req);
-                            res.status(tmp.stato).send(tmp.body);
                             InizializzaLogbaseOut(res, this.nome.toString());
+                            res.status(tmp.stato).send(tmp.body);
                             return res;
                         });
                     break;
@@ -497,12 +271,12 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet = helmet();
                     }
                     if (this.cors == undefined) {
-                        this.cors == cors(corsOptions);
+                        this.cors = cors(corsOptions);
                     }
                     (<IReturn>this.metodoAvviabile).body;
-                    app.patch("/" + this.path.toString(),
-                        cors(this.cors),
-                        helmet(this.helmet),
+                    app.patch(this.percorsi.pathGlobal,
+                        this.cors,
+                        this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
@@ -510,8 +284,8 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
                             InizializzaLogbaseIn(req, this.nome.toString());
                             const tmp = await this.Esegui(req);
-                            res.status(tmp.stato).send(tmp.body);
                             InizializzaLogbaseOut(res, this.nome.toString());
+                            res.status(tmp.stato).send(tmp.body);
                             return res;
                         });
                     break;
@@ -523,12 +297,12 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet = helmet();
                     }
                     if (this.cors == undefined) {
-                        this.cors == cors(corsOptions);
+                        this.cors = cors(corsOptions);
                     }
                     (<IReturn>this.metodoAvviabile).body;
-                    app.purge("/" + this.path.toString(),
-                        cors(this.cors),
-                        helmet(this.helmet),
+                    app.purge(this.percorsi.pathGlobal,
+                        this.cors,
+                        this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
                             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
@@ -536,8 +310,8 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                             const tmp = this.metodoAvviabile.apply(this, parametri); */
                             InizializzaLogbaseIn(req, this.nome.toString());
                             const tmp = await this.Esegui(req);
-                            res.status(tmp.stato).send(tmp.body);
                             InizializzaLogbaseOut(res, this.nome.toString());
+                            res.status(tmp.stato).send(tmp.body);
                             return res;
                         });
                     break;
@@ -547,29 +321,27 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     };
                     if (this.helmet == undefined) {
                         this.helmet = helmet();
+                        if (this.cors == undefined) {
+                            this.cors = cors(corsOptions);
+                        }
+                        (<IReturn>this.metodoAvviabile).body;
+                        app.put(this.percorsi.pathGlobal,
+                            this.cors,
+                            this.helmet,
+                            middlew,
+                            async (req: Request, res: Response) => {
+                                console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                                /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
+                                const tmp = this.metodoAvviabile.apply(this, parametri); */
+                                InizializzaLogbaseIn(req, this.nome.toString());
+                                const tmp = await this.Esegui(req);
+                                InizializzaLogbaseOut(res, this.nome.toString());
+                                res.status(tmp.stato).send(tmp.body);
+                                return res;
+                            });
+                        break;
+                        /*  */
                     }
-                    if (this.cors == undefined) {
-                        this.cors == cors(corsOptions);
-                    }
-                    (<IReturn>this.metodoAvviabile).body;
-                    app.put("/" + this.path.toString(),
-                        cors(this.cors),
-                        helmet(this.helmet),
-                        middlew,
-                        async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                            const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            InizializzaLogbaseIn(req, this.nome.toString());
-                            const tmp = await this.Esegui(req);
-                            res.status(tmp.stato).send(tmp.body);
-                            InizializzaLogbaseOut(res, this.nome.toString());
-                            return res;
-                        });
-                    break;
-
-                default:
-                    break;
             }
         }
     }
@@ -607,11 +379,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                             header = rit.header;
                     }
                 }
-
             }
-
-            //const tmp = await this.MetSpalla(body, query, header, headerpath);
-            //return tmp;
 
             if (headerpath == undefined) headerpath = "http://localhost:3000";
             console.log('chiamata per : ' + this.percorsi.pathGlobal + ' | Verbo: ' + this.tipo);
@@ -640,182 +408,101 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             let ritorno;
             let gg = this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal
             /*  */
-            ritorno = await axios({
+            /* ritorno = await axios({
                 method: this.tipo,
                 url: gg,
                 headers: header,
                 params: query,
-                data: body
-            });
-            if (ritorno) {
-                return ritorno.data;
-            } else {
-                return '';
-            };
-        } catch (error) {
-            throw new Error("Errore :" + error);
-        }
-    }
-    async MetSpalla(body: string, query: string, header: string, headerpath?: string): Promise<string> {
-        try {
-            if (headerpath == undefined) headerpath = "http://localhost:3000";
-            console.log('chiamata per : ' + this.percorsi.pathGlobal + ' | Verbo: ' + this.tipo);
-            let parametri = await this.listaParametri.SoddisfaParamtri();
+                data: '{' + body + '}'
+            }); */
 
-            if (parametri.body != "") {
-                if (body != "") {
-                    body = body + ", " + parametri.body;
-                } else {
-                    body = parametri.body;
-                }
-            }
-            if (parametri.query != "") {
-                if (query != "") {
-                    query = query + ", " + parametri.query;
-                } else
-                    query = parametri.query;
-            }
-            if (parametri.header != "") {
-                if (header != "") {
-                    header = header + ", " + parametri.header;
-                } else
-                    header = parametri.header;
-            }
-
-            let ritorno;
-            let gg = this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal
             /*  */
-            ritorno = await axios({
-                method: this.tipo,
-                url: gg,
-                headers: header,
-                params: query,
-                data: body
-            });
+            switch (this.tipo) {
+                case 'get':
+                    try {
+                        // Send a POST request
+                        ritorno = await superagent
+                            .get(this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal)
+                            .query(JSON.parse('{ ' + query + ' }'))
+                            .send(JSON.parse('{ ' + body + ' }'))
+                            .set(JSON.parse('{ ' + header + ' }'))
+                            .set('accept', 'json')
+                            //.auth('my_token', { type: 'bearer' })
+                            ;
+                    } catch (error) {
+                        console.log(error);
+                        throw new Error("Errore:" + error);
+                    }
+                    break;
+                case 'post':
+                    try {
+                        ritorno = await superagent
+                            .post(this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal)
+                            .query(JSON.parse('{ ' + query + ' }'))
+                            .send(JSON.parse('{ ' + body + ' }'))
+                            .set(JSON.parse('{ ' + header + ' }'))
+                            .set('accept', 'json')
+                    /* .set('Authorization', `Bearer ${chiave.body}`) */;
+                    } catch (error) {
+                        console.log(error);
+                        throw new Error("Errore:" + error);
+                    }
+                    break;
+                case 'purge':
+                    try {
+                        ritorno = await superagent
+                            .purge(this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal)
+                            .query(JSON.parse('{ ' + query + ' }'))
+                            .send(JSON.parse('{ ' + body + ' }'))
+                            .set(JSON.parse('{ ' + header + ' }'))
+                            .set('accept', 'json')
+                    /* .set('Authorization', `Bearer ${chiave.body}`) */;
+                    } catch (error) {
+                        console.log(error);
+                        throw new Error("Errore:" + error);
+                    }
+                    break;
+                case 'patch':
+                    try {
+                        ritorno = await superagent
+                            .patch(this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal)
+                            .query(JSON.parse('{ ' + query + ' }'))
+                            .send(JSON.parse('{ ' + body + ' }'))
+                            .set(JSON.parse('{ ' + header + ' }'))
+                            .set('accept', 'json')
+                    /* .set('Authorization', `Bearer ${chiave.body}`) */;
+                    } catch (error) {
+                        console.log(error);
+                        throw new Error("Errore:" + error);
+                    }
+                    break;
+                case 'delete':
+                    try {
+                        ritorno = await superagent
+                            .delete(this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal)
+                            .query(JSON.parse('{ ' + query + ' }'))
+                            .send(JSON.parse('{ ' + body + ' }'))
+                            .set(JSON.parse('{ ' + header + ' }'))
+                            .set('accept', 'json')
+                    /* .set('Authorization', `Bearer ${chiave.body}`) */;
+                    } catch (error) {
+                        console.log(error);
+                        throw new Error("Errore:" + error);
+                    }
+                    break;
+                default:
+                    return '';
+                    break;
+            }
+
             if (ritorno) {
-                return ritorno.data;
-            } else {
-                return '';
-            };
-            /*  */
-            if (this.tipo) {
-
-                switch (this.tipo) {
-                    case 'get':
-                        try {
-                            // Send a POST request
-
-                            /* ritorno = await superagent
-                                .get(headerpath + this.percorsi.pathGlobal)
-                                .query(JSON.parse('{ ' + query + ' }'))
-                                .send(JSON.parse('{ ' + body + ' }'))
-                                .set(JSON.parse('{ ' + header + ' }'))
-                                .set('accept', 'json')
-                                //.auth('my_token', { type: 'bearer' })
-                                ;
-                            if (ritorno) {
-                                return ritorno.body;
-                            } else {
-                                return '';
-                            } */
-                        } catch (error) {
-                            console.log(error);
-                            throw new Error("Errore:" + error);
-                        }
-                        break;
-                    case 'post':
-                        try {
-                            ritorno = await superagent
-                                .post(this.percorsi.pathGlobal)
-                                .query(JSON.parse('{ ' + query + ' }'))
-                                .send(JSON.parse('{ ' + body + ' }'))
-                                .set(JSON.parse('{ ' + header + ' }'))
-                                .set('accept', 'json')
-                        /* .set('Authorization', `Bearer ${chiave.body}`) */;
-                            if (ritorno) {
-                                return ritorno.body;
-                            } else {
-                                return '';
-                            }
-                        } catch (error) {
-                            console.log(error);
-                            throw new Error("Errore:" + error);
-                        }
-                        break;
-                    case 'purge':
-                        try {
-                            ritorno = await superagent
-                                .purge(this.percorsi.pathGlobal)
-                                .query(JSON.parse('{ ' + query + ' }'))
-                                .send(JSON.parse('{ ' + body + ' }'))
-                                .set(JSON.parse('{ ' + header + ' }'))
-                                .set('accept', 'json')
-                        /* .set('Authorization', `Bearer ${chiave.body}`) */;
-                            if (ritorno) {
-                                return ritorno.body;
-                            } else {
-                                return '';
-                            }
-                        } catch (error) {
-                            console.log(error);
-                            throw new Error("Errore:" + error);
-                        }
-                        break;
-                    case 'patch':
-                        try {
-                            ritorno = await superagent
-                                .patch(this.percorsi.pathGlobal)
-                                .query(JSON.parse('{ ' + query + ' }'))
-                                .send(JSON.parse('{ ' + body + ' }'))
-                                .set(JSON.parse('{ ' + header + ' }'))
-                                .set('accept', 'json')
-                        /* .set('Authorization', `Bearer ${chiave.body}`) */;
-                            if (ritorno) {
-                                return ritorno.body;
-                            } else {
-                                return '';
-                            }
-                        } catch (error) {
-                            console.log(error);
-                            throw new Error("Errore:" + error);
-                        }
-                        break;
-                    case 'delete':
-                        try {
-                            ritorno = await superagent
-                                .delete(this.percorsi.pathGlobal)
-                                .query(JSON.parse('{ ' + query + ' }'))
-                                .send(JSON.parse('{ ' + body + ' }'))
-                                .set(JSON.parse('{ ' + header + ' }'))
-                                .set('accept', 'json')
-                        /* .set('Authorization', `Bearer ${chiave.body}`) */;
-                            if (ritorno) {
-                                return ritorno.body;
-                            } else {
-                                return '';
-                            }
-                        } catch (error) {
-                            console.log(error);
-                            throw new Error("Errore:" + error);
-                        }
-                        break;
-                    default:
-                        return '';
-                        break;
-                }
-            }
-            else {
-                return '';
-            }
-            /* if (ritorno) {
-                ritorno?.body;
                 return ritorno.body;
             } else {
-                return undefined;
-            } */
+                return '';
+            };
+            /*  */
         } catch (error) {
-            throw new Error("Errore:" + error);
-
+            throw new Error("Errore :" + error);
         }
     }
     CercaParametroSeNoAggiungi(nome: string, parameterIndex: number, tipoParametro: TipoParametro, posizione: TypePosizione) {
@@ -1082,25 +769,25 @@ function decoratoreMetodo(parametri: IMetodo
                 }
                 if (metodo != undefined && list != undefined && classe != undefined) {
                     metodo.metodoAvviabile = descriptor.value;
-
+ 
                     if (parametri.tipo != undefined) metodo.tipo = parametri.tipo;
                     else metodo.tipo = 'get';
-
+ 
                     if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
                     else metodo.descrizione = '';
-
+ 
                     if (parametri.sommario != undefined) metodo.sommario = parametri.sommario;
                     else metodo.sommario = '';
-
+ 
                     if (parametri.interazione != undefined) metodo.tipoInterazione = parametri.interazione;
                     else metodo.tipoInterazione = 'rotta';
-
+ 
                     if (parametri.path == undefined) metodo.path = propertyKey.toString();
                     else metodo.path = parametri.path;
-
-
+ 
+ 
                     if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
-
+ 
                         const listaMidd = GetListaMiddlewareMetaData();
                         const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());
                         midd.metodoAvviabile = descriptor.value;

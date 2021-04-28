@@ -63,6 +63,28 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
             @mpAddMiddle('Valida') */
             @mpMet({tipo:'post',path:'SetNome'})
             SetNome(
+                @mpPar({                        nomeParametro:'nomeFuturo',
+                        posizione: 'body',
+                        tipoParametro:'text',
+                        descrizione:'nome che perendere il posto del vecchio.'                    }) nomeFuturo: string,
+                    @mpPar({
+                        nomeParametro:'nomignolo',
+                        posizione:'query',
+                        descrizione:'Nomiglolo passato per query',
+                        tipoParametro:'text'
+                    })nomignolo: string
+                    ){
+                this.nome = nomeFuturo;
+                const tmp : IReturn={
+                    body:{
+                        "nome": nomeFuturo+' sei un POST',
+                        "nomignolo":nomignolo+' sei un nomigolo!'
+                    },
+                    stato:200};
+                return tmp;
+            }
+
+            SetNomeConMiddleware(
                 @mpPar({
                         nomeParametro:'nomeFuturo',
                         posizione: 'body',

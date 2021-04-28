@@ -37,7 +37,9 @@ const prompts_1 = __importDefault(require("prompts"));
 const express_1 = __importDefault(require("express"));
 const lista_terminale_classe_1 = require("../liste/lista-terminale-classe");
 const bodyParser = __importStar(require("body-parser"));
-const swaggerUI = require('swagger-ui-express');
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const terminale_classe_1 = require("./terminale-classe");
+//const swaggerUI = require('swagger-ui-express');
 /**
  *
  */
@@ -64,32 +66,112 @@ exports.mpMain = mpMain;
 class Main {
     constructor(path, server) {
         this.path = path;
+        this.percorsi = { pathGlobal: "", patheader: "", porta: 0 };
         if (server == undefined)
             this.serverExpressDecorato = express_1.default();
         else
             this.serverExpressDecorato = server;
         this.listaTerminaleClassi = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale);
     }
-    Inizializza(patheader) {
+    Inizializza(patheader, porta, rottaBase) {
         let tmp = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale);
+        this.percorsi.patheader = patheader;
+        this.percorsi.porta = porta;
+        const pathGlobal = /* this.percorsi.patheader + this.percorsi.porta + */ '/' + this.path;
+        this.percorsi.pathGlobal = pathGlobal;
+        this.serverExpressDecorato.use(bodyParser.urlencoded({ 'extended': true })); // parse application/x-www-form-urlencoded
+        this.serverExpressDecorato.use(bodyParser.json()); // parse application/json
+        this.serverExpressDecorato.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
+        this.serverExpressDecorato.route;
         for (let index = 0; index < tmp.length; index++) {
             const element = tmp[index];
-            const pathGlobal = '/' + this.path + '/' + element.path;
-            element.SettaPathRoot_e_Global(this.path, pathGlobal, patheader);
-            this.serverExpressDecorato.use(bodyParser.json({
+            /* this.serverExpressDecorato.use(bodyParser.json({
                 limit: '50mb',
-                verify(req, res, buf, encoding) {
+                verify(req: any, res, buf, encoding) {
                     req.rawBody = buf;
                 }
-            }));
-            this.serverExpressDecorato.use(pathGlobal, element.rotte);
+            })); */
+            element.SettaPathRoot_e_Global(this.path, this.percorsi, this.serverExpressDecorato);
+            //this.serverExpressDecorato.use(element.GetPath, element.rotte);
         }
+        /* if (rottaBase)
+            this.serverExpressDecorato.all('/*', (req: Request, res: Response) => {
+                console.log('Risposta a chiamata : ' + '/*');
+                InizializzaLogbaseIn(req, 'IN_GENERICA');
+                res.status(555).send('No found');
+                InizializzaLogbaseOut(res, 'OUT_GENERICA');
+                return res;
+            }); */
+        terminale_classe_1.SalvaListaClasseMetaData(tmp);
     }
-    EsponiSwagger() {
+    GetJSONSwagger() {
         const swaggerJson = ``;
         let tmp2 = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale);
-        let ritorno = `
-        {
+        let ritorno = '';
+        let rr = {};
+        /* let rr: object = {
+            openapi: "3.0.0",
+            servers: [
+                {
+                    url: "https://staisicuro.medicaltech.it/",
+                    variables: {},
+                    description: "indirizzo principale"
+                },
+                {
+                    url: "http://ss-test.medicaltech.it/",
+                    description: "indirizzo secondario nel caso quello principale non dovesse funzionare."
+                }
+            ],
+            info: {
+                description: "Documentazione delle API con le quali interrogare il server dell'applicazione STAI sicuro, per il momento qui troverai solo le api con le quali interfacciarti alla parte relativa al paziente. \nSe vi sono problemi sollevare degli issues o problemi sulla pagina di github oppure scrivere direttamente una email.",
+                version: "1.0.0",
+                title: "STAI sicuro",
+                termsOfService: "https://github.com/MedicaltechTM/STAI_sicuro",
+                contact: {
+                    email: "mirkopizzini93@gmail.com",
+                    name: "mirko pizzini",
+                    url: "-"
+                },
+                license: {
+                    name: "MIT",
+                    url: "https://opensource.org/licenses/MIT"
+                }
+            }
+        }; */
+        for (let index = 0; index < tmp2.length; index++) {
+            const element = tmp2[index];
+            const tt = element.SettaSwagger();
+            /* rr = { rr, th }; */
+            if (index == 0)
+                ritorno = tt;
+            else
+                ritorno = ritorno + ',' + tt;
+        }
+        let tmp = `{
+        "openapi": "3.0.0",
+            "servers": [
+                {
+                    "url": "https://staisicuro.medicaltech.it/",
+                    "variables": {},
+                    "description": "indirizzo principale"
+                },
+                {
+                    "url": "http://ss-test.medicaltech.it/",
+                    "description": "indirizzo secondario nel caso quello principale non dovesse funzionare."
+                }
+            ],
+            "info": {
+                "description": "Documentazione delle API con le quali interrogare il server dell'applicazione STAI sicuro, per il momento qui troverai solo le api con le quali interfacciarti alla parte relativa al paziente. \nSe vi sono problemi sollevare degli issues o problemi sulla pagina di github oppure scrivere direttamente una email.",
+                "version": "1.0.0",
+                "title": "STAI sicuro",
+                "termsOfService": "https://github.com/MedicaltechTM/STAI_sicuro"
+            },
+            "tags": [
+
+            ],   
+        ` + ritorno +
+            '}';
+        let gg = {
             "openapi": "3.0.0",
             "servers": [
                 {
@@ -108,19 +190,22 @@ class Main {
                 "title": "STAI sicuro",
                 "termsOfService": "https://github.com/MedicaltechTM/STAI_sicuro"
             },
-        `;
-        for (let index = 0; index < tmp2.length; index++) {
-            const element = tmp2[index];
-            element.SettaSwagger();
-            if (index == 0 && index + 1 != tmp2.length) {
-                ritorno = ritorno + ', ';
-            }
-            if (index + 1 == tmp2.length) {
-                ritorno = ritorno + ' }';
-            }
+            "tags": [],
+            paths: {}
+        };
+        try {
+            const hhh = tmp.toString();
+            console.log(hhh);
+            JSON.parse(tmp);
         }
-        ritorno = ritorno + '}';
-        return ritorno;
+        catch (error) {
+            console.log(error);
+        }
+        return tmp;
+    }
+    AggiungiSwagger(path) {
+        const swaggerDocument = this.GetJSONSwagger();
+        this.serverExpressDecorato.use('/' + path, swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(JSON.parse(swaggerDocument)));
     }
     PrintMenu() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -160,8 +245,11 @@ class Main {
     }
     ;
     StartExpress() {
-        this.serverExpressDecorato.listen(3000);
+        var httpServer = http.createServer(this.serverExpressDecorato);
+        httpServer.listen(this.percorsi.porta);
+        //this.serverExpressDecorato.listen(this.percorsi.porta);
     }
 }
 exports.Main = Main;
+const http = __importStar(require("http"));
 //# sourceMappingURL=terminale-main.js.map

@@ -35,8 +35,8 @@ class ListaTerminaleClasse extends Array {
             for (let index = 0; index < this.length; index++) {
                 const element = this[index];
                 const tmp = index + 1;
-                ritorno.push(element.pathGlobal);
-                console.log(tmp + ': ' + element.pathGlobal);
+                ritorno.push(element.percorsi.pathGlobal);
+                console.log(tmp + ': ' + element.nome + ' | ' + element.percorsi.pathGlobal);
             }
             return ritorno;
         });
@@ -57,6 +57,15 @@ class ListaTerminaleClasse extends Array {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
             if (element.nome == nome)
+                return element;
+        }
+        return undefined;
+        //throw new Error("Errore mio !");
+    }
+    CercaConPath(path) {
+        for (let index = 0; index < this.length; index++) {
+            const element = this[index];
+            if (element.GetPath == path)
                 return element;
         }
         return undefined;
