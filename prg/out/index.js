@@ -36,7 +36,7 @@ const VerificaToken = (request, response, next) => {
 };
 let ClasseTest = class ClasseTest {
     constructor(nome, cognome) {
-        this.nome = nome;
+        this.nomeTest = nome;
         this.cognome = cognome;
     }
     //@mpMiddle
@@ -48,19 +48,30 @@ let ClasseTest = class ClasseTest {
             return response.status(403).send("Errore : " + error);
         }
     }; */
-    /* @mpMet({tipo:'get',path:'Valida',interazione:'middleware'})
-    Valida(@mpPar({nomeParametro:'token',posizione: 'body'}) token: string){
-        const tmp : IReturn={
-            body:{
-                "nome": this.nome
-            },
-            stato:200};
+    Valida(token) {
+        let tmp;
+        if (token == 'ppp') {
+            tmp = {
+                body: {
+                    "nome": this.nomeTest
+                },
+                stato: 200
+            };
+        }
+        else {
+            tmp = {
+                body: {
+                    "nome": this.nomeTest
+                },
+                stato: 500
+            };
+        }
         return tmp;
     }
-
-    @mpAddMiddle('Valida') */
+    /*
+                @mpAddMiddle('Valida') */
     SetNome(nomeFuturo, nomignolo) {
-        this.nome = nomeFuturo;
+        this.nomeTest = nomeFuturo;
         const tmp = {
             body: {
                 "nome": nomeFuturo + ' sei un POST',
@@ -71,7 +82,7 @@ let ClasseTest = class ClasseTest {
         return tmp;
     }
     SetNomeConMiddleware(nomeFuturo) {
-        this.nome = nomeFuturo;
+        this.nomeTest = nomeFuturo;
         const tmp = {
             body: {
                 "nome": nomeFuturo + ' sei un POST'
@@ -83,7 +94,7 @@ let ClasseTest = class ClasseTest {
     GetNome() {
         const tmp = {
             body: {
-                "nome": this.nome + ' sei un GET'
+                "nome": this.nomeTest + ' sei un GET'
             },
             stato: 200
         };
@@ -135,8 +146,8 @@ let ClasseTest = class ClasseTest {
         return tmp;
     } */
     MetodoPrint() {
-        if ('nome' in this) {
-            console.log(this.nome != undefined ? this.nome : "sono undefined");
+        if ('nomeTest' in this) {
+            console.log(this.nomeTest != undefined ? this.nomeTest : "sono undefined");
         }
         else {
             console.log("Classe senza nome");
@@ -144,22 +155,29 @@ let ClasseTest = class ClasseTest {
     }
 };
 __decorate([
+    terminale_metodo_1.mpMet({ tipo: 'get', path: 'Valida', interazione: 'middleware' }),
+    __param(0, terminale_parametro_1.mpPar({ nomeParametro: 'token', posizione: 'body' })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ClasseTest.prototype, "Valida", null);
+__decorate([
     terminale_metodo_1.mpMet({ tipo: 'post', path: 'SetNome' }),
     __param(0, terminale_parametro_1.mpPar({ nomeParametro: 'nomeFuturo',
         posizione: 'body',
         tipoParametro: 'text',
         descrizione: 'nome che perendere il posto del vecchio.' })),
-    __param(1, terminale_parametro_1.mpPar({
-        nomeParametro: 'nomignolo',
+    __param(1, terminale_parametro_1.mpPar({ nomeParametro: 'nomignolo',
         posizione: 'query',
         descrizione: 'Nomiglolo passato per query',
-        tipoParametro: 'text'
-    })),
+        tipoParametro: 'text' })),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], ClasseTest.prototype, "SetNome", null);
 __decorate([
+    terminale_metodo_1.mpAddMiddle('Valida'),
+    terminale_metodo_1.mpMet({ tipo: 'post', path: 'SetNomeConMiddleware' }),
     __param(0, terminale_parametro_1.mpPar({
         nomeParametro: 'nomeFuturo',
         posizione: 'body',

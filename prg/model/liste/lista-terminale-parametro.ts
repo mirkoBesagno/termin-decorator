@@ -15,7 +15,7 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
     }
     EstraiParametriDaRequest(richiesta: Request) {
         const ritorno = [];
-        for (let index = 0; index < this.length; index++) {
+        for (let index = this.length -1; index >= 0; index--) {
             const element = this[index];
 
             //const indice = JSON.stringify(richiesta.body).search(element.nome);

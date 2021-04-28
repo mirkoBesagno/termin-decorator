@@ -529,12 +529,17 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
     ConvertiInMiddleare() {
         return async (req: Request, res: Response, nex: NextFunction) => {
-            const tmp = await this.Esegui(req);
-            if (tmp.stato >= 300) {
-                throw new Error("Errore : " + tmp.body);
-            }
-            else {
-                return nex;
+            try {
+                const tmp = await this.Esegui(req);
+                if (tmp.stato >= 300) {
+                    throw new Error("Errore : " + tmp.body);
+                }
+                else {
+                    nex();
+                    return nex;
+                }
+            } catch (error) {
+                res.status(555).send("Errore : "+error);
             }
         };
     }

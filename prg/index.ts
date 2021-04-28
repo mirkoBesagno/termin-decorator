@@ -31,11 +31,11 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
 
         @mpClas('classe-test')
         class ClasseTest {
-            nome: string;
+            nomeTest: string;
             cognome:string;
 
             constructor(nome: string, cognome:string) {
-                this.nome = nome;
+                this.nomeTest = nome;
                 this.cognome=cognome;
             }
 
@@ -50,31 +50,40 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
             }; */
 
             
-            /* @mpMet({tipo:'get',path:'Valida',interazione:'middleware'})
+            @mpMet({tipo:'get',path:'Valida',interazione:'middleware'})
             Valida(@mpPar({nomeParametro:'token',posizione: 'body'}) token: string){
-                const tmp : IReturn={
+                let tmp:IReturn;
+                if (token== 'ppp') {                    
+                tmp ={
                     body:{
-                        "nome": this.nome
+                        "nome": this.nomeTest
                     },
                     stato:200};
+                } else {
+                    tmp ={
+                    body:{
+                        "nome": this.nomeTest
+                    },
+                    stato:500};
+                }
                 return tmp;
             }
-
+/*
             @mpAddMiddle('Valida') */
             @mpMet({tipo:'post',path:'SetNome'})
             SetNome(
-                @mpPar({                        nomeParametro:'nomeFuturo',
+                @mpPar({nomeParametro:'nomeFuturo',
                         posizione: 'body',
                         tipoParametro:'text',
-                        descrizione:'nome che perendere il posto del vecchio.'                    }) nomeFuturo: string,
-                    @mpPar({
-                        nomeParametro:'nomignolo',
+                        descrizione:'nome che perendere il posto del vecchio.'}) 
+                        nomeFuturo: string,
+                    @mpPar({nomeParametro:'nomignolo',
                         posizione:'query',
                         descrizione:'Nomiglolo passato per query',
-                        tipoParametro:'text'
-                    })nomignolo: string
+                        tipoParametro:'text'})
+                        nomignolo: string
                     ){
-                this.nome = nomeFuturo;
+                this.nomeTest = nomeFuturo;
                 const tmp : IReturn={
                     body:{
                         "nome": nomeFuturo+' sei un POST',
@@ -84,6 +93,9 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
                 return tmp;
             }
 
+            
+            @mpAddMiddle('Valida') 
+            @mpMet({tipo:'post',path:'SetNomeConMiddleware'})
             SetNomeConMiddleware(
                 @mpPar({
                         nomeParametro:'nomeFuturo',
@@ -92,7 +104,7 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
                         descrizione:'nome che perendere il posto del vecchio.'
                     }) nomeFuturo: string
                     ){
-                this.nome = nomeFuturo;
+                this.nomeTest = nomeFuturo;
                 const tmp : IReturn={
                     body:{
                         "nome": nomeFuturo+' sei un POST'
@@ -105,7 +117,7 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
             GetNome(){
                 const tmp : IReturn={
                     body:{
-                        "nome": this.nome +' sei un GET'
+                        "nome": this.nomeTest +' sei un GET'
                     },
                     stato:200};
                 return tmp;
@@ -159,8 +171,8 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
             } */
             
             MetodoPrint() {
-                if ('nome' in this) {
-                    console.log(this.nome != undefined ? this.nome : "sono undefined");
+                if ('nomeTest' in this) {
+                    console.log(this.nomeTest != undefined ? this.nomeTest : "sono undefined");
                 }
                 else {
                     console.log("Classe senza nome");

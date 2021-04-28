@@ -482,12 +482,18 @@ class TerminaleMetodo {
     }
     ConvertiInMiddleare() {
         return (req, res, nex) => __awaiter(this, void 0, void 0, function* () {
-            const tmp = yield this.Esegui(req);
-            if (tmp.stato >= 300) {
-                throw new Error("Errore : " + tmp.body);
+            try {
+                const tmp = yield this.Esegui(req);
+                if (tmp.stato >= 300) {
+                    throw new Error("Errore : " + tmp.body);
+                }
+                else {
+                    nex();
+                    return nex;
+                }
             }
-            else {
-                return nex;
+            catch (error) {
+                res.status(555).send("Errore : " + error);
             }
         });
     }

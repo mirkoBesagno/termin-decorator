@@ -20,7 +20,7 @@ class ListaTerminaleParametro extends Array {
     }
     EstraiParametriDaRequest(richiesta) {
         const ritorno = [];
-        for (let index = 0; index < this.length; index++) {
+        for (let index = this.length - 1; index >= 0; index--) {
             const element = this[index];
             //const indice = JSON.stringify(richiesta.body).search(element.nome);
             if (richiesta.body[element.nome] != undefined) {
