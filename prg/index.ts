@@ -11,10 +11,20 @@ import { Request, Response, NextFunction } from "express";
 import { mpMain, Main } from "./model/classi/terminale-main";
 import { mpClas } from "./model/classi/terminale-classe";
 import { IReturn, mpAddMiddle, mpMet } from "./model/classi/terminale-metodo";
-import {  TypePosizione, mpP, mpPar } from "./model/classi/terminale-parametro";
+import {  TypePosizione, mpP, mpPar, IParametro } from "./model/classi/terminale-parametro";
 import { TipoParametro } from "./model/tools";
 
-
+const test:IParametro = {
+    nomeParametro:'nomeFuturo',
+                        posizione: 'body',
+                        tipoParametro:'text',
+                        descrizione:'nome che perendere il posto del vecchio.'
+};
+const test1:IParametro = {nomeParametro:'nomignolo',
+posizione:'query',
+descrizione:'Nomiglolo passato per query',
+tipoParametro:'text'
+};
 const ff = function (req:Request,  res:Response, nex:NextFunction) {
     return nex;
 };
@@ -72,16 +82,8 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
             @mpAddMiddle('Valida') */
             @mpMet({tipo:'post',path:'SetNome'})
             SetNome(
-                @mpPar({nomeParametro:'nomeFuturo',
-                        posizione: 'body',
-                        tipoParametro:'text',
-                        descrizione:'nome che perendere il posto del vecchio.'}) 
-                        nomeFuturo: string,
-                    @mpPar({nomeParametro:'nomignolo',
-                        posizione:'query',
-                        descrizione:'Nomiglolo passato per query',
-                        tipoParametro:'text'})
-                        nomignolo: string
+                @mpPar(test)nomeFuturo: string,
+                    @mpPar(test1)nomignolo: string
                     ){
                 this.nomeTest = nomeFuturo;
                 const tmp : IReturn={
