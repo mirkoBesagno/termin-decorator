@@ -110,10 +110,12 @@ class Main {
             if (!fs_1.default.existsSync(dir)) {
                 fs_1.default.mkdirSync(dir);
             }
-            tmp.forEach(element => {
-                element;
-                fs_1.default.writeFileSync(dir + '/' + element.nome, 'Hey there!');
-            });
+            /*  tmp.forEach(classe => {
+                 classe.listaMetodi.forEach(metodo =>{
+                     metodo.
+                 });
+                 fs.writeFileSync(dir + '/' + classe.nome, 'Hey there!');
+             }); */
         }
     }
     GetJSONSwagger() {
@@ -255,11 +257,20 @@ class Main {
             }
         });
     }
-    ;
     StartExpress() {
+        this.AggiungiHTML();
         var httpServer = http.createServer(this.serverExpressDecorato);
         httpServer.listen(this.percorsi.porta);
         //this.serverExpressDecorato.listen(this.percorsi.porta);
+    }
+    AggiungiHTML() {
+        this.serverExpressDecorato.use(express_1.default.static('C:/Users/mirko.pizzini/Documents/GitHub/termin-decorator/prg/mpHTML')).get("/server", function (req, res) {
+            let tmp = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale);
+            const text = tmp.GeneraHTML();
+            fs_1.default.writeFileSync("C:/Users/mirko.pizzini/Documents/GitHub/termin-decorator/prg/mpHTML/server.html", text);
+            res.status(200).sendFile("C:/Users/mirko.pizzini/Documents/GitHub/termin-decorator/prg/mpHTML/server.html");
+            //res.status(200).send("Errore!! La richiesta non puo essere soddisfatta.");
+        });
     }
 }
 exports.Main = Main;

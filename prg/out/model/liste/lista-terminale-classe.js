@@ -94,6 +94,40 @@ class ListaTerminaleClasse extends Array {
         this.push(item);
         return item;
     }
+    GeneraHTML() {
+        let lista = '';
+        for (let index = 0; index < this.length; index++) {
+            const element = this[index];
+            const tmp = `
+            <li class="pure-menu-item">
+                <a href="#" class="pure-menu-link">${element.nome}</a>
+            </li>
+            `;
+            lista = lista + '\n' + tmp;
+        }
+        let ritorno = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Document</title>
+
+            <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
+        </head>
+        <body>
+            <div class="pure-menu pure-menu-horizontal pure-menu-scrollable">
+                <a href="#" class="pure-menu-link pure-menu-heading">Yahoo</a>
+                <ul class="pure-menu-list">
+                    ${lista}
+                </ul>
+            </div>            
+        </body>
+        </html>
+        `;
+        return ritorno;
+    }
 }
 exports.ListaTerminaleClasse = ListaTerminaleClasse;
 ListaTerminaleClasse.nomeMetadataKeyTarget = "ListaTerminaleClasse";

@@ -250,12 +250,18 @@ prompts_1.default([{
         scelta2.header = 'http://localhost';
     main.Inizializza(scelta2.header + ":", scelta2.porta, true, true);
     console.log('..... Inizializzazione fine.');
+    const vett = [
+        'express',
+        'superagent',
+        'aggiungi swagger',
+        'express + superagent',
+        'todo'
+    ];
     console.log('Menu');
-    console.log('0: express');
-    console.log('1: superagent');
-    console.log('2: aggiungi swagger');
-    console.log('3: express + superagent');
-    console.log('4: todo');
+    for (let index = 0; index < vett.length; index++) {
+        const element = vett[index];
+        console.log(index + ' :' + element);
+    }
     prompts_1.default({
         message: 'Scegli: ',
         type: 'number',
