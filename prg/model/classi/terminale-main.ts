@@ -9,6 +9,7 @@ import * as bodyParser from 'body-parser';
 import swaggerUI from "swagger-ui-express";
 import { SalvaListaClasseMetaData, TerminaleClasse } from "./terminale-classe";
 //const swaggerUI = require('swagger-ui-express');
+import fs from "fs";
 
 /**
  * 
@@ -48,7 +49,7 @@ export class Main {
         this.listaTerminaleClassi = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
     }
 
-    Inizializza(patheader: string, porta: number, rottaBase: boolean) {
+    Inizializza(patheader: string, porta: number, rottaBase: boolean, creaFile?: boolean) {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         this.percorsi.patheader = patheader;
         this.percorsi.porta = porta;
@@ -82,6 +83,18 @@ export class Main {
             }); */
 
         SalvaListaClasseMetaData(tmp);
+
+        if (creaFile == true) {
+            console.log("ciao");
+            const dir = './mpExpress';
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir);
+            }
+            tmp.forEach(element => {
+                element;
+                fs.writeFileSync(dir + '/' + element.nome, 'Hey there!');
+            });
+        }
     }
     GetJSONSwagger() {
         const swaggerJson = ``;

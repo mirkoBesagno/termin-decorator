@@ -230,7 +230,7 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
         }]).then((scelta2)=>{
             if(scelta2.porta == undefined || scelta2.porta == 0)scelta2.porta = 3030; 
             if(scelta2.header == undefined || scelta2.header == 0) scelta2.header='http://localhost';
-        main.Inizializza(scelta2.header + ":", scelta2.porta, true);
+        main.Inizializza(scelta2.header + ":", scelta2.porta, true,true);
         console.log('..... Inizializzazione fine.');
         console.log('Menu');
         console.log('0: express');

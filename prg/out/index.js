@@ -22,6 +22,17 @@ const terminale_main_1 = require("./model/classi/terminale-main");
 const terminale_classe_1 = require("./model/classi/terminale-classe");
 const terminale_metodo_1 = require("./model/classi/terminale-metodo");
 const terminale_parametro_1 = require("./model/classi/terminale-parametro");
+const test = {
+    nomeParametro: 'nomeFuturo',
+    posizione: 'body',
+    tipoParametro: 'text',
+    descrizione: 'nome che perendere il posto del vecchio.'
+};
+const test1 = { nomeParametro: 'nomignolo',
+    posizione: 'query',
+    descrizione: 'Nomiglolo passato per query',
+    tipoParametro: 'text'
+};
 const ff = function (req, res, nex) {
     return nex;
 };
@@ -163,14 +174,8 @@ __decorate([
 ], ClasseTest.prototype, "Valida", null);
 __decorate([
     terminale_metodo_1.mpMet({ tipo: 'post', path: 'SetNome' }),
-    __param(0, terminale_parametro_1.mpPar({ nomeParametro: 'nomeFuturo',
-        posizione: 'body',
-        tipoParametro: 'text',
-        descrizione: 'nome che perendere il posto del vecchio.' })),
-    __param(1, terminale_parametro_1.mpPar({ nomeParametro: 'nomignolo',
-        posizione: 'query',
-        descrizione: 'Nomiglolo passato per query',
-        tipoParametro: 'text' })),
+    __param(0, terminale_parametro_1.mpPar(test)),
+    __param(1, terminale_parametro_1.mpPar(test1)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
@@ -243,7 +248,7 @@ prompts_1.default([{
         scelta2.porta = 3030;
     if (scelta2.header == undefined || scelta2.header == 0)
         scelta2.header = 'http://localhost';
-    main.Inizializza(scelta2.header + ":", scelta2.porta, true);
+    main.Inizializza(scelta2.header + ":", scelta2.porta, true, true);
     console.log('..... Inizializzazione fine.');
     console.log('Menu');
     console.log('0: express');

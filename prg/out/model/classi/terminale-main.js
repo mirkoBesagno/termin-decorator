@@ -40,6 +40,7 @@ const bodyParser = __importStar(require("body-parser"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const terminale_classe_1 = require("./terminale-classe");
 //const swaggerUI = require('swagger-ui-express');
+const fs_1 = __importDefault(require("fs"));
 /**
  *
  */
@@ -73,7 +74,7 @@ class Main {
             this.serverExpressDecorato = server;
         this.listaTerminaleClassi = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale);
     }
-    Inizializza(patheader, porta, rottaBase) {
+    Inizializza(patheader, porta, rottaBase, creaFile) {
         let tmp = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale);
         this.percorsi.patheader = patheader;
         this.percorsi.porta = porta;
@@ -103,6 +104,17 @@ class Main {
                 return res;
             }); */
         terminale_classe_1.SalvaListaClasseMetaData(tmp);
+        if (creaFile == true) {
+            console.log("ciao");
+            const dir = './mpExpress';
+            if (!fs_1.default.existsSync(dir)) {
+                fs_1.default.mkdirSync(dir);
+            }
+            tmp.forEach(element => {
+                element;
+                fs_1.default.writeFileSync(dir + '/' + element.nome, 'Hey there!');
+            });
+        }
     }
     GetJSONSwagger() {
         const swaggerJson = ``;
