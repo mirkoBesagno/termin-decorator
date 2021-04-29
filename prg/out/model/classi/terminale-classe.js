@@ -109,6 +109,10 @@ class TerminaleClasse {
             }
         });
     }
+    GeneraStruttura(path) {
+        const fileHTML = '';
+        const fileTypeScript = '';
+    }
     PrintCredenziali() {
         const tmp = "nome:" + this.nome + ":;:" +
             "id:" + this.id + ":;:" +

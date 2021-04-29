@@ -104,19 +104,19 @@ class Main {
                 return res;
             }); */
         terminale_classe_1.SalvaListaClasseMetaData(tmp);
-        if (creaFile == true) {
-            console.log("ciao");
-            const dir = './mpExpress';
-            if (!fs_1.default.existsSync(dir)) {
-                fs_1.default.mkdirSync(dir);
-            }
-            /*  tmp.forEach(classe => {
-                 classe.listaMetodi.forEach(metodo =>{
-                     metodo.
-                 });
-                 fs.writeFileSync(dir + '/' + classe.nome, 'Hey there!');
-             }); */
-        }
+        /* if (creaFile == true) {
+           console.log("ciao");
+           const dir = './mpExpress';
+           if (!fs.existsSync(dir)) {
+               fs.mkdirSync(dir);
+           }
+           tmp.forEach(classe => {
+                classe.listaMetodi.forEach(metodo =>{
+                    metodo.
+                });
+                fs.writeFileSync(dir + '/' + classe.nome, 'Hey there!');
+            });
+       }*/
     }
     GetJSONSwagger() {
         const swaggerJson = ``;
@@ -264,13 +264,22 @@ class Main {
         //this.serverExpressDecorato.listen(this.percorsi.porta);
     }
     AggiungiHTML() {
-        this.serverExpressDecorato.use(express_1.default.static('C:/Users/mirko.pizzini/Documents/GitHub/termin-decorator/prg/mpHTML')).get("/server", function (req, res) {
+        this.serverExpressDecorato /* .use(express.static(__dirname+'../../../mpHTML/server.html')) */.get("/server", function (req, res) {
             let tmp = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale);
             const text = tmp.GeneraHTML();
-            fs_1.default.writeFileSync("C:/Users/mirko.pizzini/Documents/GitHub/termin-decorator/prg/mpHTML/server.html", text);
-            res.status(200).sendFile("C:/Users/mirko.pizzini/Documents/GitHub/termin-decorator/prg/mpHTML/server.html");
+            /* fs.writeFileSync(__dirname+'../../../mpHTML/server.html',text)
+            res.status(200).sendFile(__dirname+'../../../mpHTML/server.html'); */
+            res.status(200).send(text);
             //res.status(200).send("Errore!! La richiesta non puo essere soddisfatta.");
         });
+    }
+    GeneraStruttura(path) {
+        let tmp = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale);
+        var dir = path + '/component-main';
+        if (!fs_1.default.existsSync(dir)) {
+            fs_1.default.mkdirSync(dir);
+        }
+        tmp.GeneraStruttura(dir);
     }
 }
 exports.Main = Main;

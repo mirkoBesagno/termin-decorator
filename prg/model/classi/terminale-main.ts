@@ -84,19 +84,19 @@ export class Main {
 
         SalvaListaClasseMetaData(tmp);
 
-        if (creaFile == true) {
-            console.log("ciao");
-            const dir = './mpExpress';
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir);
-            }
-            /*  tmp.forEach(classe => {
-                 classe.listaMetodi.forEach(metodo =>{
-                     metodo.
-                 });
-                 fs.writeFileSync(dir + '/' + classe.nome, 'Hey there!');
-             }); */
-        }
+        /* if (creaFile == true) {
+           console.log("ciao");
+           const dir = './mpExpress';
+           if (!fs.existsSync(dir)) {
+               fs.mkdirSync(dir);
+           }
+           tmp.forEach(classe => {
+                classe.listaMetodi.forEach(metodo =>{
+                    metodo.
+                });
+                fs.writeFileSync(dir + '/' + classe.nome, 'Hey there!');
+            }); 
+       }*/
     }
     GetJSONSwagger() {
         const swaggerJson = ``;
@@ -250,13 +250,22 @@ export class Main {
         //this.serverExpressDecorato.listen(this.percorsi.porta);
     }
     AggiungiHTML() {
-        this.serverExpressDecorato.use(express.static('C:/Users/mirko.pizzini/Documents/GitHub/termin-decorator/prg/mpHTML')).get("/server", function (req, res) {
+        this.serverExpressDecorato/* .use(express.static(__dirname+'../../../mpHTML/server.html')) */.get("/server", function (req, res) {
             let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
             const text = tmp.GeneraHTML();
-            fs.writeFileSync("C:/Users/mirko.pizzini/Documents/GitHub/termin-decorator/prg/mpHTML/server.html",text)
-            res.status(200).sendFile("C:/Users/mirko.pizzini/Documents/GitHub/termin-decorator/prg/mpHTML/server.html");
+            /* fs.writeFileSync(__dirname+'../../../mpHTML/server.html',text)
+            res.status(200).sendFile(__dirname+'../../../mpHTML/server.html'); */
+            res.status(200).send(text);
             //res.status(200).send("Errore!! La richiesta non puo essere soddisfatta.");
         });
+    }
+    GeneraStruttura(path: string) {
+        let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
+        var dir = path + '/component-main';
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir);
+        }
+        tmp.GeneraStruttura(dir);
     }
 }
 

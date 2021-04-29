@@ -7,6 +7,7 @@ import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import { ListaTerminaleMetodo } from "../liste/lista-terminale-metodo";
 import { TerminaleMetodo } from "./terminale-metodo";
 import { IRaccoltaPercorsi } from "./terminale-main";
+import fs from 'fs';
 
 export class TerminaleClasse implements IPrintabile {
     static nomeMetadataKeyTarget = "ClasseTerminaleTarget";
@@ -27,7 +28,7 @@ export class TerminaleClasse implements IPrintabile {
         const pathGlobal = '/' + this.path;
         this.percorsi.pathGlobal = pathGlobal;
     }
-    
+
     percorsi: IRaccoltaPercorsi;
 
     constructor(nome: string, path?: string, headerPath?: string, port?: number) {
@@ -105,14 +106,18 @@ export class TerminaleClasse implements IPrintabile {
             }
         }
     }
-
+    GeneraStruttura(path: string) {
+        const fileHTML: string = '';
+        const fileTypeScript: string = '';
+        
+    }
     PrintCredenziali() {
         const tmp = "nome:" + this.nome + ":;:" +
             "id:" + this.id + ":;:" +
             "listaMetodi.length:" + this.listaMetodi.length + ":;:";
         //console.log(tmp);
     }
-    SettaPathRoot_e_Global(item: string, percorsi: IRaccoltaPercorsi, app:any) {
+    SettaPathRoot_e_Global(item: string, percorsi: IRaccoltaPercorsi, app: any) {
 
         if (percorsi.patheader == undefined) this.percorsi.patheader = "http://localhost:";
         else this.percorsi.patheader = percorsi.patheader;
