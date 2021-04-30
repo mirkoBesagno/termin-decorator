@@ -109,7 +109,7 @@ export class TerminaleClasse implements IPrintabile {
     GeneraStruttura(path: string) {
         const fileHTML: string = '';
         const fileTypeScript: string = '';
-        
+
     }
     PrintCredenziali() {
         const tmp = "nome:" + this.nome + ":;:" +
@@ -175,6 +175,20 @@ export class TerminaleClasse implements IPrintabile {
         }
         return terminale;
     }
+    GeneraHTML() {
+        let listaNomi = '';
+        for (let index = 0; index < this.listaMetodi.length; index++) {
+            const element = this.listaMetodi[index];
+            let bodyStart = `<button class="accordion">${element.nome}</button>
+                         <div class="panel">`;
+            let bodyEnd = '</div>';
+            const tmp = `
+            <p>${element.PrintStamp()}</p>            
+             </br>\n`;
+            listaNomi = listaNomi + '\n' + bodyStart + tmp + bodyEnd;
+        }
+        return listaNomi;
+    }
     /* SettaHTML() {
         const tmp: any[] = [];
         for (let index = 0; index < this.listaMetodi.length; index++) {
@@ -195,14 +209,6 @@ function decoratoreClasse(percorso: string): any {
         const classe = CheckClasseMetaData(ctr.name);
         classe.SetPath = percorso;
         SalvaListaClasseMetaData(tmp);
-    }
-}
-function decoratoreClasseeRev(percorso: string): any {
-    return (ctr: Function) => {
-        const list: ListaTerminaleClasse = GetListaClasseMetaData();
-        const classe = list.CercaConNomeSeNoAggiungi(ctr.name);
-        classe.SetPath = percorso;
-        SalvaListaClasseMetaData(list);
     }
 }
 

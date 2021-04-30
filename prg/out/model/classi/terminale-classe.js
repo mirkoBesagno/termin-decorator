@@ -177,6 +177,20 @@ class TerminaleClasse {
         }
         return terminale;
     }
+    GeneraHTML() {
+        let listaNomi = '';
+        for (let index = 0; index < this.listaMetodi.length; index++) {
+            const element = this.listaMetodi[index];
+            let bodyStart = `<button class="accordion">${element.nome}</button>
+                         <div class="panel">`;
+            let bodyEnd = '</div>';
+            const tmp = `
+            <p>${element.PrintStamp()}</p>            
+             </br>\n`;
+            listaNomi = listaNomi + '\n' + bodyStart + tmp + bodyEnd;
+        }
+        return listaNomi;
+    }
 }
 exports.TerminaleClasse = TerminaleClasse;
 TerminaleClasse.nomeMetadataKeyTarget = "ClasseTerminaleTarget";
@@ -204,14 +218,6 @@ exports.MPClasse = decoratoreClasse;
 exports.MPDecoratoreClasse = decoratoreClasse;
 exports.MPDecClasse = decoratoreClasse;
 exports.MPDecClas = decoratoreClasse;
-function decoratoreClasseeRev(percorso) {
-    return (ctr) => {
-        const list = GetListaClasseMetaData();
-        const classe = list.CercaConNomeSeNoAggiungi(ctr.name);
-        classe.SetPath = percorso;
-        SalvaListaClasseMetaData(list);
-    };
-}
 function CheckClasseMetaData(nome) {
     let listClasse = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale); // vado a prendere la struttura legata alle funzioni ovvero le classi
     if (listClasse == undefined) /* se non c'è la creo*/ {

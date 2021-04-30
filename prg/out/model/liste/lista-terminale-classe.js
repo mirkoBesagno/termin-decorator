@@ -97,65 +97,134 @@ class ListaTerminaleClasse extends Array {
     }
     GeneraHTML() {
         let listaNomi = '';
+        let bodyStart = `<div class="tab">`;
+        let bodyEnd = '</div>';
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
-            const tmp = `
-            <li class="nav-item" role="presentation">
-                <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#${element.nome}" role="tab" aria-controls="pills-home" aria-selected="true">${element.nome}</a>
-            </li>
-            `;
+            const tmp = `<button class="tablinks" onclick="openCity(event, '${element.nome}')">${element.nome}</button>`;
             listaNomi = listaNomi + '\n' + tmp;
         }
         let listaMetodi = '';
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
-            const tmp = `
-            <li class="nav-item" role="presentation">
-                <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#${element.nome}" role="tab" aria-controls="pills-home" aria-selected="true">${element.nome}</a>
-            </li>
-            `;
+            const tmp = element.GeneraHTML();
             listaNomi = listaNomi + '\n' + tmp;
         }
         let ritorno = `
         <!DOCTYPE html>
-        <html lang="en">
+        <html>
 
         <head>
-            <meta charset="UTF-8">
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Document</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+                body {
+                    font-family: Arial;
+                }
 
-            <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css"
-                integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
-            <!-- Bootstrap CSS -->
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
-                integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+                /* Style the tab */
+                .tab {
+                    overflow: hidden;
+                    border: 1px solid #ccc;
+                    background-color: #f1f1f1;
+                }
 
+                /* Style the buttons inside the tab */
+                .tab button {
+                    background-color: inherit;
+                    float: left;
+                    border: none;
+                    outline: none;
+                    cursor: pointer;
+                    padding: 14px 16px;
+                    transition: 0.3s;
+                    font-size: 17px;
+                }
+
+                /* Change background color of buttons on hover */
+                .tab button:hover {
+                    background-color: #ddd;
+                }
+
+                /* Create an active/current tablink class */
+                .tab button.active {
+                    background-color: #ccc;
+                }
+
+                /* Style the tab content */
+                .tabcontent {
+                    display: none;
+                    padding: 6px 12px;
+                    border: 1px solid #ccc;
+                    border-top: none;
+                }
+
+                /* Style the accordion content */
+                .accordion {
+                    background-color: #eee;
+                    color: #444;
+                    cursor: pointer;
+                    padding: 18px;
+                    width: 100%;
+                    border: none;
+                    text-align: left;
+                    outline: none;
+                    font-size: 15px;
+                    transition: 0.4s;
+                  }
+                  
+                /* Style the accordion content */
+                  .active, .accordion:hover {
+                    background-color: #ccc; 
+                  }
+                  
+                /* Style the accordion content */
+                  .panel {
+                    padding: 0 18px;
+                    display: none;
+                    background-color: white;
+                    overflow: hidden;
+                  }
+                  </style>
+            </style>
         </head>
 
         <body>
-            <!-- Option 1: jQuery and Bootstrap Bundle (includes Popper) -->
-            <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-                integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-                crossorigin="anonymous"></script>
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
-                integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
-                crossorigin="anonymous"></script>
 
-            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab"
-                        aria-controls="pills-home" aria-selected="true">
-                        ${listaNomi}
-                    </a>
-                </li>
-            </ul>
-            <div class="tab-content" id="pills-tabContent">
-                <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-                    ${listaMetodi}
-                </div>
-            </div>
+            <h2>Tabs</h2>
+            <p>Click on the buttons inside the tabbed menu:</p>
+
+            ${listaNomi}
+
+
+            <script>
+                function openCity(evt, cityName) {
+                    var i, tabcontent, tablinks;
+                    tabcontent = document.getElementsByClassName("tabcontent");
+                    for (i = 0; i < tabcontent.length; i++) {
+                        tabcontent[i].style.display = "none";
+                    }
+                    tablinks = document.getElementsByClassName("tablinks");
+                    for (i = 0; i < tablinks.length; i++) {
+                        tablinks[i].className = tablinks[i].className.replace(" active", "");
+                    }
+                    document.getElementById(cityName).style.display = "block";
+                    evt.currentTarget.className += " active";
+                }
+                var acc = document.getElementsByClassName("accordion");
+                var i;
+
+                for (i = 0; i < acc.length; i++) {
+                acc[i].addEventListener("click", function() {
+                    this.classList.toggle("active");
+                    var panel = this.nextElementSibling;
+                    if (panel.style.display === "block") {
+                    panel.style.display = "none";
+                    } else {
+                    panel.style.display = "block";
+                    }
+                });
+                }
+            </script>
 
         </body>
 
