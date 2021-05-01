@@ -186,53 +186,16 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
 
         }
 
-        @mpClas('classe-test-1')
-        class ClasseTest1 {
-            nomeTest: string;
-            cognome:string;
-
-            constructor(nome: string, cognome:string) {
-                this.nomeTest = nome;
-                this.cognome=cognome;
+        @mpClas('prima-classe')
+        class PrimaClasse {
+            constructor() {
             }
 
-            //@mpMiddle
-            /* VerificaToken = (request: Request, response: Response, next: NextFunction) => {
-                try {
-                    next();
-                } catch (error) {
-                    console.log(error);
-                    return response.status(403).send("Errore : " + error);
-                }
-            }; */
-
-            
-            @mpMet({tipo:'get',path:'Valida1',interazione:'middleware'})
-            Valida1(@mpPar({nomeParametro:'token',posizione: 'body'}) token: string){
-                let tmp:IReturn;
-                if (token== 'ppp') {                    
-                tmp ={
-                    body:{
-                        "nome": this.nomeTest
-                    },
-                    stato:200};
-                } else {
-                    tmp ={
-                    body:{
-                        "nome": this.nomeTest
-                    },
-                    stato:500};
-                }
-                return tmp;
-            }
-/*
-            @mpAddMiddle('Valida') */
-            @mpMet({tipo:'post',path:'SetNome'})
-            SetNome(
+            @mpMet({tipo:'post',path:'PrimoMetodo'})
+            PrimoMetodo(
                 @mpPar(test)nomeFuturo: string,
                     @mpPar(test1)nomignolo: string
                     ){
-                this.nomeTest = nomeFuturo;
                 const tmp : IReturn={
                     body:{
                         "nome": nomeFuturo+' sei un POST',
@@ -244,104 +207,19 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
 
             
 
-            @mpMet({tipo:'get', path:'GetNome'})
-            GetNome(){
+            @mpMet({tipo:'get', path:'SecondoMetodo'})
+            SecondoMetodo(){
                 const tmp : IReturn={
                     body:{
-                        "nome": this.nomeTest +' sei un GET'
+                        "nome": ' sei un GET'
                     },
                     stato:200};
                 return tmp;
-            }
-
-
-            /* @mpMet('post', "SetCognome")
-            SetCognome(@mpPar('text', 'cognomeNuovo', 'body') cognomeNuovo: string) {
-                this.cognome = cognomeNuovo;
-                const tmp : IReturn={
-                    body:{
-                        "cognome": this.cognome
-                    },
-                    stato:200};
-                return tmp;
-            }
-            @mpMet('get', 'GetCognome')
-            GetCognome() {
-                const tmp : IReturn={
-                    body:{
-                        "cognome": this.cognome
-                    },
-                    stato:200};
-                return tmp;
-            }
-
-            @mpMet('post','set-nome-e-cognome')
-            SetNome_E_Cognome(
-                @mpP('text', 'nomeNuovo', 'body') nome:string, 
-            @mpP('text', 'cognomeNuovo', 'query') cognome:string){
-                this.cognome = cognome;
-                this.nome= nome;
-                const tmp : IReturn={
-                    body:{
-                        "nome":this.nome,
-                        "cognome": this.cognome
-                    },
-                    stato:200};
-                return tmp;
-            }
-            @mpMet('get','get-nome-e-cognome')
-            GetNome_E_Cognome(){
-                
-                const tmp : IReturn={
-                    body:{
-                        "nome":this.nome,
-                        "cognome": this.cognome
-                    },
-                    stato:200};
-                return tmp;
-            } */
-            
-            MetodoPrint() {
-                if ('nomeTest' in this) {
-                    console.log(this.nomeTest != undefined ? this.nomeTest : "sono undefined");
-                }
-                else {
-                    console.log("Classe senza nome");
-
-                }
             }
 
         }
-        /* @mpClass('classe1')
-        class Classe1 {
-            nome: string;
-            constructor(nome: string) {
-                this.nome = nome;
-            }
-            @mpMet()
-            SetNome(@mpPar("char") nomeFuturo: string) {
-                this.nome = nomeFuturo;
-            }
 
-            @mpMet()
-            SetNomePrimo(@mpPar("char") nomeFuturoPrimo: string) {
-                this.nome = nomeFuturoPrimo;
-            }
-            @mpMet()
-            SetNomeSecondo(@mpPar("char") nomeFuturoSecondo: string) {
-                this.nome = nomeFuturoSecondo;
-            }
-
-            MetodoPrint() {
-                if ('nome' in this) {
-                    console.log(this.nome != undefined ? this.nome : "sono undefined");
-                }
-                else {
-                    console.log("Classe senza nome");
-
-                }
-            }
-        } */
+    
         const classecosi = new ClasseTest("prima classe!!",'cognome prima classe?!??!');
         classecosi.MetodoPrint();
 

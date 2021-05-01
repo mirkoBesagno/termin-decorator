@@ -22,6 +22,7 @@ const terminale_main_1 = require("./model/classi/terminale-main");
 const terminale_classe_1 = require("./model/classi/terminale-classe");
 const terminale_metodo_1 = require("./model/classi/terminale-metodo");
 const terminale_parametro_1 = require("./model/classi/terminale-parametro");
+require("reflect-metadata");
 const test = {
     nomeParametro: 'nomeFuturo',
     posizione: 'body',
@@ -203,36 +204,47 @@ ClasseTest = __decorate([
     terminale_classe_1.mpClas('classe-test'),
     __metadata("design:paramtypes", [String, String])
 ], ClasseTest);
-/* @mpClass('classe1')
-class Classe1 {
-    nome: string;
-    constructor(nome: string) {
-        this.nome = nome;
+let PrimaClasse = class PrimaClasse {
+    constructor() {
     }
-    @mpMet()
-    SetNome(@mpPar("char") nomeFuturo: string) {
-        this.nome = nomeFuturo;
+    PrimoMetodo(nomeFuturo, nomignolo) {
+        const tmp = {
+            body: {
+                "nome": nomeFuturo + ' sei un POST',
+                "nomignolo": nomignolo + ' sei un nomigolo!'
+            },
+            stato: 200
+        };
+        return tmp;
     }
-
-    @mpMet()
-    SetNomePrimo(@mpPar("char") nomeFuturoPrimo: string) {
-        this.nome = nomeFuturoPrimo;
+    SecondoMetodo() {
+        const tmp = {
+            body: {
+                "nome": ' sei un GET'
+            },
+            stato: 200
+        };
+        return tmp;
     }
-    @mpMet()
-    SetNomeSecondo(@mpPar("char") nomeFuturoSecondo: string) {
-        this.nome = nomeFuturoSecondo;
-    }
-
-    MetodoPrint() {
-        if ('nome' in this) {
-            console.log(this.nome != undefined ? this.nome : "sono undefined");
-        }
-        else {
-            console.log("Classe senza nome");
-
-        }
-    }
-} */
+};
+__decorate([
+    terminale_metodo_1.mpMet({ tipo: 'post', path: 'PrimoMetodo' }),
+    __param(0, terminale_parametro_1.mpPar(test)),
+    __param(1, terminale_parametro_1.mpPar(test1)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], PrimaClasse.prototype, "PrimoMetodo", null);
+__decorate([
+    terminale_metodo_1.mpMet({ tipo: 'get', path: 'SecondoMetodo' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], PrimaClasse.prototype, "SecondoMetodo", null);
+PrimaClasse = __decorate([
+    terminale_classe_1.mpClas('prima-classe'),
+    __metadata("design:paramtypes", [])
+], PrimaClasse);
 const classecosi = new ClasseTest("prima classe!!", 'cognome prima classe?!??!');
 classecosi.MetodoPrint();
 const main = new terminale_main_1.Main("app");

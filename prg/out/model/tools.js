@@ -2,6 +2,27 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InizializzaLogbaseOut = exports.InizializzaLogbaseIn = exports.targetTerminale = void 0;
 exports.targetTerminale = { name: 'Terminale' };
+/* @Entity()
+export class LogBaseIn {
+    @PrimaryGeneratedColumn()
+    id: number;
+    @Column({type: "varchar", nullable: true})
+    data: string;
+    @Column({type: "varchar", nullable: true})
+    url: string;
+    @Column({type: "varchar", nullable: true})
+    query: string;
+    @Column({type: "varchar", nullable: true})
+    body: string;
+    @Column({type: "varchar", nullable: true})
+    header: string;
+    @Column({type: "varchar", nullable: true})
+    header: string;
+    @Column({type: "varchar", nullable: true})
+    local: string;
+    @Column({type: "varchar", nullable: true})
+    remote: string;
+} */
 function InizializzaLogbaseIn(req, nomeMetodo) {
     console.log("Arrivato in : " + nomeMetodo + "\n"
         + "Data : " + new Date(Date.now()) + "\n"

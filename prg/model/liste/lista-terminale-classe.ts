@@ -81,20 +81,94 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
         return item;
     }
 
+
     GeneraHTML() {
+        let stile = `
+        body {
+            font-family: Arial;
+        }
+
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+
+        /* Style the accordion content */
+        .accordion {
+            background-color: #eee;
+            color: #444;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+            transition: 0.4s;
+          }
+          
+        /* Style the accordion content */
+          .active, .accordion:hover {
+            background-color: #ccc; 
+          }
+          
+        /* Style the accordion content */
+          .panel {
+            padding: 0 18px;
+            display: none;
+            background-color: white;
+            overflow: hidden;
+          }
+        `;
         let listaNomi = '';
         let bodyStart = `<div class="tab">`;
         let bodyEnd = '</div>';
+
+        listaNomi = listaNomi + bodyStart;
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
             const tmp = `<button class="tablinks" onclick="openCity(event, '${element.nome}')">${element.nome}</button>`;
             listaNomi = listaNomi + '\n' + tmp;
         }
-        let listaMetodi = '';
+        listaNomi = listaNomi + bodyEnd;
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
+            bodyStart = `<div id="${element.nome}" class="tabcontent">`;
+            bodyEnd = '</div>';
             const tmp = element.GeneraHTML();
-            listaNomi = listaNomi + '\n' + tmp;
+            listaNomi = listaNomi + '\n' + bodyStart + tmp + bodyEnd;
         }
         let ritorno = `
         <!DOCTYPE html>
@@ -103,74 +177,7 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
         <head>
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <style>
-                body {
-                    font-family: Arial;
-                }
-
-                /* Style the tab */
-                .tab {
-                    overflow: hidden;
-                    border: 1px solid #ccc;
-                    background-color: #f1f1f1;
-                }
-
-                /* Style the buttons inside the tab */
-                .tab button {
-                    background-color: inherit;
-                    float: left;
-                    border: none;
-                    outline: none;
-                    cursor: pointer;
-                    padding: 14px 16px;
-                    transition: 0.3s;
-                    font-size: 17px;
-                }
-
-                /* Change background color of buttons on hover */
-                .tab button:hover {
-                    background-color: #ddd;
-                }
-
-                /* Create an active/current tablink class */
-                .tab button.active {
-                    background-color: #ccc;
-                }
-
-                /* Style the tab content */
-                .tabcontent {
-                    display: none;
-                    padding: 6px 12px;
-                    border: 1px solid #ccc;
-                    border-top: none;
-                }
-
-                /* Style the accordion content */
-                .accordion {
-                    background-color: #eee;
-                    color: #444;
-                    cursor: pointer;
-                    padding: 18px;
-                    width: 100%;
-                    border: none;
-                    text-align: left;
-                    outline: none;
-                    font-size: 15px;
-                    transition: 0.4s;
-                  }
-                  
-                /* Style the accordion content */
-                  .active, .accordion:hover {
-                    background-color: #ccc; 
-                  }
-                  
-                /* Style the accordion content */
-                  .panel {
-                    padding: 0 18px;
-                    display: none;
-                    background-color: white;
-                    overflow: hidden;
-                  }
-                  </style>
+                ${stile}
             </style>
         </head>
 
