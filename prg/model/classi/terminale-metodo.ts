@@ -94,28 +94,45 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         return tmp;
     }
     GeneraHTML() {
-        let listaNomi = '';
+        let listaNomi = `
+            <table>
+                <tr>
+                    <th>nome</th>
+                    <th>posizione</th>
+                    <th>sommario</th>
+                    <th>descrizione</th>
+                    <th>indexParameter</th>
+                    <th>tipo</th>
+                    <th>#INPUT#</th>
+                </tr>`;
+        let tt = `</table>`
+
+        let param = ``;
         for (let index = 0; index < this.listaParametri.length; index++) {
             const element = this.listaParametri[index];
-            let param = `<div> `;
-            param = param + `<label for="">nome :${element.nome}</label>`;
-            param = param + `<label for="">posizione :${element.posizione}</label>`;
-            param = param + `<label for="">sommario :${element.sommario}</label>`;
-            param = param + `<label for="">descrizione :${element.descrizione}</label>`;
-            param = param + `<label for="">indexParameter :${element.indexParameter}</label>`;
-            param = param + `<label for="">tipo :${element.tipo}</label>`;
+            let inputhtml = '';
             switch (element.tipo) {
                 case 'text':
-                    param = param + '<input type="text" name="" id="">';
+                    inputhtml = '<input type="text" name="" id="">';
                     break;
                 case 'date':
-                    param = param + '<input type="date" name="" id="">';
+                    inputhtml = '<input type="date" name="" id="">';
                     break;
                 case 'number':
-                    param = param + '<input type="number" name="" id="">';
+                    inputhtml = '<input type="number" name="" id="">';
                     break;
             }
-
+            param = param + `
+                <tr>
+                    <td>${element.nome}</td>
+                    <td>${element.posizione}</td>
+                    <td>${element.sommario}</td>
+                    <td>${element.descrizione}</td>
+                    <td>${element.indexParameter}</td>
+                    <td>${element.tipo}</td>
+                    <td>${inputhtml}</td>
+                </tr>`
+                ;
             let bodyStart = `<script type="text/javascript">
             function UserAction() {
                 var passw = document.getElementById("password").value;
@@ -163,9 +180,9 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                 }
             }
         </script>`;
-            param = param + `</div>`;
-            listaNomi = listaNomi + '\n' + param;
         }
+        param = param + tt;
+        listaNomi = listaNomi + '\n' + param;
         return listaNomi;
     }
     ConfiguraRotta(rotte: Router, percorsi: IRaccoltaPercorsi): Router {

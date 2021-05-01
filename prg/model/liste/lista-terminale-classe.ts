@@ -151,6 +151,25 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
             background-color: white;
             overflow: hidden;
           }
+
+          /* Style the table content */
+          table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+          }
+          
+          /* Style the table content */
+          td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+          }
+          
+          /* Style the table content */
+          tr:nth-child(even) {
+            background-color: #dddddd;
+          }
         `;
         let listaNomi = '';
         let bodyStart = `<div class="tab">`;
