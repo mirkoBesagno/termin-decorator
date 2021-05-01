@@ -1,17 +1,39 @@
 
-import { Request, Response  } from "express";
+import { Request, Response } from "express";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 export var targetTerminale = { name: 'Terminale' };
 
 export interface IPrintabile {
     PrintMenu(): any
 }
 export interface IDescrivibile {
-    descrizione:string;
-    sommario:string;
+    descrizione: string;
+    sommario: string;
 }
 
-export type TipoParametro ="number"| "text"| "date";
+export type TipoParametro = "number" | "text" | "date";
 
+/* @Entity()
+export class LogBaseIn {
+    @PrimaryGeneratedColumn()
+    id: number;
+    @Column({type: "varchar", nullable: true})
+    data: string;
+    @Column({type: "varchar", nullable: true})
+    url: string;
+    @Column({type: "varchar", nullable: true})
+    query: string;
+    @Column({type: "varchar", nullable: true})
+    body: string;
+    @Column({type: "varchar", nullable: true})
+    header: string;
+    @Column({type: "varchar", nullable: true})
+    header: string;
+    @Column({type: "varchar", nullable: true})
+    local: string;
+    @Column({type: "varchar", nullable: true})
+    remote: string;
+} */
 export function InizializzaLogbaseIn(req: Request, nomeMetodo?: string): string {
     console.log("Arrivato in : " + nomeMetodo + "\n"
         + "Data : " + new Date(Date.now()) + "\n"

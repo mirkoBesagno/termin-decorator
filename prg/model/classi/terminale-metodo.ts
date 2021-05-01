@@ -93,6 +93,81 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         //console.log(tmp);
         return tmp;
     }
+    GeneraHTML() {
+        let listaNomi = '';
+        for (let index = 0; index < this.listaParametri.length; index++) {
+            const element = this.listaParametri[index];
+            let param = `<div> `;
+            param = param + `<label for="">nome :${element.nome}</label>`;
+            param = param + `<label for="">posizione :${element.posizione}</label>`;
+            param = param + `<label for="">sommario :${element.sommario}</label>`;
+            param = param + `<label for="">descrizione :${element.descrizione}</label>`;
+            param = param + `<label for="">indexParameter :${element.indexParameter}</label>`;
+            param = param + `<label for="">tipo :${element.tipo}</label>`;
+            switch (element.tipo) {
+                case 'text':
+                    param = param + '<input type="text" name="" id="">';
+                    break;
+                case 'date':
+                    param = param + '<input type="date" name="" id="">';
+                    break;
+                case 'number':
+                    param = param + '<input type="number" name="" id="">';
+                    break;
+            }
+
+            let bodyStart = `<script type="text/javascript">
+            function UserAction() {
+                var passw = document.getElementById("password").value;
+                if (passw.length >= 8) {
+    
+                    var x = document.URL;
+                    var vettore = x.split('/');
+                    var body = vettore[vettore.length - 1];
+                    var gg = body.split('?', 2);
+                    gg = gg[1].substring(3);
+                    var xhttp = new XMLHttpRequest();
+                    let url
+                    if (process.env.NODE_ENV == "test") {
+                        url = new URL('https://ss-test.medicaltech.it/api/medico/reimposta-password-medico');
+                    }
+                    else if (process.env.NODE_ENV == "production") {
+                        url = new URL('https://staisicuro.medicaltech.it/api/medico/reimposta-password-medico');
+                    }
+                    let json = JSON.stringify({
+                        password: passw,
+                        token: gg
+                    });
+    
+                    xhttp.onreadystatechange = function () {
+                        if (this.readyState == 4 && this.status == 200) {
+                            alert('Richiesta accettata. 4\n' + this.responseText);
+                            window.close();
+                        }
+                        if (this.readyState == 4 && this.status == 500) {
+                            alert("Richiesta respinta. 4\n" + this.responseText);
+                        }
+                        if (this.readyState == 4 && this.status == 502) {
+                            alert("Richiesta potrebbe essere accettata ma c'è stato un errore nel proxy.");
+                            window.close();
+                        }
+                    };
+    
+                    xhttp.open("POST", url, true);
+                    xhttp.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                    xhttp.send(json);
+                    //window.close();   
+                }
+                else {
+                    alert("Attenzione almeno 8 caratteri");
+                }
+            }
+        </script>`;
+            param = param + `</div>`;
+            listaNomi = listaNomi + '\n' + param;
+        }
+        return listaNomi;
+    }
     ConfiguraRotta(rotte: Router, percorsi: IRaccoltaPercorsi): Router {
         this.percorsi.patheader = percorsi.patheader;
         this.percorsi.porta = percorsi.porta;
@@ -539,7 +614,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     return nex;
                 }
             } catch (error) {
-                res.status(555).send("Errore : "+error);
+                res.status(555).send("Errore : " + error);
             }
         };
     }

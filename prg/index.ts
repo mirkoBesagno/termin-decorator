@@ -14,6 +14,8 @@ import { IReturn, mpAddMiddle, mpMet } from "./model/classi/terminale-metodo";
 import {  TypePosizione, mpP, mpPar, IParametro } from "./model/classi/terminale-parametro";
 import { TipoParametro } from "./model/tools";
 
+import "reflect-metadata";
+
 const test:IParametro = {
     nomeParametro:'nomeFuturo',
                         posizione: 'body',
@@ -184,7 +186,132 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
 
         }
 
+        @mpClas('classe-test-1')
+        class ClasseTest1 {
+            nomeTest: string;
+            cognome:string;
 
+            constructor(nome: string, cognome:string) {
+                this.nomeTest = nome;
+                this.cognome=cognome;
+            }
+
+            //@mpMiddle
+            /* VerificaToken = (request: Request, response: Response, next: NextFunction) => {
+                try {
+                    next();
+                } catch (error) {
+                    console.log(error);
+                    return response.status(403).send("Errore : " + error);
+                }
+            }; */
+
+            
+            @mpMet({tipo:'get',path:'Valida1',interazione:'middleware'})
+            Valida1(@mpPar({nomeParametro:'token',posizione: 'body'}) token: string){
+                let tmp:IReturn;
+                if (token== 'ppp') {                    
+                tmp ={
+                    body:{
+                        "nome": this.nomeTest
+                    },
+                    stato:200};
+                } else {
+                    tmp ={
+                    body:{
+                        "nome": this.nomeTest
+                    },
+                    stato:500};
+                }
+                return tmp;
+            }
+/*
+            @mpAddMiddle('Valida') */
+            @mpMet({tipo:'post',path:'SetNome'})
+            SetNome(
+                @mpPar(test)nomeFuturo: string,
+                    @mpPar(test1)nomignolo: string
+                    ){
+                this.nomeTest = nomeFuturo;
+                const tmp : IReturn={
+                    body:{
+                        "nome": nomeFuturo+' sei un POST',
+                        "nomignolo":nomignolo+' sei un nomigolo!'
+                    },
+                    stato:200};
+                return tmp;
+            }
+
+            
+
+            @mpMet({tipo:'get', path:'GetNome'})
+            GetNome(){
+                const tmp : IReturn={
+                    body:{
+                        "nome": this.nomeTest +' sei un GET'
+                    },
+                    stato:200};
+                return tmp;
+            }
+
+
+            /* @mpMet('post', "SetCognome")
+            SetCognome(@mpPar('text', 'cognomeNuovo', 'body') cognomeNuovo: string) {
+                this.cognome = cognomeNuovo;
+                const tmp : IReturn={
+                    body:{
+                        "cognome": this.cognome
+                    },
+                    stato:200};
+                return tmp;
+            }
+            @mpMet('get', 'GetCognome')
+            GetCognome() {
+                const tmp : IReturn={
+                    body:{
+                        "cognome": this.cognome
+                    },
+                    stato:200};
+                return tmp;
+            }
+
+            @mpMet('post','set-nome-e-cognome')
+            SetNome_E_Cognome(
+                @mpP('text', 'nomeNuovo', 'body') nome:string, 
+            @mpP('text', 'cognomeNuovo', 'query') cognome:string){
+                this.cognome = cognome;
+                this.nome= nome;
+                const tmp : IReturn={
+                    body:{
+                        "nome":this.nome,
+                        "cognome": this.cognome
+                    },
+                    stato:200};
+                return tmp;
+            }
+            @mpMet('get','get-nome-e-cognome')
+            GetNome_E_Cognome(){
+                
+                const tmp : IReturn={
+                    body:{
+                        "nome":this.nome,
+                        "cognome": this.cognome
+                    },
+                    stato:200};
+                return tmp;
+            } */
+            
+            MetodoPrint() {
+                if ('nomeTest' in this) {
+                    console.log(this.nomeTest != undefined ? this.nomeTest : "sono undefined");
+                }
+                else {
+                    console.log("Classe senza nome");
+
+                }
+            }
+
+        }
         /* @mpClass('classe1')
         class Classe1 {
             nome: string;

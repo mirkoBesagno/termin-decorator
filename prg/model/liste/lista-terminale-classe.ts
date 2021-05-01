@@ -210,6 +210,8 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
                     }
                 });
                 }
+
+                
             </script>
 
         </body>

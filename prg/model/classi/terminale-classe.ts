@@ -183,10 +183,16 @@ export class TerminaleClasse implements IPrintabile {
                          <div class="panel">`;
             let bodyEnd = '</div>';
             const tmp = `
-            <p>${element.PrintStamp()}</p>            
-             </br>\n`;
+            <p>${element.PrintStamp()}</p>    
+            <div>${element.GeneraHTML()}</div>        
+             </br>
+             <button onclick="UserAction()">Invia</button>
+             <p>Ritorno :</p>
+             <textarea name="" id="" cols="30" rows="10"></textarea>
+             `;
             listaNomi = listaNomi + '\n' + bodyStart + tmp + bodyEnd;
         }
+
         return listaNomi;
     }
     /* SettaHTML() {
