@@ -20,23 +20,40 @@ class ListaTerminaleParametro extends Array {
     }
     EstraiParametriDaRequest(richiesta) {
         const ritorno = [];
+        let nontrovato = [];
+        let errori = [];
         for (let index = this.length - 1; index >= 0; index--) {
             const element = this[index];
-            //const indice = JSON.stringify(richiesta.body).search(element.nome);
-            if (richiesta.body[element.nome] != undefined) {
-                const tmp = richiesta.body[element.nome];
+            let tmp = undefined;
+            if (richiesta.body[element.nomeParametro] != undefined) {
+                tmp = richiesta.body[element.nomeParametro];
+            }
+            else if (richiesta.query[element.nomeParametro] != undefined) {
+                tmp = richiesta.query[element.nomeParametro];
+            }
+            else if (richiesta.headers[element.nomeParametro] != undefined) {
+                tmp = richiesta.headers[element.nomeParametro];
+            }
+            else {
+                nontrovato.push({
+                    nomeParametro: element.nomeParametro,
+                    posizioneParametro: element.indexParameter
+                });
+            }
+            if (element.Validatore) {
+                const rit = element.Validatore(tmp);
+                if (rit.approvato == false) {
+                    rit.terminale = {
+                        nomeParametro: element.nomeParametro, posizione: element.posizione, tipoParametro: element.tipoParametro, descrizione: element.descrizione, sommario: element.sommario
+                    };
+                    errori.push(rit);
+                }
+            }
+            if (tmp) {
                 ritorno.push(tmp);
             }
-            else if (richiesta.query[element.nome] != undefined) {
-                const tmp2 = richiesta.query[element.nome];
-                ritorno.push(tmp2);
-            }
-            else if (richiesta.headers[element.nome] != undefined) {
-                const tmp3 = richiesta.headers[element.nome];
-                ritorno.push(tmp3);
-            }
         }
-        return ritorno;
+        return { ritorno, nontrovato, errori };
     }
     SoddisfaParamtri() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -50,10 +67,10 @@ class ListaTerminaleParametro extends Array {
                         body = body + ', ';
                     }
                     primo = true;
-                    const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
-                        + element.tipo + 'Descrizione : ' + element.descrizione + '|Inserire valore :';
+                    const messaggio = "Nome campo :" + element.nomeParametro + "|Tipo campo :"
+                        + element.tipoParametro + 'Descrizione : ' + element.descrizione + '|Inserire valore :';
                     const scelta = yield prompts_1.default({ message: messaggio, type: 'text', name: 'scelta' });
-                    body = body + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
+                    body = body + ' "' + element.nomeParametro + '": ' + ' "' + scelta.scelta + '" ';
                 }
             }
             body = body + '';
@@ -67,10 +84,10 @@ class ListaTerminaleParametro extends Array {
                         query = query + ', ';
                     }
                     primo = true;
-                    const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
-                        + element.tipo + 'Descrizione : ' + element.descrizione + '|Inserire valore :';
+                    const messaggio = "Nome campo :" + element.nomeParametro + "|Tipo campo :"
+                        + element.tipoParametro + 'Descrizione : ' + element.descrizione + '|Inserire valore :';
                     const scelta = yield prompts_1.default({ message: messaggio, type: 'text', name: 'scelta' });
-                    query = query + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
+                    query = query + ' "' + element.nomeParametro + '": ' + ' "' + scelta.scelta + '" ';
                 }
             }
             query = query + '';
@@ -84,10 +101,10 @@ class ListaTerminaleParametro extends Array {
                         header = header + ', ';
                     }
                     primo = true;
-                    const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
-                        + element.tipo + 'Descrizione : ' + element.descrizione + '|Inserire valore :';
+                    const messaggio = "Nome campo :" + element.nomeParametro + "|Tipo campo :"
+                        + element.tipoParametro + 'Descrizione : ' + element.descrizione + '|Inserire valore :';
                     const scelta = yield prompts_1.default({ message: messaggio, type: 'text', name: 'scelta' });
-                    header = header + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
+                    header = header + ' "' + element.nomeParametro + '": ' + ' "' + scelta.scelta + '" ';
                 }
             }
             header = header + '';

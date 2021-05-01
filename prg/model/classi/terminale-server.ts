@@ -1,6 +1,5 @@
 
 import { ConnectionOptions, createConnection, getConnectionManager } from "typeorm";
-import { LogBaseIn } from "../tools";
 
 
 export class TerminaleServer {

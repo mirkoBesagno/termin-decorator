@@ -72,28 +72,45 @@ class TerminaleMetodo {
         return tmp;
     }
     GeneraHTML() {
-        let listaNomi = '';
+        let listaNomi = `
+            <table>
+                <tr>
+                    <th>nome</th>
+                    <th>posizione</th>
+                    <th>sommario</th>
+                    <th>descrizione</th>
+                    <th>indexParameter</th>
+                    <th>tipo</th>
+                    <th>#INPUT#</th>
+                </tr>`;
+        let tt = `</table>`;
+        let param = ``;
         for (let index = 0; index < this.listaParametri.length; index++) {
             const element = this.listaParametri[index];
-            let param = `<div> `;
-            param = param + `<label for="">nome :${element.nome}</label>`;
-            param = param + `<label for="">posizione :${element.posizione}</label>`;
-            param = param + `<label for="">sommario :${element.sommario}</label>`;
-            param = param + `<label for="">descrizione :${element.descrizione}</label>`;
-            param = param + `<label for="">indexParameter :${element.indexParameter}</label>`;
-            param = param + `<label for="">tipo :${element.tipo}</label>`;
-            switch (element.tipo) {
+            let inputhtml = '';
+            let bodyStart = '';
+            switch (element.tipoParametro) {
                 case 'text':
-                    param = param + '<input type="text" name="" id="">';
+                    inputhtml = '<input type="text" name="" id="">';
                     break;
                 case 'date':
-                    param = param + '<input type="date" name="" id="">';
+                    inputhtml = '<input type="date" name="" id="">';
                     break;
                 case 'number':
-                    param = param + '<input type="number" name="" id="">';
+                    inputhtml = '<input type="number" name="" id="">';
                     break;
             }
-            let bodyStart = `<script type="text/javascript">
+            param = param + `
+                <tr>
+                    <td>${element.nomeParametro}</td>
+                    <td>${element.posizione}</td>
+                    <td>${element.sommario}</td>
+                    <td>${element.descrizione}</td>
+                    <td>${element.indexParameter}</td>
+                    <td>${element.tipoParametro}</td>
+                    <td>${inputhtml}</td>
+                </tr>`;
+            bodyStart = `<script type="text/javascript">
             function UserAction() {
                 var passw = document.getElementById("password").value;
                 if (passw.length >= 8) {
@@ -140,9 +157,9 @@ class TerminaleMetodo {
                 }
             }
         </script>`;
-            param = param + `</div>`;
-            listaNomi = listaNomi + '\n' + param;
         }
+        param = param + tt;
+        listaNomi = listaNomi + '\n' + param;
         return listaNomi;
     }
     ConfiguraRotta(rotte, percorsi) {
@@ -246,12 +263,7 @@ class TerminaleMetodo {
                         this.helmet = helmet_1.default();
                     }
                     app.get(this.percorsi.pathGlobal /* this.path */, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                        tools_1.InizializzaLogbaseIn(req, this.nome.toString());
-                        const tmp = yield this.Esegui(req);
-                        tools_1.InizializzaLogbaseOut(res, this.nome.toString());
-                        res.status(tmp.stato).send(tmp.body);
-                        return res;
+                        return yield this.ChiamataGenerica(req, res);
                     }));
                     break;
                 case 'post':
@@ -266,14 +278,7 @@ class TerminaleMetodo {
                     }
                     this.metodoAvviabile.body;
                     app.post(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                        /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                        const tmp = this.metodoAvviabile.apply(this, parametri); */
-                        tools_1.InizializzaLogbaseIn(req, this.nome.toString());
-                        const tmp = yield this.Esegui(req);
-                        tools_1.InizializzaLogbaseOut(res, this.nome.toString());
-                        res.status(tmp.stato).send(tmp.body);
-                        return res;
+                        return yield this.ChiamataGenerica(req, res);
                     }));
                     break;
                 case 'delete':
@@ -288,14 +293,7 @@ class TerminaleMetodo {
                         this.cors = cors_1.default(corsOptions);
                     }
                     app.delete(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                        /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                        const tmp = this.metodoAvviabile.apply(this, parametri); */
-                        tools_1.InizializzaLogbaseIn(req, this.nome.toString());
-                        const tmp = yield this.Esegui(req);
-                        tools_1.InizializzaLogbaseOut(res, this.nome.toString());
-                        res.status(tmp.stato).send(tmp.body);
-                        return res;
+                        return yield this.ChiamataGenerica(req, res);
                     }));
                     break;
                 case 'patch':
@@ -310,14 +308,7 @@ class TerminaleMetodo {
                     }
                     this.metodoAvviabile.body;
                     app.patch(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                        /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                        const tmp = this.metodoAvviabile.apply(this, parametri); */
-                        tools_1.InizializzaLogbaseIn(req, this.nome.toString());
-                        const tmp = yield this.Esegui(req);
-                        tools_1.InizializzaLogbaseOut(res, this.nome.toString());
-                        res.status(tmp.stato).send(tmp.body);
-                        return res;
+                        return yield this.ChiamataGenerica(req, res);
                     }));
                     break;
                 case 'purge':
@@ -332,14 +323,7 @@ class TerminaleMetodo {
                     }
                     this.metodoAvviabile.body;
                     app.purge(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                        /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                        const tmp = this.metodoAvviabile.apply(this, parametri); */
-                        tools_1.InizializzaLogbaseIn(req, this.nome.toString());
-                        const tmp = yield this.Esegui(req);
-                        tools_1.InizializzaLogbaseOut(res, this.nome.toString());
-                        res.status(tmp.stato).send(tmp.body);
-                        return res;
+                        return yield this.ChiamataGenerica(req, res);
                     }));
                     break;
                 case 'put':
@@ -353,20 +337,37 @@ class TerminaleMetodo {
                         }
                         this.metodoAvviabile.body;
                         app.put(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                            const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            tools_1.InizializzaLogbaseIn(req, this.nome.toString());
-                            const tmp = yield this.Esegui(req);
-                            tools_1.InizializzaLogbaseOut(res, this.nome.toString());
-                            res.status(tmp.stato).send(tmp.body);
-                            return res;
+                            return yield this.ChiamataGenerica(req, res);
                         }));
                         break;
-                        /*  */
                     }
             }
         }
+    }
+    ChiamataGenerica(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                const logIn = tools_1.InizializzaLogbaseIn(req, this.nome.toString());
+                const tmp = yield this.Esegui(req);
+                if (this.onParametriNonTrovati) {
+                    this.onParametriNonTrovati(tmp.nonTrovati);
+                }
+                res.status(tmp.stato).send(tmp.body);
+                const logOit = tools_1.InizializzaLogbaseOut(res, this.nome.toString());
+                if (this.onChiamataCompletata) {
+                    this.onChiamataCompletata(logIn, tmp, logOit);
+                }
+                return res;
+            }
+            catch (error) {
+                if (this.onChiamataCompletata) {
+                    this.onChiamataCompletata('', { stato: 500, body: error }, '');
+                }
+                res.status(500).send(error);
+                return res;
+            }
+        });
     }
     ChiamaLaRotta(headerpath) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -538,20 +539,49 @@ class TerminaleMetodo {
     }
     Esegui(req) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-            const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-            let tmp;
             try {
-                tmp = this.metodoAvviabile.apply(this, parametri);
+                console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+                const parametri = this.listaParametri.EstraiParametriDaRequest(req);
+                if (parametri.errori.length == 0) {
+                    //if(this.Validatore)this.Validatore(parametri.ritorno,parametri.nontrovato);
+                    let tmp = {
+                        body: {}, nonTrovati: parametri.nontrovato,
+                        inErrore: parametri.errori, stato: 0
+                    };
+                    try {
+                        const tmpReturn = this.metodoAvviabile.apply(this, parametri.ritorno);
+                        if ('body' in tmpReturn)
+                            tmp.body = tmpReturn.body;
+                        else
+                            tmp.body = tmpReturn;
+                        if ('stato' in tmpReturn)
+                            tmp.stato = tmpReturn.stato;
+                    }
+                    catch (error) {
+                        console.log("Errore : \n" + error);
+                        tmp = {
+                            body: { "Errore Interno filtrato ": 'internal error!!!!' },
+                            stato: 500,
+                            nonTrovati: parametri.nontrovato
+                        };
+                    }
+                    return tmp;
+                }
+                else {
+                    let tmp = {
+                        body: parametri.errori, nonTrovati: parametri.nontrovato,
+                        inErrore: parametri.errori, stato: 500
+                    };
+                    return tmp;
+                }
             }
             catch (error) {
-                console.log("Errore : \n" + error);
-                tmp = {
+                console.log("Errore : ", error);
+                return {
                     body: { "Errore Interno filtrato ": 'internal error!!!!' },
                     stato: 500
                 };
             }
-            return tmp;
         });
     }
     ConvertiInMiddleare() {
@@ -787,57 +817,12 @@ exports.CheckMetodoMetaData = CheckMetodoMetaData;
 function decoratoreMetodo(parametri) {
     return function (target, propertyKey, descriptor) {
         const list = terminale_classe_1.GetListaClasseMetaData();
-        /* let classe: TerminaleClasse;
-        const classeCampione = list.CercaConNomeSeNoAggiungi(target.constructor.name);
-        if (parametri.nomiClasseRiferimento != undefined && parametri.nomiClasseRiferimento.length > 0) {
-            for (let index = 0; index < parametri.nomiClasseRiferimento.length; index++) {
-                const element = parametri.nomiClasseRiferimento[index];
-                classe = list.CercaConNomeSeNoAggiungi(element);
-                const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-                const metodo2 = classeCampione.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-                for (let index = 0; index < metodo2.listaParametri.length; index++) {
-                    const element = metodo2.listaParametri[index];
-                    metodo.CercaParametroSeNoAggiungi(element.nome, element.indexParameter, element.tipo, element.posizione);
-                }
-                if (metodo != undefined && list != undefined && classe != undefined) {
-                    metodo.metodoAvviabile = descriptor.value;
- 
-                    if (parametri.tipo != undefined) metodo.tipo = parametri.tipo;
-                    else metodo.tipo = 'get';
- 
-                    if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
-                    else metodo.descrizione = '';
- 
-                    if (parametri.sommario != undefined) metodo.sommario = parametri.sommario;
-                    else metodo.sommario = '';
- 
-                    if (parametri.interazione != undefined) metodo.tipoInterazione = parametri.interazione;
-                    else metodo.tipoInterazione = 'rotta';
- 
-                    if (parametri.path == undefined) metodo.path = propertyKey.toString();
-                    else metodo.path = parametri.path;
- 
- 
-                    if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
- 
-                        const listaMidd = GetListaMiddlewareMetaData();
-                        const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());
-                        midd.metodoAvviabile = descriptor.value;
-                        midd.listaParametri = metodo.listaParametri;
-                        SalvaListaMiddlewareMetaData(listaMidd);
-                    }
-                    SalvaListaClasseMetaData(list);
-                }
-                else {
-                    console.log("Errore mio!");
-                }
-            }
-        } */
-        /* Caso base */
+        /* inizializzo metodo */
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+        /* inizio a lavorare sul metodo */
         if (metodo != undefined && list != undefined && classe != undefined) {
-            metodo.metodoAvviabile = descriptor.value;
+            metodo.metodoAvviabile = descriptor.value; //la prendo come riferimento 
             if (parametri.nomiClasseRiferimento != undefined)
                 metodo.nomiClassiDiRiferimento = parametri.nomiClasseRiferimento;
             if (parametri.tipo != undefined)
@@ -860,6 +845,11 @@ function decoratoreMetodo(parametri) {
                 metodo.path = propertyKey.toString();
             else
                 metodo.path = parametri.path;
+            if (parametri.onChiamataCompletata != null)
+                metodo.onChiamataCompletata = parametri.onChiamataCompletata;
+            if (parametri.Validatore != null)
+                metodo.Validatore = parametri.Validatore;
+            /* configuro i middleware */
             if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
                 const listaMidd = lista_terminale_metodo_1.GetListaMiddlewareMetaData();
                 const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());
@@ -875,7 +865,7 @@ function decoratoreMetodo(parametri) {
                     for (let index = 0; index < metodo.listaParametri.length; index++) {
                         const element = metodo.listaParametri[index];
                         /* configuro i parametri */
-                        const paramestro = metodoTmp.CercaParametroSeNoAggiungi(element.nome, element.indexParameter, element.tipo, element.posizione);
+                        const paramestro = metodoTmp.CercaParametroSeNoAggiungi(element.nomeParametro, element.indexParameter, element.tipoParametro, element.posizione);
                         if (parametri.descrizione != undefined)
                             paramestro.descrizione = element.descrizione;
                         else

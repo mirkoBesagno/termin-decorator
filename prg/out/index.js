@@ -27,7 +27,18 @@ const test = {
     nomeParametro: 'nomeFuturo',
     posizione: 'body',
     tipoParametro: 'text',
-    descrizione: 'nome che perendere il posto del vecchio.'
+    descrizione: 'nome che perendere il posto del vecchio.',
+    Validatore: (parametro) => {
+        let tmp = false;
+        if (parametro) {
+            tmp = true;
+        }
+        return {
+            approvato: tmp,
+            stato: 300,
+            messaggio: 'ciao'
+        };
+    }
 };
 const test1 = { nomeParametro: 'nomignolo',
     posizione: 'query',
@@ -103,68 +114,6 @@ let ClasseTest = class ClasseTest {
         };
         return tmp;
     }
-    GetNome() {
-        const tmp = {
-            body: {
-                "nome": this.nomeTest + ' sei un GET'
-            },
-            stato: 200
-        };
-        return tmp;
-    }
-    /* @mpMet('post', "SetCognome")
-    SetCognome(@mpPar('text', 'cognomeNuovo', 'body') cognomeNuovo: string) {
-        this.cognome = cognomeNuovo;
-        const tmp : IReturn={
-            body:{
-                "cognome": this.cognome
-            },
-            stato:200};
-        return tmp;
-    }
-    @mpMet('get', 'GetCognome')
-    GetCognome() {
-        const tmp : IReturn={
-            body:{
-                "cognome": this.cognome
-            },
-            stato:200};
-        return tmp;
-    }
-
-    @mpMet('post','set-nome-e-cognome')
-    SetNome_E_Cognome(
-        @mpP('text', 'nomeNuovo', 'body') nome:string,
-    @mpP('text', 'cognomeNuovo', 'query') cognome:string){
-        this.cognome = cognome;
-        this.nome= nome;
-        const tmp : IReturn={
-            body:{
-                "nome":this.nome,
-                "cognome": this.cognome
-            },
-            stato:200};
-        return tmp;
-    }
-    @mpMet('get','get-nome-e-cognome')
-    GetNome_E_Cognome(){
-        
-        const tmp : IReturn={
-            body:{
-                "nome":this.nome,
-                "cognome": this.cognome
-            },
-            stato:200};
-        return tmp;
-    } */
-    MetodoPrint() {
-        if ('nomeTest' in this) {
-            console.log(this.nomeTest != undefined ? this.nomeTest : "sono undefined");
-        }
-        else {
-            console.log("Classe senza nome");
-        }
-    }
 };
 __decorate([
     terminale_metodo_1.mpMet({ tipo: 'get', path: 'Valida', interazione: 'middleware' }),
@@ -174,8 +123,29 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ClasseTest.prototype, "Valida", null);
 __decorate([
-    terminale_metodo_1.mpMet({ tipo: 'post', path: 'SetNome' }),
-    __param(0, terminale_parametro_1.mpPar(test)),
+    terminale_metodo_1.mpMet({ tipo: 'post', path: 'SetNome', onChiamataCompletata: (logOn, result, logIn) => {
+            console.log(logOn);
+        }, Validatore: (ritorno, nontrovato) => {
+            return true;
+        }
+    }),
+    __param(0, terminale_parametro_1.mpPar({
+        nomeParametro: 'nomeFuturo',
+        posizione: 'body',
+        tipoParametro: 'text',
+        descrizione: 'nome che perendere il posto del vecchio.',
+        Validatore: (parametro) => {
+            let tmp = false;
+            if (parametro) {
+                tmp = true;
+            }
+            return {
+                approvato: tmp,
+                stato: 0,
+                messaggio: 'ciao'
+            };
+        }
+    })),
     __param(1, terminale_parametro_1.mpPar(test1)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
@@ -183,70 +153,35 @@ __decorate([
 ], ClasseTest.prototype, "SetNome", null);
 __decorate([
     terminale_metodo_1.mpAddMiddle('Valida'),
-    terminale_metodo_1.mpMet({ tipo: 'post', path: 'SetNomeConMiddleware' }),
+    terminale_metodo_1.mpMet({ tipo: 'post', path: 'SetNomeConMiddleware', Validatore: (ritorno, nontrovato) => {
+            return true;
+        } }),
     __param(0, terminale_parametro_1.mpPar({
         nomeParametro: 'nomeFuturo',
         posizione: 'body',
         tipoParametro: 'text',
-        descrizione: 'nome che perendere il posto del vecchio.'
+        descrizione: 'nome che perendere il posto del vecchio.',
+        Validatore: (parametro) => {
+            let tmp = false;
+            if (parametro) {
+                tmp = true;
+            }
+            return {
+                approvato: tmp,
+                stato: 300,
+                messaggio: 'ciao'
+            };
+        }
     })),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ClasseTest.prototype, "SetNomeConMiddleware", null);
-__decorate([
-    terminale_metodo_1.mpMet({ tipo: 'get', path: 'GetNome' }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], ClasseTest.prototype, "GetNome", null);
 ClasseTest = __decorate([
     terminale_classe_1.mpClas('classe-test'),
     __metadata("design:paramtypes", [String, String])
 ], ClasseTest);
-let PrimaClasse = class PrimaClasse {
-    constructor() {
-    }
-    PrimoMetodo(nomeFuturo, nomignolo) {
-        const tmp = {
-            body: {
-                "nome": nomeFuturo + ' sei un POST',
-                "nomignolo": nomignolo + ' sei un nomigolo!'
-            },
-            stato: 200
-        };
-        return tmp;
-    }
-    SecondoMetodo() {
-        const tmp = {
-            body: {
-                "nome": ' sei un GET'
-            },
-            stato: 200
-        };
-        return tmp;
-    }
-};
-__decorate([
-    terminale_metodo_1.mpMet({ tipo: 'post', path: 'PrimoMetodo' }),
-    __param(0, terminale_parametro_1.mpPar(test)),
-    __param(1, terminale_parametro_1.mpPar(test1)),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", void 0)
-], PrimaClasse.prototype, "PrimoMetodo", null);
-__decorate([
-    terminale_metodo_1.mpMet({ tipo: 'get', path: 'SecondoMetodo' }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], PrimaClasse.prototype, "SecondoMetodo", null);
-PrimaClasse = __decorate([
-    terminale_classe_1.mpClas('prima-classe'),
-    __metadata("design:paramtypes", [])
-], PrimaClasse);
 const classecosi = new ClasseTest("prima classe!!", 'cognome prima classe?!??!');
-classecosi.MetodoPrint();
 const main = new terminale_main_1.Main("app");
 console.log('Inizializzazione inizio .....');
 prompts_1.default([{

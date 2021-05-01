@@ -35,7 +35,7 @@ export class LogBaseIn {
     remote: string;
 } */
 export function InizializzaLogbaseIn(req: Request, nomeMetodo?: string): string {
-    console.log("Arrivato in : " + nomeMetodo + "\n"
+    console.log("InizializzaLogbaseIn - Arrivato in : " + nomeMetodo + "\n"
         + "Data : " + new Date(Date.now()) + "\n"
         + "url : " + req.originalUrl + "\n"
         + "query : " + JSON.stringify(req.query) + "\n"
@@ -70,7 +70,7 @@ export function InizializzaLogbaseOut(req: Response, nomeMetodo?: string): strin
         t1 = req.socket.localAddress + " : " + req.socket.localPort;
         t2 = req.socket.remoteAddress + " : " + req.socket.remotePort;
     }
-    console.log("Arrivato in : " + nomeMetodo + "\n"
+    console.log("InizializzaLogbaseOut - Arrivato in : " + nomeMetodo + "\n"
         + "Data : " + new Date(Date.now()) + "\n"
         + "headersSent : " + req.headersSent + "\n"
         // + "json : " + req.json + "\n"

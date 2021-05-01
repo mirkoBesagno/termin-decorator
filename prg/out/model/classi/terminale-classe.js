@@ -185,12 +185,13 @@ class TerminaleClasse {
                          <div class="panel">`;
             let bodyEnd = '</div>';
             const tmp = `
-            <p>${element.PrintStamp()}</p>    
+           <p>${element.nome}</p>
+           <!-- <p>${element.PrintStamp()}</p> --> 
             <div>${element.GeneraHTML()}</div>        
              </br>
              <button onclick="UserAction()">Invia</button>
              <p>Ritorno :</p>
-             <textarea name="" id="" cols="30" rows="10"></textarea>
+             <textarea name="" id="" style="width:100%" rows="10"></textarea>
              `;
             listaNomi = listaNomi + '\n' + bodyStart + tmp + bodyEnd;
         }

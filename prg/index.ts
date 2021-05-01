@@ -15,12 +15,25 @@ import {  TypePosizione, mpP, mpPar, IParametro } from "./model/classi/terminale
 import { TipoParametro } from "./model/tools";
 
 import "reflect-metadata";
+import validator from "validator";
+import { INonTrovato } from "./model/liste/lista-terminale-parametro";
 
 const test:IParametro = {
     nomeParametro:'nomeFuturo',
                         posizione: 'body',
                         tipoParametro:'text',
-                        descrizione:'nome che perendere il posto del vecchio.'
+                        descrizione:'nome che perendere il posto del vecchio.',                        
+                        Validatore:(parametro)=>{
+                            let tmp = false;
+                            if (parametro) {
+                                tmp = true;
+                            } 
+                            return {
+                                approvato:tmp,
+                                stato:300,
+                                messaggio:'ciao'
+                            };
+                        }
 };
 const test1:IParametro = {nomeParametro:'nomignolo',
 posizione:'query',
@@ -82,11 +95,32 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
             }
 /*
             @mpAddMiddle('Valida') */
-            @mpMet({tipo:'post',path:'SetNome'})
-            SetNome(
-                @mpPar(test)nomeFuturo: string,
-                    @mpPar(test1)nomignolo: string
-                    ){
+            @mpMet({tipo:'post',path:'SetNome',
+            onChiamataCompletata:(logOn: string, result: any, logIn: string)=>{
+                console.log(logOn);
+            },Validatore:(ritorno: IParametro[], nontrovato: INonTrovato[])=>{
+
+return true;
+            }
+        })
+            SetNome(@mpPar({
+                    nomeParametro:'nomeFuturo',
+                    posizione: 'body',
+                    tipoParametro:'text',
+                    descrizione:'nome che perendere il posto del vecchio.',                        
+                    Validatore:(parametro)=>{
+                        let tmp = false;
+                        if (parametro) {
+                            tmp = true;
+                        } 
+                        return {
+                        approvato:tmp,
+                        stato:0,
+                        messaggio:'ciao'
+                        };
+                        }
+                })nomeFuturo: string,
+                    @mpPar(test1)nomignolo: string){
                 this.nomeTest = nomeFuturo;
                 const tmp : IReturn={
                     body:{
@@ -99,13 +133,28 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
 
             
             @mpAddMiddle('Valida') 
-            @mpMet({tipo:'post',path:'SetNomeConMiddleware'})
+            @mpMet({tipo:'post',path:'SetNomeConMiddleware',
+            Validatore:(ritorno: any[], nontrovato: INonTrovato[])=>{
+
+                return true;
+            }})
             SetNomeConMiddleware(
                 @mpPar({
                         nomeParametro:'nomeFuturo',
                         posizione: 'body',
                         tipoParametro:'text',
-                        descrizione:'nome che perendere il posto del vecchio.'
+                        descrizione:'nome che perendere il posto del vecchio.',
+                        Validatore:(parametro)=>{
+                            let tmp = false;
+                            if (parametro) {
+                                tmp = true;
+                            } 
+                            return {
+                                approvato:tmp,
+                                stato:300,
+                                messaggio:'ciao'
+                            };
+                        }
                     }) nomeFuturo: string
                     ){
                 this.nomeTest = nomeFuturo;
@@ -115,114 +164,14 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
                     },
                     stato:200};
                 return tmp;
-            }
-
-            @mpMet({tipo:'get', path:'GetNome'})
-            GetNome(){
-                const tmp : IReturn={
-                    body:{
-                        "nome": this.nomeTest +' sei un GET'
-                    },
-                    stato:200};
-                return tmp;
-            }
-
-
-            /* @mpMet('post', "SetCognome")
-            SetCognome(@mpPar('text', 'cognomeNuovo', 'body') cognomeNuovo: string) {
-                this.cognome = cognomeNuovo;
-                const tmp : IReturn={
-                    body:{
-                        "cognome": this.cognome
-                    },
-                    stato:200};
-                return tmp;
-            }
-            @mpMet('get', 'GetCognome')
-            GetCognome() {
-                const tmp : IReturn={
-                    body:{
-                        "cognome": this.cognome
-                    },
-                    stato:200};
-                return tmp;
-            }
-
-            @mpMet('post','set-nome-e-cognome')
-            SetNome_E_Cognome(
-                @mpP('text', 'nomeNuovo', 'body') nome:string, 
-            @mpP('text', 'cognomeNuovo', 'query') cognome:string){
-                this.cognome = cognome;
-                this.nome= nome;
-                const tmp : IReturn={
-                    body:{
-                        "nome":this.nome,
-                        "cognome": this.cognome
-                    },
-                    stato:200};
-                return tmp;
-            }
-            @mpMet('get','get-nome-e-cognome')
-            GetNome_E_Cognome(){
-                
-                const tmp : IReturn={
-                    body:{
-                        "nome":this.nome,
-                        "cognome": this.cognome
-                    },
-                    stato:200};
-                return tmp;
-            } */
-            
-            MetodoPrint() {
-                if ('nomeTest' in this) {
-                    console.log(this.nomeTest != undefined ? this.nomeTest : "sono undefined");
-                }
-                else {
-                    console.log("Classe senza nome");
-
-                }
-            }
+            }           
 
         }
 
-        @mpClas('prima-classe')
-        class PrimaClasse {
-            constructor() {
-            }
-
-            @mpMet({tipo:'post',path:'PrimoMetodo'})
-            PrimoMetodo(
-                @mpPar(test)nomeFuturo: string,
-                    @mpPar(test1)nomignolo: string
-                    ){
-                const tmp : IReturn={
-                    body:{
-                        "nome": nomeFuturo+' sei un POST',
-                        "nomignolo":nomignolo+' sei un nomigolo!'
-                    },
-                    stato:200};
-                return tmp;
-            }
-
-            
-
-            @mpMet({tipo:'get', path:'SecondoMetodo'})
-            SecondoMetodo(){
-                const tmp : IReturn={
-                    body:{
-                        "nome": ' sei un GET'
-                    },
-                    stato:200};
-                return tmp;
-            }
-
-        }
 
     
         const classecosi = new ClasseTest("prima classe!!",'cognome prima classe?!??!');
-        classecosi.MetodoPrint();
-
+        
         const main = new Main("app");
         console.log('Inizializzazione inizio .....');
         

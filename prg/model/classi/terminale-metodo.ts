@@ -1,28 +1,33 @@
 import { IDescrivibile, InizializzaLogbaseIn, InizializzaLogbaseOut, IPrintabile, targetTerminale, TipoParametro } from "../tools";
 import { CheckClasseMetaData, GetListaClasseMetaData, SalvaListaClasseMetaData, TerminaleClasse } from "./terminale-classe";
-import { TypePosizione, TerminaleParametro } from "./terminale-parametro";
+import { TypePosizione, TerminaleParametro, IParametro } from "./terminale-parametro";
 import chiedi from "prompts";
 import helmet from "helmet";
 
 import superagent, { head } from "superagent";
 import express, { Router, Request, Response, NextFunction } from "express";
 import { GetListaMiddlewareMetaData, ListaTerminaleMetodo, ListaTerminaleMiddleware, SalvaListaMiddlewareMetaData } from "../liste/lista-terminale-metodo";
-import { ListaTerminaleParametro } from "../liste/lista-terminale-parametro";
+import { INonTrovato, ListaTerminaleParametro } from "../liste/lista-terminale-parametro";
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import cors from 'cors';
 import { IRaccoltaPercorsi } from "./terminale-main";
 import { textChangeRangeIsUnchanged } from "typescript";
 import axios from "axios";
+import validator from "validator";
 export type TypeInterazone = "rotta" | "middleware" | 'ambo';
 
 export interface IReturn {
     body: object;
     stato: number;
+    nonTrovati?: INonTrovato[];
+    inErrore?: IRitornoValidatore[];
 }
 export interface IResponse {
     body: string
 }
+export interface ITerminaleMetodo {
 
+}
 export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
     static nomeMetadataKeyTarget = "MetodoTerminaleTarget";
@@ -44,6 +49,11 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
     descrizione: string;
     sommario: string;
     nomiClassiDiRiferimento: string[] = [];
+
+    onChiamataCompletata?: (logOn: string, result: any, logIn: string) => void;
+    onParametriNonTrovati?: (nonTrovati?: INonTrovato[]) => void;
+
+    Validatore?: (ritorno: any[], nontrovato: INonTrovato[]) => boolean;
 
     constructor(nome: string, path: string, classePath: string) {
         this.listaParametri = new ListaTerminaleParametro();
@@ -112,7 +122,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             const element = this.listaParametri[index];
             let inputhtml = '';
             let bodyStart = '';
-            switch (element.tipo) {
+            switch (element.tipoParametro) {
                 case 'text':
                     inputhtml = '<input type="text" name="" id="">';
                     break;
@@ -125,12 +135,12 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             }
             param = param + `
                 <tr>
-                    <td>${element.nome}</td>
+                    <td>${element.nomeParametro}</td>
                     <td>${element.posizione}</td>
                     <td>${element.sommario}</td>
                     <td>${element.descrizione}</td>
                     <td>${element.indexParameter}</td>
-                    <td>${element.tipo}</td>
+                    <td>${element.tipoParametro}</td>
                     <td>${inputhtml}</td>
                 </tr>`
                 ;
@@ -296,12 +306,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            InizializzaLogbaseIn(req, this.nome.toString());
-                            const tmp = await this.Esegui(req);
-                            InizializzaLogbaseOut(res, this.nome.toString());
-                            res.status(tmp.stato).send(tmp.body);
-                            return res;
+                            return await this.ChiamataGenerica(req, res);
                         });
                     break;
                 case 'post':
@@ -320,14 +325,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                            const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            InizializzaLogbaseIn(req, this.nome.toString());
-                            const tmp = await this.Esegui(req);
-                            InizializzaLogbaseOut(res, this.nome.toString());
-                            res.status(tmp.stato).send(tmp.body);
-                            return res;
+                            return await this.ChiamataGenerica(req, res);
                         });
                     break;
                 case 'delete':
@@ -346,14 +344,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                            const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            InizializzaLogbaseIn(req, this.nome.toString());
-                            const tmp = await this.Esegui(req);
-                            InizializzaLogbaseOut(res, this.nome.toString());
-                            res.status(tmp.stato).send(tmp.body);
-                            return res;
+                            return await this.ChiamataGenerica(req, res);
                         });
                     break;
                 case 'patch':
@@ -372,14 +363,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                            const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            InizializzaLogbaseIn(req, this.nome.toString());
-                            const tmp = await this.Esegui(req);
-                            InizializzaLogbaseOut(res, this.nome.toString());
-                            res.status(tmp.stato).send(tmp.body);
-                            return res;
+                            return await this.ChiamataGenerica(req, res);
                         });
                     break;
                 case 'purge':
@@ -398,14 +382,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
-                            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                            /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                            const tmp = this.metodoAvviabile.apply(this, parametri); */
-                            InizializzaLogbaseIn(req, this.nome.toString());
-                            const tmp = await this.Esegui(req);
-                            InizializzaLogbaseOut(res, this.nome.toString());
-                            res.status(tmp.stato).send(tmp.body);
-                            return res;
+                            return await this.ChiamataGenerica(req, res);
                         });
                     break;
                 case 'put':
@@ -423,19 +400,33 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                             this.helmet,
                             middlew,
                             async (req: Request, res: Response) => {
-                                console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                                /* const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                                const tmp = this.metodoAvviabile.apply(this, parametri); */
-                                InizializzaLogbaseIn(req, this.nome.toString());
-                                const tmp = await this.Esegui(req);
-                                InizializzaLogbaseOut(res, this.nome.toString());
-                                res.status(tmp.stato).send(tmp.body);
-                                return res;
+                                return await this.ChiamataGenerica(req, res);
                             });
                         break;
-                        /*  */
                     }
             }
+        }
+    }
+    async ChiamataGenerica(req: Request, res: Response) {
+        try {
+            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+            const logIn = InizializzaLogbaseIn(req, this.nome.toString());
+            const tmp: IReturn = await this.Esegui(req);
+            if (this.onParametriNonTrovati) {
+                this.onParametriNonTrovati(tmp.nonTrovati);
+            }
+            res.status(tmp.stato).send(tmp.body);
+            const logOit = InizializzaLogbaseOut(res, this.nome.toString());
+            if (this.onChiamataCompletata) {
+                this.onChiamataCompletata(logIn, tmp, logOit);
+            }
+            return res;
+        } catch (error) {
+            if (this.onChiamataCompletata) {
+                this.onChiamataCompletata('', { stato: 500, body: error }, '');
+            }
+            res.status(500).send(error);
+            return res;
         }
     }
     async ChiamaLaRotta(headerpath?: string) {
@@ -604,19 +595,46 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         return tmp;
     }
     async Esegui(req: Request): Promise<IReturn> {
-        console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-        const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-        let tmp: IReturn;
         try {
-            tmp = this.metodoAvviabile.apply(this, parametri);
+            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+            const parametri = this.listaParametri.EstraiParametriDaRequest(req);
+            if (parametri.errori.length == 0) {
+
+                //if(this.Validatore)this.Validatore(parametri.ritorno,parametri.nontrovato);
+                let tmp: IReturn = {
+                    body: {}, nonTrovati: parametri.nontrovato,
+                    inErrore: parametri.errori, stato: 0
+                };
+                try {
+                    const tmpReturn = this.metodoAvviabile.apply(this, parametri.ritorno);
+                    if ('body' in tmpReturn) tmp.body = tmpReturn.body;
+                    else tmp.body = tmpReturn;
+                    if ('stato' in tmpReturn) tmp.stato = tmpReturn.stato;
+
+                } catch (error) {
+                    console.log("Errore : \n" + error);
+                    tmp = {
+                        body: { "Errore Interno filtrato ": 'internal error!!!!' },
+                        stato: 500,
+                        nonTrovati: parametri.nontrovato
+                    };
+                }
+                return tmp;
+            }
+            else {
+                let tmp: IReturn = {
+                    body: parametri.errori, nonTrovati: parametri.nontrovato,
+                    inErrore: parametri.errori, stato: 500
+                };
+                return tmp;
+            }
         } catch (error) {
-            console.log("Errore : \n" + error);
-            tmp = {
+            console.log("Errore : ", error);
+            return {
                 body: { "Errore Interno filtrato ": 'internal error!!!!' },
                 stato: 500
             };
         }
-        return tmp;
     }
 
 
@@ -840,70 +858,31 @@ export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse)
 }
 
 export type TypeMetod = "get" | "put" | "post" | "patch" | "purge" | "delete";
-
+export interface IRitornoValidatore {
+    approvato: boolean,
+    stato: number,
+    messaggio: string,
+    terminale?: IParametro
+}
 export interface IMetodo {
     tipo?: TypeMetod,
     path?: string,
     interazione?: TypeInterazone,
     descrizione?: string,
     sommario?: string
-    nomiClasseRiferimento?: string[]
+    nomiClasseRiferimento?: string[],
+    onChiamataCompletata?: (logOn: string, result: any, logIn: string) => void
+    Validatore?: (ritorno: IParametro[], nontrovato: INonTrovato[]) => boolean
 }
-function decoratoreMetodo(parametri: IMetodo
-): MethodDecorator {
+function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
     return function (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
-        /* let classe: TerminaleClasse;
-        const classeCampione = list.CercaConNomeSeNoAggiungi(target.constructor.name);
-        if (parametri.nomiClasseRiferimento != undefined && parametri.nomiClasseRiferimento.length > 0) {
-            for (let index = 0; index < parametri.nomiClasseRiferimento.length; index++) {
-                const element = parametri.nomiClasseRiferimento[index];
-                classe = list.CercaConNomeSeNoAggiungi(element);
-                const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-                const metodo2 = classeCampione.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-                for (let index = 0; index < metodo2.listaParametri.length; index++) {
-                    const element = metodo2.listaParametri[index];
-                    metodo.CercaParametroSeNoAggiungi(element.nome, element.indexParameter, element.tipo, element.posizione);
-                }
-                if (metodo != undefined && list != undefined && classe != undefined) {
-                    metodo.metodoAvviabile = descriptor.value;
- 
-                    if (parametri.tipo != undefined) metodo.tipo = parametri.tipo;
-                    else metodo.tipo = 'get';
- 
-                    if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
-                    else metodo.descrizione = '';
- 
-                    if (parametri.sommario != undefined) metodo.sommario = parametri.sommario;
-                    else metodo.sommario = '';
- 
-                    if (parametri.interazione != undefined) metodo.tipoInterazione = parametri.interazione;
-                    else metodo.tipoInterazione = 'rotta';
- 
-                    if (parametri.path == undefined) metodo.path = propertyKey.toString();
-                    else metodo.path = parametri.path;
- 
- 
-                    if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
- 
-                        const listaMidd = GetListaMiddlewareMetaData();
-                        const midd = listaMidd.CercaConNomeSeNoAggiungi(propertyKey.toString());
-                        midd.metodoAvviabile = descriptor.value;
-                        midd.listaParametri = metodo.listaParametri;
-                        SalvaListaMiddlewareMetaData(listaMidd);
-                    }
-                    SalvaListaClasseMetaData(list);
-                }
-                else {
-                    console.log("Errore mio!");
-                }
-            }
-        } */
-        /* Caso base */
+        /* inizializzo metodo */
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+        /* inizio a lavorare sul metodo */
         if (metodo != undefined && list != undefined && classe != undefined) {
-            metodo.metodoAvviabile = descriptor.value;
+            metodo.metodoAvviabile = descriptor.value;//la prendo come riferimento 
             if (parametri.nomiClasseRiferimento != undefined)
                 metodo.nomiClassiDiRiferimento = parametri.nomiClasseRiferimento;
 
@@ -922,7 +901,10 @@ function decoratoreMetodo(parametri: IMetodo
             if (parametri.path == undefined) metodo.path = propertyKey.toString();
             else metodo.path = parametri.path;
 
+            if (parametri.onChiamataCompletata != null) metodo.onChiamataCompletata = parametri.onChiamataCompletata;
+            if (parametri.Validatore != null) metodo.Validatore = parametri.Validatore;
 
+            /* configuro i middleware */
             if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
 
                 const listaMidd = GetListaMiddlewareMetaData();
@@ -939,8 +921,8 @@ function decoratoreMetodo(parametri: IMetodo
                     for (let index = 0; index < metodo.listaParametri.length; index++) {
                         const element = metodo.listaParametri[index];
                         /* configuro i parametri */
-                        const paramestro = metodoTmp.CercaParametroSeNoAggiungi(element.nome, element.indexParameter,
-                            element.tipo, element.posizione);
+                        const paramestro = metodoTmp.CercaParametroSeNoAggiungi(element.nomeParametro, element.indexParameter,
+                            element.tipoParametro, element.posizione);
                         if (parametri.descrizione != undefined) paramestro.descrizione = element.descrizione;
                         else paramestro.descrizione = '';
 

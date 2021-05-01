@@ -2,38 +2,61 @@
 import { Router, Request, Response } from "express";
 
 import chiedi from "prompts";
+import { IRitornoValidatore } from "../classi/terminale-metodo";
 
 import { TypePosizione, TerminaleParametro } from "../classi/terminale-parametro";
 
 export interface IParametri {
     body: string, query: string, header: string
 }
+export interface INonTrovato {
+    nomeParametro: string, posizioneParametro: number
+}
+export interface IErroreEstrazione {
 
+}
 export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
+
     constructor() {
         super();
     }
-    EstraiParametriDaRequest(richiesta: Request) {
-        const ritorno = [];
-        for (let index = this.length -1; index >= 0; index--) {
-            const element = this[index];
 
-            //const indice = JSON.stringify(richiesta.body).search(element.nome);
-            if (richiesta.body[element.nome] != undefined) {
-                const tmp = richiesta.body[element.nome];
+    EstraiParametriDaRequest(richiesta: Request) {
+        const ritorno: any[] = [];
+        let nontrovato: INonTrovato[] = [];
+        let errori: IRitornoValidatore[] = [];
+        for (let index = this.length - 1; index >= 0; index--) {
+            const element = this[index];
+            let tmp = undefined;
+            if (richiesta.body[element.nomeParametro] != undefined) {
+                tmp = richiesta.body[element.nomeParametro];
+            }
+            else if (richiesta.query[element.nomeParametro] != undefined) {
+                tmp = richiesta.query[element.nomeParametro];
+            }
+            else if (richiesta.headers[element.nomeParametro] != undefined) {
+                tmp = richiesta.headers[element.nomeParametro];
+            }
+            else {
+                nontrovato.push({
+                    nomeParametro: element.nomeParametro,
+                    posizioneParametro: element.indexParameter
+                });
+            }
+            if (element.Validatore) {
+                const rit = element.Validatore(tmp)
+                if (rit.approvato == false) {
+                    rit.terminale = {
+                        nomeParametro: element.nomeParametro, posizione: element.posizione, tipoParametro: element.tipoParametro, descrizione: element.descrizione, sommario: element.sommario
+                    }
+                    errori.push(rit)
+                }
+            }
+            if (tmp) {
                 ritorno.push(tmp);
             }
-            else if (richiesta.query[element.nome] != undefined) {
-                const tmp2 = richiesta.query[element.nome];
-                ritorno.push(tmp2);
-            }
-            else if (richiesta.headers[element.nome] != undefined) {
-                const tmp3 = richiesta.headers[element.nome];
-                ritorno.push(tmp3);
-            }
         }
-        return ritorno;
-
+        return { ritorno, nontrovato, errori };
     }
     async SoddisfaParamtri(): Promise<IParametri> {
         let body = '';
@@ -46,10 +69,10 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
                     body = body + ', ';
                 }
                 primo = true;
-                const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
-                    + element.tipo + 'Descrizione : ' +element.descrizione+ '|Inserire valore :';
+                const messaggio = "Nome campo :" + element.nomeParametro + "|Tipo campo :"
+                    + element.tipoParametro + 'Descrizione : ' + element.descrizione + '|Inserire valore :';
                 const scelta = await chiedi({ message: messaggio, type: 'text', name: 'scelta' });
-                body = body + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
+                body = body + ' "' + element.nomeParametro + '": ' + ' "' + scelta.scelta + '" ';
             }
         }
         body = body + '';
@@ -64,10 +87,10 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
                     query = query + ', ';
                 }
                 primo = true;
-                const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
-                    + element.tipo +  'Descrizione : ' +element.descrizione+'|Inserire valore :';
+                const messaggio = "Nome campo :" + element.nomeParametro + "|Tipo campo :"
+                    + element.tipoParametro + 'Descrizione : ' + element.descrizione + '|Inserire valore :';
                 const scelta = await chiedi({ message: messaggio, type: 'text', name: 'scelta' });
-                query = query + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
+                query = query + ' "' + element.nomeParametro + '": ' + ' "' + scelta.scelta + '" ';
             }
         }
         query = query + '';
@@ -83,10 +106,10 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
                     header = header + ', ';
                 }
                 primo = true;
-                const messaggio = "Nome campo :" + element.nome + "|Tipo campo :"
-                    + element.tipo + 'Descrizione : ' +element.descrizione+ '|Inserire valore :';
+                const messaggio = "Nome campo :" + element.nomeParametro + "|Tipo campo :"
+                    + element.tipoParametro + 'Descrizione : ' + element.descrizione + '|Inserire valore :';
                 const scelta = await chiedi({ message: messaggio, type: 'text', name: 'scelta' });
-                header = header + ' "' + element.nome + '": ' + ' "' + scelta.scelta + '" ';
+                header = header + ' "' + element.nomeParametro + '": ' + ' "' + scelta.scelta + '" ';
             }
         }
         header = header + '';

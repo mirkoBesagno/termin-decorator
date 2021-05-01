@@ -4,9 +4,9 @@ exports.MPDecPar = exports.MPDecParametro = exports.MPDecoratoreParametroGeneric
 const tools_1 = require("../tools");
 const terminale_classe_1 = require("./terminale-classe");
 class TerminaleParametro {
-    constructor(nome, tipo, posizione, indexParameter) {
-        this.nome = nome;
-        this.tipo = tipo;
+    constructor(nomeParametro, tipoParametro, posizione, indexParameter) {
+        this.nomeParametro = nomeParametro;
+        this.tipoParametro = tipoParametro;
         this.posizione = posizione;
         this.indexParameter = indexParameter;
         this.descrizione = "";
@@ -16,25 +16,25 @@ class TerminaleParametro {
         const t = Reflect.getMetadata('info', tools_1.targetTerminale);
     }
     PrintCredenziali() {
-        console.log("nome:" + this.nome + ':;:' + "tipo:" + this.tipo.toString());
+        console.log("nomeParametro:" + this.nomeParametro + ':;:' + "tipoParametro:" + this.tipoParametro.toString());
     }
     PrintParametro() {
-        return "tipo:" + this.tipo.toString() + ";" + "nome:" + this.nome;
+        return "tipoParametro:" + this.tipoParametro.toString() + ";" + "nomeParametro:" + this.nomeParametro;
     }
     SettaSwagger() {
         /* const tmp = {
-            name: this.nome,
+            name: this.nomeParametro,
             in: this.posizione,
             required: false,
-            type: this.tipo,
+            type: this.tipoParametro,
             description: this.descrizione,
             summary: this.sommario
         }; */
         const ritorno = `{
-                "name": "${this.nome}",
+                "name": "${this.nomeParametro}",
                 "in": "${this.posizione}",
                 "required": false,
-                "type": "${this.tipo}",
+                "type": "${this.tipoParametro}",
                 "description": "${this.descrizione}",
                 "summary":"${this.sommario}"
             }`;
@@ -68,6 +68,8 @@ function decoratoreParametroGenerico(parametri) {
             paramestro.sommario = parametri.sommario;
         else
             paramestro.sommario = '';
+        if (parametri.Validatore != undefined)
+            paramestro.Validatore = parametri.Validatore;
         terminale_classe_1.SalvaListaClasseMetaData(list);
     };
 }

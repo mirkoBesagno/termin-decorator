@@ -1,6 +1,6 @@
 
 import { IDescrivibile, IPrintabile, targetTerminale, TipoParametro } from "../tools";
-import { CheckMetodoMetaData, TerminaleMetodo } from "./terminale-metodo";
+import { CheckMetodoMetaData, IRitornoValidatore, TerminaleMetodo } from "./terminale-metodo";
 
 
 import superagent, { post } from "superagent";
@@ -12,17 +12,20 @@ import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 export type TypePosizione = "body" | "query" | 'header';
 
 
-export class TerminaleParametro implements IDescrivibile {
-    nome: string;
-    tipo: TipoParametro;
+export class TerminaleParametro implements IDescrivibile, IParametro {
+    nomeParametro: string;
+    tipoParametro: TipoParametro;
     posizione: TypePosizione;
     indexParameter: number;
 
     descrizione: string;
     sommario: string;
-    constructor(nome: string, tipo: TipoParametro, posizione: TypePosizione, indexParameter: number) {
-        this.nome = nome;
-        this.tipo = tipo;
+
+
+    Validatore?: (parametro:any) => IRitornoValidatore
+    constructor(nomeParametro: string, tipoParametro: TipoParametro, posizione: TypePosizione, indexParameter: number) {
+        this.nomeParametro = nomeParametro;
+        this.tipoParametro = tipoParametro;
         this.posizione = posizione;
         this.indexParameter = indexParameter;
 
@@ -34,26 +37,26 @@ export class TerminaleParametro implements IDescrivibile {
         const t = Reflect.getMetadata('info', targetTerminale);
     }
     PrintCredenziali() {
-        console.log("nome:" + this.nome + ':;:' + "tipo:" + this.tipo.toString());
+        console.log("nomeParametro:" + this.nomeParametro + ':;:' + "tipoParametro:" + this.tipoParametro.toString());
     }
     PrintParametro() {
-        return "tipo:" + this.tipo.toString() + ";" + "nome:" + this.nome;
+        return "tipoParametro:" + this.tipoParametro.toString() + ";" + "nomeParametro:" + this.nomeParametro;
     }
     SettaSwagger() {
         /* const tmp = {
-            name: this.nome,
+            name: this.nomeParametro,
             in: this.posizione,
             required: false,
-            type: this.tipo,
+            type: this.tipoParametro,
             description: this.descrizione,
             summary: this.sommario
         }; */
         const ritorno =
             `{
-                "name": "${this.nome}",
+                "name": "${this.nomeParametro}",
                 "in": "${this.posizione}",
                 "required": false,
-                "type": "${this.tipo}",
+                "type": "${this.tipoParametro}",
                 "description": "${this.descrizione}",
                 "summary":"${this.sommario}"
             }`;
@@ -67,7 +70,9 @@ export class TerminaleParametro implements IDescrivibile {
 }
 
 export interface IParametro {
-    nomeParametro: string, posizione: TypePosizione, tipoParametro?: TipoParametro, descrizione?: string, sommario?: string
+    nomeParametro: string, posizione: TypePosizione, tipoParametro?: TipoParametro,
+    descrizione?: string, sommario?: string,
+    Validatore?: (parametro:any) => IRitornoValidatore
 }
 
 function decoratoreParametroGenerico(parametri: IParametro)/* (nomeParametro: string, posizione: TypePosizione, tipoParametro?: TipoParametro, descrizione?: string, sommario?: string) */ {
@@ -79,13 +84,15 @@ function decoratoreParametroGenerico(parametri: IParametro)/* (nomeParametro: st
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-        const paramestro = metodo.CercaParametroSeNoAggiungi(parametri.nomeParametro, parameterIndex, 
+        const paramestro = metodo.CercaParametroSeNoAggiungi(parametri.nomeParametro, parameterIndex,
             parametri.tipoParametro, parametri.posizione);
         if (parametri.descrizione != undefined) paramestro.descrizione = parametri.descrizione;
         else paramestro.descrizione = '';
 
         if (parametri.sommario != undefined) paramestro.sommario = parametri.sommario;
         else paramestro.sommario = '';
+
+        if (parametri.Validatore != undefined) paramestro.Validatore = parametri.Validatore;
 
         SalvaListaClasseMetaData(list);
     }
