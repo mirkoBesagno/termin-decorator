@@ -111,6 +111,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         for (let index = 0; index < this.listaParametri.length; index++) {
             const element = this.listaParametri[index];
             let inputhtml = '';
+            let bodyStart = '';
             switch (element.tipo) {
                 case 'text':
                     inputhtml = '<input type="text" name="" id="">';
@@ -133,7 +134,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     <td>${inputhtml}</td>
                 </tr>`
                 ;
-            let bodyStart = `<script type="text/javascript">
+            bodyStart = `<script type="text/javascript">
             function UserAction() {
                 var passw = document.getElementById("password").value;
                 if (passw.length >= 8) {
