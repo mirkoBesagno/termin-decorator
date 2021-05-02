@@ -7,7 +7,7 @@ import helmet from "helmet";
 import superagent, { head } from "superagent";
 import express, { Router, Request, Response, NextFunction } from "express";
 import { GetListaMiddlewareMetaData, ListaTerminaleMetodo, ListaTerminaleMiddleware, SalvaListaMiddlewareMetaData } from "../liste/lista-terminale-metodo";
-import { INonTrovato, ListaTerminaleParametro } from "../liste/lista-terminale-parametro";
+import { INonTrovato, IParametriEstratti, ListaTerminaleParametro } from "../liste/lista-terminale-parametro";
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import cors from 'cors';
 import { IRaccoltaPercorsi } from "./terminale-main";
@@ -17,7 +17,7 @@ import validator from "validator";
 export type TypeInterazone = "rotta" | "middleware" | 'ambo';
 
 export interface IReturn {
-    body: object;
+    body: object | string;
     stato: number;
     nonTrovati?: INonTrovato[];
     inErrore?: IRitornoValidatore[];
@@ -53,7 +53,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
     onChiamataCompletata?: (logOn: string, result: any, logIn: string) => void;
     onParametriNonTrovati?: (nonTrovati?: INonTrovato[]) => void;
 
-    Validatore?: (ritorno: any[], nontrovato: INonTrovato[]) => boolean;
+    Validatore?: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => IRitornoValidatore;
 
     constructor(nome: string, path: string, classePath: string) {
         this.listaParametri = new ListaTerminaleParametro();
@@ -598,15 +598,18 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         try {
             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
             const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-            if (parametri.errori.length == 0) {
+            let valido: IRitornoValidatore | undefined = { approvato: true, stato: 200, messaggio: '' };
+            if (this.Validatore) valido = this.Validatore(parametri, this.listaParametri);
+            else valido = undefined;
 
-                //if(this.Validatore)this.Validatore(parametri.ritorno,parametri.nontrovato);
+            if ((valido && valido.approvato) || (!valido && parametri.errori.length == 0)) {
+
                 let tmp: IReturn = {
                     body: {}, nonTrovati: parametri.nontrovato,
-                    inErrore: parametri.errori, stato: 0
+                    inErrore: parametri.errori, stato: 200
                 };
                 try {
-                    const tmpReturn = this.metodoAvviabile.apply(this, parametri.ritorno);
+                    const tmpReturn = this.metodoAvviabile.apply(this, parametri.valoriParametri);
                     if ('body' in tmpReturn) tmp.body = tmpReturn.body;
                     else tmp.body = tmpReturn;
                     if ('stato' in tmpReturn) tmp.stato = tmpReturn.stato;
@@ -623,9 +626,24 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             }
             else {
                 let tmp: IReturn = {
-                    body: parametri.errori, nonTrovati: parametri.nontrovato,
-                    inErrore: parametri.errori, stato: 500
+                    body: parametri.errori,
+                    nonTrovati: parametri.nontrovato,
+                    inErrore: parametri.errori,
+                    stato: 500
                 };
+                if (valido) {
+                    tmp = {
+                        body: valido.messaggio,
+                        stato: 500,
+                    }
+                } else {
+                    tmp = {
+                        body: parametri.errori,
+                        nonTrovati: parametri.nontrovato,
+                        inErrore: parametri.errori,
+                        stato: 500
+                    };
+                }
                 return tmp;
             }
         } catch (error) {
@@ -872,7 +890,7 @@ export interface IMetodo {
     sommario?: string
     nomiClasseRiferimento?: string[],
     onChiamataCompletata?: (logOn: string, result: any, logIn: string) => void
-    Validatore?: (ritorno: IParametro[], nontrovato: INonTrovato[]) => boolean
+    Validatore?: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => IRitornoValidatore;
 }
 function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
     return function (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
@@ -902,8 +920,9 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
             else metodo.path = parametri.path;
 
             if (parametri.onChiamataCompletata != null) metodo.onChiamataCompletata = parametri.onChiamataCompletata;
-            if (parametri.Validatore != null) metodo.Validatore = parametri.Validatore;
 
+            if (parametri.Validatore != null) metodo.Validatore = parametri.Validatore;
+            
             /* configuro i middleware */
             if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
 

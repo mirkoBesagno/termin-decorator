@@ -15,16 +15,19 @@ export interface INonTrovato {
 export interface IErroreEstrazione {
 
 }
+export interface IParametriEstratti {
+    valoriParametri: any[], nontrovato: INonTrovato[], errori: IRitornoValidatore[]
+}
 export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
 
     constructor() {
         super();
     }
 
-    EstraiParametriDaRequest(richiesta: Request) {
-        const ritorno: any[] = [];
-        let nontrovato: INonTrovato[] = [];
-        let errori: IRitornoValidatore[] = [];
+    EstraiParametriDaRequest(richiesta: Request): IParametriEstratti {
+        const ritorno: IParametriEstratti = {
+            errori: [], nontrovato: [], valoriParametri: []
+        };
         for (let index = this.length - 1; index >= 0; index--) {
             const element = this[index];
             let tmp = undefined;
@@ -38,7 +41,7 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
                 tmp = richiesta.headers[element.nomeParametro];
             }
             else {
-                nontrovato.push({
+                ritorno.nontrovato.push({
                     nomeParametro: element.nomeParametro,
                     posizioneParametro: element.indexParameter
                 });
@@ -46,17 +49,17 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
             if (element.Validatore) {
                 const rit = element.Validatore(tmp)
                 if (rit.approvato == false) {
-                    rit.terminale = {
+                    /* rit.terminale = {
                         nomeParametro: element.nomeParametro, posizione: element.posizione, tipoParametro: element.tipoParametro, descrizione: element.descrizione, sommario: element.sommario
-                    }
-                    errori.push(rit)
+                    } */
+                    rit.terminale = element;
+                    ritorno.errori.push(rit)
                 }
             }
-            if (tmp) {
-                ritorno.push(tmp);
-            }
+            ritorno.valoriParametri.push(tmp);
         }
-        return { ritorno, nontrovato, errori };
+
+        return ritorno;
     }
     async SoddisfaParamtri(): Promise<IParametri> {
         let body = '';

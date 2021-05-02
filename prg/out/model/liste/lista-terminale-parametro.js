@@ -19,9 +19,9 @@ class ListaTerminaleParametro extends Array {
         super();
     }
     EstraiParametriDaRequest(richiesta) {
-        const ritorno = [];
-        let nontrovato = [];
-        let errori = [];
+        const ritorno = {
+            errori: [], nontrovato: [], valoriParametri: []
+        };
         for (let index = this.length - 1; index >= 0; index--) {
             const element = this[index];
             let tmp = undefined;
@@ -35,7 +35,7 @@ class ListaTerminaleParametro extends Array {
                 tmp = richiesta.headers[element.nomeParametro];
             }
             else {
-                nontrovato.push({
+                ritorno.nontrovato.push({
                     nomeParametro: element.nomeParametro,
                     posizioneParametro: element.indexParameter
                 });
@@ -43,17 +43,16 @@ class ListaTerminaleParametro extends Array {
             if (element.Validatore) {
                 const rit = element.Validatore(tmp);
                 if (rit.approvato == false) {
-                    rit.terminale = {
+                    /* rit.terminale = {
                         nomeParametro: element.nomeParametro, posizione: element.posizione, tipoParametro: element.tipoParametro, descrizione: element.descrizione, sommario: element.sommario
-                    };
-                    errori.push(rit);
+                    } */
+                    rit.terminale = element;
+                    ritorno.errori.push(rit);
                 }
             }
-            if (tmp) {
-                ritorno.push(tmp);
-            }
+            ritorno.valoriParametri.push(tmp);
         }
-        return { ritorno, nontrovato, errori };
+        return ritorno;
     }
     SoddisfaParamtri() {
         return __awaiter(this, void 0, void 0, function* () {

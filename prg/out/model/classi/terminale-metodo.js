@@ -542,14 +542,18 @@ class TerminaleMetodo {
             try {
                 console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                 const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                if (parametri.errori.length == 0) {
-                    //if(this.Validatore)this.Validatore(parametri.ritorno,parametri.nontrovato);
+                let valido = { approvato: true, stato: 200, messaggio: '' };
+                if (this.Validatore)
+                    valido = this.Validatore(parametri, this.listaParametri);
+                else
+                    valido = undefined;
+                if ((valido && valido.approvato) || (!valido && parametri.errori.length == 0)) {
                     let tmp = {
                         body: {}, nonTrovati: parametri.nontrovato,
-                        inErrore: parametri.errori, stato: 0
+                        inErrore: parametri.errori, stato: 200
                     };
                     try {
-                        const tmpReturn = this.metodoAvviabile.apply(this, parametri.ritorno);
+                        const tmpReturn = this.metodoAvviabile.apply(this, parametri.valoriParametri);
                         if ('body' in tmpReturn)
                             tmp.body = tmpReturn.body;
                         else
@@ -569,9 +573,25 @@ class TerminaleMetodo {
                 }
                 else {
                     let tmp = {
-                        body: parametri.errori, nonTrovati: parametri.nontrovato,
-                        inErrore: parametri.errori, stato: 500
+                        body: parametri.errori,
+                        nonTrovati: parametri.nontrovato,
+                        inErrore: parametri.errori,
+                        stato: 500
                     };
+                    if (valido) {
+                        tmp = {
+                            body: valido.messaggio,
+                            stato: 500,
+                        };
+                    }
+                    else {
+                        tmp = {
+                            body: parametri.errori,
+                            nonTrovati: parametri.nontrovato,
+                            inErrore: parametri.errori,
+                            stato: 500
+                        };
+                    }
                     return tmp;
                 }
             }

@@ -16,7 +16,7 @@ import { TipoParametro } from "./model/tools";
 
 import "reflect-metadata";
 import validator from "validator";
-import { INonTrovato } from "./model/liste/lista-terminale-parametro";
+import { INonTrovato, IParametriEstratti, ListaTerminaleParametro } from "./model/liste/lista-terminale-parametro";
 
 const test:IParametro = {
     nomeParametro:'nomeFuturo',
@@ -98,9 +98,17 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
             @mpMet({tipo:'post',path:'SetNome',
             onChiamataCompletata:(logOn: string, result: any, logIn: string)=>{
                 console.log(logOn);
-            },Validatore:(ritorno: IParametro[], nontrovato: INonTrovato[])=>{
-
-return true;
+            },
+            Validatore:(param:IParametriEstratti, listaParametri:ListaTerminaleParametro)=>{
+                let app = false;
+                listaParametri.forEach(element => {
+                    if(element.nomeParametro== 'nomeFuturo' && param.valoriParametri[element.indexParameter] == 'casa')app = true;
+                });
+                    return {
+                        approvato:app,
+                        messaggio:'',
+                        stato:200
+                    };
             }
         })
             SetNome(@mpPar({
@@ -133,11 +141,7 @@ return true;
 
             
             @mpAddMiddle('Valida') 
-            @mpMet({tipo:'post',path:'SetNomeConMiddleware',
-            Validatore:(ritorno: any[], nontrovato: INonTrovato[])=>{
-
-                return true;
-            }})
+            @mpMet({tipo:'post',path:'SetNomeConMiddleware'})
             SetNomeConMiddleware(
                 @mpPar({
                         nomeParametro:'nomeFuturo',

@@ -125,8 +125,18 @@ __decorate([
 __decorate([
     terminale_metodo_1.mpMet({ tipo: 'post', path: 'SetNome', onChiamataCompletata: (logOn, result, logIn) => {
             console.log(logOn);
-        }, Validatore: (ritorno, nontrovato) => {
-            return true;
+        },
+        Validatore: (param, listaParametri) => {
+            let app = false;
+            listaParametri.forEach(element => {
+                if (element.nomeParametro == 'nomeFuturo' && param.valoriParametri[element.indexParameter] == 'casa')
+                    app = true;
+            });
+            return {
+                approvato: app,
+                messaggio: '',
+                stato: 200
+            };
         }
     }),
     __param(0, terminale_parametro_1.mpPar({
@@ -153,9 +163,7 @@ __decorate([
 ], ClasseTest.prototype, "SetNome", null);
 __decorate([
     terminale_metodo_1.mpAddMiddle('Valida'),
-    terminale_metodo_1.mpMet({ tipo: 'post', path: 'SetNomeConMiddleware', Validatore: (ritorno, nontrovato) => {
-            return true;
-        } }),
+    terminale_metodo_1.mpMet({ tipo: 'post', path: 'SetNomeConMiddleware' }),
     __param(0, terminale_parametro_1.mpPar({
         nomeParametro: 'nomeFuturo',
         posizione: 'body',
