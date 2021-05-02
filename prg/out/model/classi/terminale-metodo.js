@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MPDecMet = exports.MPDecMetodo = exports.MPDecoratoreMetodo = exports.MPMetodo = exports.MPM = exports.MPMetRev = exports.mpDecMet = exports.mpDecMetodo = exports.mpDecoratoreMetodo = exports.mpMetodo = exports.mpM = exports.mpMet = exports.mpMetRev = exports.mpAddMiddle = exports.mpAddHelmet = exports.mpAddCors = exports.CheckMetodoMetaData = exports.TerminaleMetodo = void 0;
+exports.MPDecMet = exports.MPDecMetodo = exports.MPDecoratoreMetodo = exports.MPMetodo = exports.MPM = exports.MPMetRev = exports.mpDecMet = exports.mpDecMetodo = exports.mpDecoratoreMetodo = exports.mpMetodo = exports.mpM = exports.mpMet = exports.mpMetRev = exports.mpAddMiddle = exports.mpAddHelmet = exports.mpAddCors = exports.TerminaleMetodo = void 0;
 const tools_1 = require("../tools");
 const terminale_classe_1 = require("./terminale-classe");
 const terminale_parametro_1 = require("./terminale-parametro");
@@ -161,43 +161,6 @@ class TerminaleMetodo {
         param = param + tt;
         listaNomi = listaNomi + '\n' + param;
         return listaNomi;
-    }
-    ConfiguraRotta(rotte, percorsi) {
-        this.percorsi.patheader = percorsi.patheader;
-        this.percorsi.porta = percorsi.porta;
-        const pathGlobal = percorsi.pathGlobal + '/' + this.path;
-        this.percorsi.pathGlobal = pathGlobal;
-        const middlew = [];
-        this.middleware.forEach(element => {
-            if (element instanceof TerminaleMetodo) {
-                const listaMidd = lista_terminale_metodo_1.GetListaMiddlewareMetaData();
-                const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
-                middlew.push(midd.ConvertiInMiddleare());
-            }
-        });
-        if (this.metodoAvviabile != undefined) {
-            var corsOptions = {
-                methods: this.tipo
-            };
-            if (this.helmet == undefined) {
-                this.helmet = helmet_1.default();
-            }
-            if (this.cors == undefined) {
-                this.cors == cors_1.default(corsOptions);
-            }
-            rotte.all("/" + this.percorsi.pathGlobal /* this.path */, cors_1.default(this.cors), 
-            /*helmet(this.helmet),
-            middlew, */
-            (req, res) => __awaiter(this, void 0, void 0, function* () {
-                console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                tools_1.InizializzaLogbaseIn(req, this.nome.toString());
-                const tmp = yield this.Esegui(req);
-                res.status(tmp.stato).send(tmp.body);
-                tools_1.InizializzaLogbaseOut(res, this.nome.toString());
-                return res;
-            }));
-        }
-        return rotte;
     }
     ConfiguraRottaApplicazione(app, percorsi) {
         this.percorsi.patheader = percorsi.patheader;
@@ -821,19 +784,6 @@ class TerminaleMetodo {
 }
 exports.TerminaleMetodo = TerminaleMetodo;
 TerminaleMetodo.nomeMetadataKeyTarget = "MetodoTerminaleTarget";
-function CheckMetodoMetaData(nomeMetodo, classe) {
-    let tmp = Reflect.getMetadata(lista_terminale_metodo_1.ListaTerminaleMetodo.nomeMetadataKeyTarget, tools_1.targetTerminale); // vado a prendere la struttura legata alle funzioni
-    if (tmp == undefined) { //se non c'è 
-        tmp = new lista_terminale_metodo_1.ListaTerminaleMetodo(classe.rotte); //lo creo
-        Reflect.defineMetadata(lista_terminale_metodo_1.ListaTerminaleMetodo.nomeMetadataKeyTarget, tmp, tools_1.targetTerminale); //e lo aggiungo a i metadata
-    }
-    let terminale = tmp.CercaConNome(nomeMetodo); //cerca la mia funzione
-    if (terminale == undefined) /* se non c'è */ {
-        terminale = new TerminaleMetodo(nomeMetodo, "", classe.nome); // creo la funzione
-    }
-    return terminale;
-}
-exports.CheckMetodoMetaData = CheckMetodoMetaData;
 function decoratoreMetodo(parametri) {
     return function (target, propertyKey, descriptor) {
         const list = terminale_classe_1.GetListaClasseMetaData();

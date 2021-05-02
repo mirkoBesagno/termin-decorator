@@ -1,6 +1,6 @@
 
 import { IDescrivibile, IPrintabile, targetTerminale, TipoParametro } from "../tools";
-import { CheckMetodoMetaData, IRitornoValidatore, TerminaleMetodo } from "./terminale-metodo";
+import { IRitornoValidatore, TerminaleMetodo } from "./terminale-metodo";
 
 
 import superagent, { post } from "superagent";
@@ -100,17 +100,3 @@ function decoratoreParametroGenerico(parametri: IParametro)/* (nomeParametro: st
 
 
 export { decoratoreParametroGenerico as mpPar };
-export { decoratoreParametroGenerico as mpParRev };
-export { decoratoreParametroGenerico as mpP };
-export { decoratoreParametroGenerico as mpParametro };
-export { decoratoreParametroGenerico as mpDecoratoreParametroGenerico };
-export { decoratoreParametroGenerico as mpDecParametro };
-export { decoratoreParametroGenerico as mpDecPar };
-
-
-export { decoratoreParametroGenerico as MPParRev };
-export { decoratoreParametroGenerico as MPP };
-export { decoratoreParametroGenerico as MPParametro };
-export { decoratoreParametroGenerico as MPDecoratoreParametroGenerico };
-export { decoratoreParametroGenerico as MPDecParametro };
-export { decoratoreParametroGenerico as MPDecPar };

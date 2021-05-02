@@ -11,7 +11,7 @@ import { Request, Response, NextFunction } from "express";
 import { mpMain, Main } from "./model/classi/terminale-main";
 import { mpClas } from "./model/classi/terminale-classe";
 import { IReturn, mpAddMiddle, mpMet } from "./model/classi/terminale-metodo";
-import {  TypePosizione, mpP, mpPar, IParametro } from "./model/classi/terminale-parametro";
+import {  mpPar, IParametro } from "./model/classi/terminale-parametro";
 import { TipoParametro } from "./model/tools";
 
 import "reflect-metadata";

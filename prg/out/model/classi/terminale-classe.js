@@ -23,7 +23,7 @@ class TerminaleClasse {
     constructor(nome, path, headerPath, port) {
         this.id = Math.random().toString();
         this.rotte = express_1.Router();
-        this.listaMetodi = new lista_terminale_metodo_1.ListaTerminaleMetodo(this.rotte);
+        this.listaMetodi = new lista_terminale_metodo_1.ListaTerminaleMetodo();
         this.nome = nome;
         if (path)
             this.path = path;

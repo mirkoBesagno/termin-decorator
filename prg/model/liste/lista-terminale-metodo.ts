@@ -4,10 +4,9 @@ import { targetTerminale } from "../tools";
 
 export class ListaTerminaleMetodo extends Array<TerminaleMetodo> {
     static nomeMetadataKeyTarget = "ListaTerminaleMetodo";
-    rotte: Router;
-    constructor(rotte: Router) {
+
+    constructor() {
         super();
-        this.rotte = rotte;
     }
     CercaConNome(nome: string): TerminaleMetodo | undefined {
         for (let index = 0; index < this.length; index++) {
@@ -21,12 +20,10 @@ export class ListaTerminaleMetodo extends Array<TerminaleMetodo> {
             const element = this[index];
             if (element.nome == item.nome && element.classePath == item.classePath) {
                 this[index] = item;
-                this.rotte = item.ConfiguraRotta(this.rotte, { porta: 0, pathGlobal: '', patheader: '' });
                 return item;
             }
         }
         this.push(item);
-        this.rotte = item.ConfiguraRotta(this.rotte, { porta: 0, pathGlobal: '', patheader: '' });
         return item;
     }
 }

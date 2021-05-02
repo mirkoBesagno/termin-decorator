@@ -34,7 +34,7 @@ export class TerminaleClasse implements IPrintabile {
     constructor(nome: string, path?: string, headerPath?: string, port?: number) {
         this.id = Math.random().toString();
         this.rotte = Router();
-        this.listaMetodi = new ListaTerminaleMetodo(this.rotte);
+        this.listaMetodi = new ListaTerminaleMetodo();
 
         this.nome = nome;
         if (path) this.path = path;
@@ -196,14 +196,6 @@ export class TerminaleClasse implements IPrintabile {
 
         return listaNomi;
     }
-    /* SettaHTML() {
-        const tmp: any[] = [];
-        for (let index = 0; index < this.listaMetodi.length; index++) {
-            const element = this.listaMetodi[index];
-            tmp.push(element.Se);
-        }
-        return tmp;
-    } */
 }
 
 /**

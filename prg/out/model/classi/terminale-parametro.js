@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MPDecPar = exports.MPDecParametro = exports.MPDecoratoreParametroGenerico = exports.MPParametro = exports.MPP = exports.MPParRev = exports.mpDecPar = exports.mpDecParametro = exports.mpDecoratoreParametroGenerico = exports.mpParametro = exports.mpP = exports.mpParRev = exports.mpPar = exports.TerminaleParametro = void 0;
+exports.mpPar = exports.TerminaleParametro = void 0;
 const tools_1 = require("../tools");
 const terminale_classe_1 = require("./terminale-classe");
 class TerminaleParametro {
@@ -74,16 +74,4 @@ function decoratoreParametroGenerico(parametri) {
     };
 }
 exports.mpPar = decoratoreParametroGenerico;
-exports.mpParRev = decoratoreParametroGenerico;
-exports.mpP = decoratoreParametroGenerico;
-exports.mpParametro = decoratoreParametroGenerico;
-exports.mpDecoratoreParametroGenerico = decoratoreParametroGenerico;
-exports.mpDecParametro = decoratoreParametroGenerico;
-exports.mpDecPar = decoratoreParametroGenerico;
-exports.MPParRev = decoratoreParametroGenerico;
-exports.MPP = decoratoreParametroGenerico;
-exports.MPParametro = decoratoreParametroGenerico;
-exports.MPDecoratoreParametroGenerico = decoratoreParametroGenerico;
-exports.MPDecParametro = decoratoreParametroGenerico;
-exports.MPDecPar = decoratoreParametroGenerico;
 //# sourceMappingURL=terminale-parametro.js.map

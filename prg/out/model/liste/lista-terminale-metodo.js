@@ -4,9 +4,8 @@ exports.SalvaListaMiddlewareMetaData = exports.GetListaMiddlewareMetaData = expo
 const terminale_metodo_1 = require("../classi/terminale-metodo");
 const tools_1 = require("../tools");
 class ListaTerminaleMetodo extends Array {
-    constructor(rotte) {
+    constructor() {
         super();
-        this.rotte = rotte;
     }
     CercaConNome(nome) {
         for (let index = 0; index < this.length; index++) {
@@ -21,12 +20,10 @@ class ListaTerminaleMetodo extends Array {
             const element = this[index];
             if (element.nome == item.nome && element.classePath == item.classePath) {
                 this[index] = item;
-                this.rotte = item.ConfiguraRotta(this.rotte, { porta: 0, pathGlobal: '', patheader: '' });
                 return item;
             }
         }
         this.push(item);
-        this.rotte = item.ConfiguraRotta(this.rotte, { porta: 0, pathGlobal: '', patheader: '' });
         return item;
     }
 }

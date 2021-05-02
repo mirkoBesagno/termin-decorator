@@ -199,46 +199,6 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         listaNomi = listaNomi + '\n' + param;
         return listaNomi;
     }
-    ConfiguraRotta(rotte: Router, percorsi: IRaccoltaPercorsi): Router {
-        this.percorsi.patheader = percorsi.patheader;
-        this.percorsi.porta = percorsi.porta;
-        const pathGlobal = percorsi.pathGlobal + '/' + this.path;
-        this.percorsi.pathGlobal = pathGlobal;
-        const middlew: any[] = [];
-        this.middleware.forEach(element => {
-
-            if (element instanceof TerminaleMetodo) {
-                const listaMidd = GetListaMiddlewareMetaData();
-                const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
-                middlew.push(midd.ConvertiInMiddleare());
-            }
-        });
-        if (this.metodoAvviabile != undefined) {
-            var corsOptions = {
-                methods: this.tipo
-            }
-
-            if (this.helmet == undefined) {
-                this.helmet = helmet();
-            }
-            if (this.cors == undefined) {
-                this.cors == cors(corsOptions);
-            }
-            rotte.all("/" + this.percorsi.pathGlobal /* this.path */,
-                cors(this.cors),
-                /*helmet(this.helmet),
-                middlew, */
-                async (req: Request, res: Response) => {
-                    console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
-                    InizializzaLogbaseIn(req, this.nome.toString());
-                    const tmp = await this.Esegui(req);
-                    res.status(tmp.stato).send(tmp.body);
-                    InizializzaLogbaseOut(res, this.nome.toString());
-                    return res;
-                });
-        }
-        return rotte;
-    }
     ConfiguraRottaApplicazione(app: any, percorsi: IRaccoltaPercorsi) {
         this.percorsi.patheader = percorsi.patheader;
         this.percorsi.porta = percorsi.porta;
@@ -865,18 +825,6 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
     }
 }
 
-export function CheckMetodoMetaData(nomeMetodo: string, classe: TerminaleClasse) {
-    let tmp: ListaTerminaleMetodo = Reflect.getMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, targetTerminale); // vado a prendere la struttura legata alle funzioni
-    if (tmp == undefined) {//se non c'è 
-        tmp = new ListaTerminaleMetodo(classe.rotte);//lo creo
-        Reflect.defineMetadata(ListaTerminaleMetodo.nomeMetadataKeyTarget, tmp, targetTerminale);//e lo aggiungo a i metadata
-    }
-    let terminale = tmp.CercaConNome(nomeMetodo); //cerca la mia funzione
-    if (terminale == undefined)/* se non c'è */ {
-        terminale = new TerminaleMetodo(nomeMetodo, "", classe.nome); // creo la funzione
-    }
-    return terminale;
-}
 
 export type TypeMetod = "get" | "put" | "post" | "patch" | "purge" | "delete";
 export interface IRitornoValidatore {
