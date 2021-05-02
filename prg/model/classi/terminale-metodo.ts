@@ -54,6 +54,9 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
     onParametriNonTrovati?: (nonTrovati?: INonTrovato[]) => void;
 
     Validatore?: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => IRitornoValidatore;
+    onPrimaDiEseguireMetodo?: () => void;
+    onPrimaDiEseguireExpress?: () => void;
+    onPrimaDirestituireResponseExpress?: () => void;
 
     constructor(nome: string, path: string, classePath: string) {
         this.listaParametri = new ListaTerminaleParametro();
@@ -922,7 +925,7 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
             if (parametri.onChiamataCompletata != null) metodo.onChiamataCompletata = parametri.onChiamataCompletata;
 
             if (parametri.Validatore != null) metodo.Validatore = parametri.Validatore;
-            
+
             /* configuro i middleware */
             if (parametri.interazione == 'middleware' || parametri.interazione == 'ambo') {
 
