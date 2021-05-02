@@ -834,7 +834,12 @@ export interface IRitornoValidatore {
     terminale?: IParametro
 }
 export interface IMetodo {
+    /**
+     * Specifica il tipo, questo puo essere:
+     * "get" | "put" | "post" | "patch" | "purge" | "delete"
+     */
     tipo?: TypeMetod,
+    
     path?: string,
     interazione?: TypeInterazone,
     descrizione?: string,
