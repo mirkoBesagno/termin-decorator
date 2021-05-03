@@ -33,6 +33,9 @@ export function mpMain(path: string) {
         }; */
     }
 }
+/**
+ * questa interfaccia aggrega le varie parti di un percorso
+ */
 export interface IRaccoltaPercorsi {
     pathGlobal: string, patheader: string, porta: number
 }

@@ -14,6 +14,9 @@ import { IRaccoltaPercorsi } from "./terminale-main";
 import { textChangeRangeIsUnchanged } from "typescript";
 import axios from "axios";
 import validator from "validator";
+import qs from "querystring";
+import http from "http";
+
 export type TypeInterazone = "rotta" | "middleware" | 'ambo';
 
 export interface IReturn {
@@ -54,7 +57,8 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
     onParametriNonTrovati?: (nonTrovati?: INonTrovato[]) => void;
 
     Validatore?: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => IRitornoValidatore;
-    onPrimaDiEseguireMetodo?: () => void;
+    onPrimaDiEseguireMetodo?: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => any[];
+    onPrimaDiTerminareLaChiamata?: (res: IReturn) => IReturn;
     onPrimaDiEseguireExpress?: () => void;
     onPrimaDirestituireResponseExpress?: () => void;
 
@@ -74,131 +78,6 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         //this.listaRotteGeneraChiavi = [];
     }
 
-    async PrintMenu() {
-        for (let index = 0; index < this.listaParametri.length; index++) {
-            const element = this.listaParametri[index];
-            element.PrintMenu();
-        }
-    }
-    PrintCredenziali(pathRoot?: string) {
-        const tab = '\t\t\t';
-        let parametri = "";
-        console.log(tab + 'TerminaleMetodo' + '->' + 'PrintCredenziali');
-        console.log(tab + this.nome + ' | ' + this.path + ' ;');
-
-        for (let index = 0; index < this.listaParametri.length; index++) {
-            const element = this.listaParametri[index];
-            parametri = parametri + element.PrintParametro();
-        }
-        if (pathRoot != undefined) console.log(tab + this.nome + ' | ' + '/' + pathRoot + '/' + this.path + '  |  ' + parametri);
-        else console.log(tab + this.nome + ' | ' + "/" + this.path + '  |  ' + parametri);
-        console.log(this.percorsi.pathGlobal);
-
-
-    }
-    PrintStamp() {
-        let parametri = "";
-        for (let index = 0; index < this.listaParametri.length; index++) {
-            const element = this.listaParametri[index];
-            parametri = parametri + element.PrintParametro();
-        }
-        const tmp = this.nome + ' | ' + this.percorsi.pathGlobal + '/' + this.path + '  |  ' + parametri;
-        //console.log(tmp);
-        return tmp;
-    }
-    GeneraHTML() {
-        let listaNomi = `
-            <table>
-                <tr>
-                    <th>nome</th>
-                    <th>posizione</th>
-                    <th>sommario</th>
-                    <th>descrizione</th>
-                    <th>indexParameter</th>
-                    <th>tipo</th>
-                    <th>#INPUT#</th>
-                </tr>`;
-        let tt = `</table>`
-
-        let param = ``;
-        for (let index = 0; index < this.listaParametri.length; index++) {
-            const element = this.listaParametri[index];
-            let inputhtml = '';
-            let bodyStart = '';
-            switch (element.tipoParametro) {
-                case 'text':
-                    inputhtml = '<input type="text" name="" id="">';
-                    break;
-                case 'date':
-                    inputhtml = '<input type="date" name="" id="">';
-                    break;
-                case 'number':
-                    inputhtml = '<input type="number" name="" id="">';
-                    break;
-            }
-            param = param + `
-                <tr>
-                    <td>${element.nomeParametro}</td>
-                    <td>${element.posizione}</td>
-                    <td>${element.sommario}</td>
-                    <td>${element.descrizione}</td>
-                    <td>${element.indexParameter}</td>
-                    <td>${element.tipoParametro}</td>
-                    <td>${inputhtml}</td>
-                </tr>`
-                ;
-            bodyStart = `<script type="text/javascript">
-            function UserAction() {
-                var passw = document.getElementById("password").value;
-                if (passw.length >= 8) {
-    
-                    var x = document.URL;
-                    var vettore = x.split('/');
-                    var body = vettore[vettore.length - 1];
-                    var gg = body.split('?', 2);
-                    gg = gg[1].substring(3);
-                    var xhttp = new XMLHttpRequest();
-                    let url
-                    if (process.env.NODE_ENV == "test") {
-                        url = new URL('https://ss-test.medicaltech.it/api/medico/reimposta-password-medico');
-                    }
-                    else if (process.env.NODE_ENV == "production") {
-                        url = new URL('https://staisicuro.medicaltech.it/api/medico/reimposta-password-medico');
-                    }
-                    let json = JSON.stringify({
-                        password: passw,
-                        token: gg
-                    });
-    
-                    xhttp.onreadystatechange = function () {
-                        if (this.readyState == 4 && this.status == 200) {
-                            alert('Richiesta accettata. 4\n' + this.responseText);
-                            window.close();
-                        }
-                        if (this.readyState == 4 && this.status == 500) {
-                            alert("Richiesta respinta. 4\n" + this.responseText);
-                        }
-                        if (this.readyState == 4 && this.status == 502) {
-                            alert("Richiesta potrebbe essere accettata ma c'è stato un errore nel proxy.");
-                            window.close();
-                        }
-                    };
-    
-                    xhttp.open("POST", url, true);
-                    xhttp.setRequestHeader("Content-type", "application/json; charset=utf-8");
-                    xhttp.send(json);
-                    //window.close();   
-                }
-                else {
-                    alert("Attenzione almeno 8 caratteri");
-                }
-            }
-        </script>`;
-        }
-        param = param + tt;
-        listaNomi = listaNomi + '\n' + param;
-        return listaNomi;
-    }
     ConfiguraRottaApplicazione(app: any, percorsi: IRaccoltaPercorsi) {
         this.percorsi.patheader = percorsi.patheader;
         this.percorsi.porta = percorsi.porta;
@@ -374,10 +253,9 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         try {
             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
             const logIn = InizializzaLogbaseIn(req, this.nome.toString());
-            const tmp: IReturn = await this.Esegui(req);
-            if (this.onParametriNonTrovati) {
-                this.onParametriNonTrovati(tmp.nonTrovati);
-            }
+            let tmp: IReturn = await this.Esegui(req);
+            if (this.onParametriNonTrovati) this.onParametriNonTrovati(tmp.nonTrovati);
+            if (this.onPrimaDiTerminareLaChiamata) tmp = this.onPrimaDiTerminareLaChiamata(tmp);
             res.status(tmp.stato).send(tmp.body);
             const logOit = InizializzaLogbaseOut(res, this.nome.toString());
             if (this.onChiamataCompletata) {
@@ -464,6 +342,41 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             }); */
 
             /*  */
+
+            /* // Build the post string from an object
+            var post_data = qs.stringify({
+                'compilation_level': 'ADVANCED_OPTIMIZATIONS',
+                'output_format': 'json',
+                'output_info': 'compiled_code',
+                'warning_level': 'QUIET',
+                'js_code': JSON.parse('{ ' + body + ' }')
+            });
+
+            var post_options = {
+                host: this.percorsi.patheader,
+                port: this.percorsi.porta,
+                path: this.percorsi.pathGlobal,
+                method: this.tipo,
+                query: JSON.parse('{ ' + query + ' }'),
+                header: Object.assign({
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Length': Buffer.byteLength(post_data),
+                }, JSON.parse('{ ' + header + ' }'))
+            };
+
+            // Set up the request
+            var post_req = await http.request(post_options);
+             , function (res) {
+            res.setEncoding('utf8');
+            res.on('data', function (chunk) {
+                console.log('Response: ' + chunk);
+            });
+        }); 
+
+            // post the data
+            post_req.write(post_data);
+            post_req.end(); */
+
             switch (this.tipo) {
                 case 'get':
                     try {
@@ -564,15 +477,16 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             let valido: IRitornoValidatore | undefined = { approvato: true, stato: 200, messaggio: '' };
             if (this.Validatore) valido = this.Validatore(parametri, this.listaParametri);
             else valido = undefined;
-
             if ((valido && valido.approvato) || (!valido && parametri.errori.length == 0)) {
-
                 let tmp: IReturn = {
                     body: {}, nonTrovati: parametri.nontrovato,
                     inErrore: parametri.errori, stato: 200
                 };
                 try {
-                    const tmpReturn = this.metodoAvviabile.apply(this, parametri.valoriParametri);
+                    let parametriTmp = parametri.valoriParametri;
+                    if (this.onPrimaDiEseguireMetodo) parametriTmp = this.onPrimaDiEseguireMetodo(parametri,
+                        this.listaParametri);
+                    const tmpReturn = this.metodoAvviabile.apply(this, parametriTmp);
                     if ('body' in tmpReturn) tmp.body = tmpReturn.body;
                     else tmp.body = tmpReturn;
                     if ('stato' in tmpReturn) tmp.stato = tmpReturn.stato;
@@ -618,7 +532,6 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         }
     }
 
-
     ConvertiInMiddleare() {
         return async (req: Request, res: Response, nex: NextFunction) => {
             try {
@@ -634,6 +547,131 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                 res.status(555).send("Errore : " + error);
             }
         };
+    }
+    async PrintMenu() {
+        for (let index = 0; index < this.listaParametri.length; index++) {
+            const element = this.listaParametri[index];
+            element.PrintMenu();
+        }
+    }
+    PrintCredenziali(pathRoot?: string) {
+        const tab = '\t\t\t';
+        let parametri = "";
+        console.log(tab + 'TerminaleMetodo' + '->' + 'PrintCredenziali');
+        console.log(tab + this.nome + ' | ' + this.path + ' ;');
+
+        for (let index = 0; index < this.listaParametri.length; index++) {
+            const element = this.listaParametri[index];
+            parametri = parametri + element.PrintParametro();
+        }
+        if (pathRoot != undefined) console.log(tab + this.nome + ' | ' + '/' + pathRoot + '/' + this.path + '  |  ' + parametri);
+        else console.log(tab + this.nome + ' | ' + "/" + this.path + '  |  ' + parametri);
+        console.log(this.percorsi.pathGlobal);
+
+
+    }
+    PrintStamp() {
+        let parametri = "";
+        for (let index = 0; index < this.listaParametri.length; index++) {
+            const element = this.listaParametri[index];
+            parametri = parametri + element.PrintParametro();
+        }
+        const tmp = this.nome + ' | ' + this.percorsi.pathGlobal + '/' + this.path + '  |  ' + parametri;
+        //console.log(tmp);
+        return tmp;
+    }
+    GeneraHTML() {
+        let listaNomi = `
+            <table>
+                <tr>
+                    <th>nome</th>
+                    <th>posizione</th>
+                    <th>sommario</th>
+                    <th>descrizione</th>
+                    <th>indexParameter</th>
+                    <th>tipo</th>
+                    <th>#INPUT#</th>
+                </tr>`;
+        let tt = `</table>`
+
+        let param = ``;
+        for (let index = 0; index < this.listaParametri.length; index++) {
+            const element = this.listaParametri[index];
+            let inputhtml = '';
+            let bodyStart = '';
+            switch (element.tipoParametro) {
+                case 'text':
+                    inputhtml = '<input type="text" name="" id="">';
+                    break;
+                case 'date':
+                    inputhtml = '<input type="date" name="" id="">';
+                    break;
+                case 'number':
+                    inputhtml = '<input type="number" name="" id="">';
+                    break;
+            }
+            param = param + `
+                <tr>
+                    <td>${element.nomeParametro}</td>
+                    <td>${element.posizione}</td>
+                    <td>${element.sommario}</td>
+                    <td>${element.descrizione}</td>
+                    <td>${element.indexParameter}</td>
+                    <td>${element.tipoParametro}</td>
+                    <td>${inputhtml}</td>
+                </tr>`
+                ;
+            bodyStart = `<script type="text/javascript">
+            function UserAction() {
+                var passw = document.getElementById("password").value;
+                if (passw.length >= 8) {
+    
+                    var x = document.URL;
+                    var vettore = x.split('/');
+                    var body = vettore[vettore.length - 1];
+                    var gg = body.split('?', 2);
+                    gg = gg[1].substring(3);
+                    var xhttp = new XMLHttpRequest();
+                    let url
+                    if (process.env.NODE_ENV == "test") {
+                        url = new URL('https://ss-test.medicaltech.it/api/medico/reimposta-password-medico');
+                    }
+                    else if (process.env.NODE_ENV == "production") {
+                        url = new URL('https://staisicuro.medicaltech.it/api/medico/reimposta-password-medico');
+                    }
+                    let json = JSON.stringify({
+                        password: passw,
+                        token: gg
+                    });
+    
+                    xhttp.onreadystatechange = function () {
+                        if (this.readyState == 4 && this.status == 200) {
+                            alert('Richiesta accettata. 4\n' + this.responseText);
+                            window.close();
+                        }
+                        if (this.readyState == 4 && this.status == 500) {
+                            alert("Richiesta respinta. 4\n" + this.responseText);
+                        }
+                        if (this.readyState == 4 && this.status == 502) {
+                            alert("Richiesta potrebbe essere accettata ma c'è stato un errore nel proxy.");
+                            window.close();
+                        }
+                    };
+    
+                    xhttp.open("POST", url, true);
+                    xhttp.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                    xhttp.send(json);
+                    //window.close();   
+                }
+                else {
+                    alert("Attenzione almeno 8 caratteri");
+                }
+            }
+        </script>`;
+        }
+        param = param + tt;
+        listaNomi = listaNomi + '\n' + param;
+        return listaNomi;
     }
     SettaSwagger(tipoInterazione: 'rotta' | 'middleware') {
 
@@ -833,21 +871,32 @@ export interface IRitornoValidatore {
     messaggio: string,
     terminale?: IParametro
 }
+/**
+ * 
+ */
 export interface IMetodo {
-    /**
-     * Specifica il tipo, questo puo essere:
-     * "get" | "put" | "post" | "patch" | "purge" | "delete"
-     */
+    /** Specifica il tipo, questo puo essere: "get" | "put" | "post" | "patch" | "purge" | "delete" */
     tipo?: TypeMetod,
-    
+    /** specifica il percorso di una particolare, se non impostato prende il nome della classe */
     path?: string,
+    /** l'interazione è come viene gestito il metodo, puo essere : "rotta" | "middleware" | "ambo" */
     interazione?: TypeInterazone,
+    /** la descrizione è utile piu nel menu o in caso di output */
     descrizione?: string,
-    sommario?: string
+    /** il sommario è una versione piu semplice della descrizione */
+    sommario?: string,
+    /** questa è la strada per andare ad assegnare questa funzione è piu classi o sotto percorsi */
     nomiClasseRiferimento?: string[],
+
     onChiamataCompletata?: (logOn: string, result: any, logIn: string) => void
+
     Validatore?: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => IRitornoValidatore;
 }
+/**
+ * Decoratore di metodo,
+ * @param parametri 
+ * @returns 
+ */
 function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
     return function (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
@@ -994,11 +1043,7 @@ export function mpAddHelmet(helmet: any): MethodDecorator {
     }
 }
 export function mpAddMiddle(item: any): MethodDecorator {
-    return function (
-        target: Object,
-        propertyKey: string | symbol,
-        descriptor: PropertyDescriptor
-    ) {
+    return function (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());

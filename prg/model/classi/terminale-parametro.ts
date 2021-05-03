@@ -22,7 +22,7 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
     sommario: string;
 
 
-    Validatore?: (parametro:any) => IRitornoValidatore
+    Validatore?: (parametro: any) => IRitornoValidatore
     constructor(nomeParametro: string, tipoParametro: TipoParametro, posizione: TypePosizione, indexParameter: number) {
         this.nomeParametro = nomeParametro;
         this.tipoParametro = tipoParametro;
@@ -70,9 +70,18 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
 }
 
 export interface IParametro {
-    nomeParametro: string, posizione: TypePosizione, tipoParametro?: TipoParametro,
-    descrizione?: string, sommario?: string,
-    Validatore?: (parametro:any) => IRitornoValidatore
+    /** nome del parametro */
+    nomeParametro: string,
+    /** la posizione rispetto alla chiamata */
+    posizione: TypePosizione,
+    /** fa riferimento al tipo di base */
+    tipoParametro?: TipoParametro,
+    /** descrizione lunga */
+    descrizione?: string,
+    /** descrizione breve */
+    sommario?: string,
+    
+    Validatore?: (parametro: any) => IRitornoValidatore
 }
 
 function decoratoreParametroGenerico(parametri: IParametro)/* (nomeParametro: string, posizione: TypePosizione, tipoParametro?: TipoParametro, descrizione?: string, sommario?: string) */ {

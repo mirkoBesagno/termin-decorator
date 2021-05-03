@@ -9,7 +9,10 @@ import { TerminaleMetodo } from "./terminale-metodo";
 import { IRaccoltaPercorsi } from "./terminale-main";
 import fs from 'fs';
 
+import http from "http";
+
 export class TerminaleClasse implements IPrintabile {
+
     static nomeMetadataKeyTarget = "ClasseTerminaleTarget";
 
     listaMetodi: ListaTerminaleMetodo;
@@ -199,14 +202,14 @@ export class TerminaleClasse implements IPrintabile {
 }
 
 /**
- * 
- * @param ctr 
+ * @param percorso : questo inizializza
  */
-function decoratoreClasse(percorso: string): any {
+function decoratoreClasse(percorso?: string): any {
     return (ctr: Function) => {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         const classe = CheckClasseMetaData(ctr.name);
-        classe.SetPath = percorso;
+        if (percorso) classe.SetPath = percorso;
+        else classe.SetPath = ctr.name;
         SalvaListaClasseMetaData(tmp);
     }
 }

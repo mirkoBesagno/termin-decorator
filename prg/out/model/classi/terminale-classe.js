@@ -201,14 +201,16 @@ class TerminaleClasse {
 exports.TerminaleClasse = TerminaleClasse;
 TerminaleClasse.nomeMetadataKeyTarget = "ClasseTerminaleTarget";
 /**
- *
- * @param ctr
+ * @param percorso : questo inizializza
  */
 function decoratoreClasse(percorso) {
     return (ctr) => {
         let tmp = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale);
         const classe = CheckClasseMetaData(ctr.name);
-        classe.SetPath = percorso;
+        if (percorso)
+            classe.SetPath = percorso;
+        else
+            classe.SetPath = ctr.name;
         SalvaListaClasseMetaData(tmp);
     };
 }

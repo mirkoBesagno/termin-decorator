@@ -133,7 +133,7 @@ __decorate([
                     app = true;
             });
             return {
-                approvato: app,
+                approvato: true,
                 messaggio: '',
                 stato: 200
             };
@@ -150,8 +150,8 @@ __decorate([
                 tmp = true;
             }
             return {
-                approvato: tmp,
-                stato: 0,
+                approvato: true,
+                stato: 200,
                 messaggio: 'ciao'
             };
         }
@@ -163,7 +163,7 @@ __decorate([
 ], ClasseTest.prototype, "SetNome", null);
 __decorate([
     terminale_metodo_1.mpAddMiddle('Valida'),
-    terminale_metodo_1.mpMet({ tipo: 'post', path: 'SetNomeConMiddleware' }),
+    terminale_metodo_1.mpMet({ tipo: 'post' }),
     __param(0, terminale_parametro_1.mpPar({
         nomeParametro: 'nomeFuturo',
         posizione: 'body',
@@ -186,7 +186,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ClasseTest.prototype, "SetNomeConMiddleware", null);
 ClasseTest = __decorate([
-    terminale_classe_1.mpClas('classe-test'),
+    terminale_classe_1.mpClas(),
     __metadata("design:paramtypes", [String, String])
 ], ClasseTest);
 const classecosi = new ClasseTest("prima classe!!", 'cognome prima classe?!??!');

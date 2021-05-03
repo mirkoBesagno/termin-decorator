@@ -54,7 +54,7 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
     }
 };
 
-        @mpClas('classe-test')
+        @mpClas()
         class ClasseTest {
             nomeTest: string;
             cognome:string;
@@ -105,12 +105,14 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
                     if(element.nomeParametro== 'nomeFuturo' && param.valoriParametri[element.indexParameter] == 'casa')app = true;
                 });
                     return {
-                        approvato:app,
+                        approvato:true,
                         messaggio:'',
                         stato:200
                     };
             }
         })
+        
+        
             SetNome(@mpPar({
                     nomeParametro:'nomeFuturo',
                     posizione: 'body',
@@ -122,8 +124,8 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
                             tmp = true;
                         } 
                         return {
-                        approvato:tmp,
-                        stato:0,
+                        approvato:true,
+                        stato:200,
                         messaggio:'ciao'
                         };
                         }
@@ -141,7 +143,7 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
 
             
             @mpAddMiddle('Valida') 
-            @mpMet({tipo:'post',path:'SetNomeConMiddleware'})
+            @mpMet({tipo:'post'})
             SetNomeConMiddleware(
                 @mpPar({
                         nomeParametro:'nomeFuturo',
