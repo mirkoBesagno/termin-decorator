@@ -15,11 +15,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mpClas = exports.mpPar = exports.mpMet = void 0;
+exports.mpClas = exports.mpPar = exports.mpMet = exports.Main = void 0;
 const prompts_1 = __importDefault(require("prompts"));
 //import { Progetto } from "./app/progetto/progetto.classe";
 require("reflect-metadata");
 const terminale_main_1 = require("./model/classi/terminale-main");
+Object.defineProperty(exports, "Main", { enumerable: true, get: function () { return terminale_main_1.Main; } });
 const terminale_classe_1 = require("./model/classi/terminale-classe");
 Object.defineProperty(exports, "mpClas", { enumerable: true, get: function () { return terminale_classe_1.mpClas; } });
 const terminale_metodo_1 = require("./model/classi/terminale-metodo");

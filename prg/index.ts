@@ -18,7 +18,7 @@ import "reflect-metadata";
 import validator from "validator";
 import { INonTrovato, IParametriEstratti, ListaTerminaleParametro } from "./model/liste/lista-terminale-parametro";
 
-
+export {Main as Main};
 export { mpMet as mpMet };
 export { mpPar as mpPar };
 export { mpClas as mpClas };

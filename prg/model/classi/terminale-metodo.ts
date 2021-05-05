@@ -910,8 +910,11 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
                 metodo.nomiClassiDiRiferimento = parametri.nomiClasseRiferimento;
 
             if (parametri.tipo != undefined) metodo.tipo = parametri.tipo;
+            else if (parametri.tipo == undefined && metodo.listaParametri.length == 0) metodo.tipo = 'get';
+            else if (parametri.tipo == undefined && metodo.listaParametri.length > 0) metodo.tipo = 'post';
+            //else if (parametri.tipo == undefined && metodo.listaParametri.length < 0) metodo.tipo = 'post';
             else metodo.tipo = 'get';
-
+            
             if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
             else metodo.descrizione = '';
 
