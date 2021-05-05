@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MPDecMet = exports.MPDecMetodo = exports.MPDecoratoreMetodo = exports.MPMetodo = exports.MPM = exports.MPMetRev = exports.mpDecMet = exports.mpDecMetodo = exports.mpDecoratoreMetodo = exports.mpMetodo = exports.mpM = exports.mpMet = exports.mpMetRev = exports.mpAddMiddle = exports.mpAddHelmet = exports.mpAddCors = exports.TerminaleMetodo = void 0;
+exports.mpMet = exports.mpAddMiddle = exports.mpAddHelmet = exports.mpAddCors = exports.TerminaleMetodo = void 0;
 const tools_1 = require("../tools");
 const terminale_classe_1 = require("./terminale-classe");
 const terminale_parametro_1 = require("./terminale-parametro");
@@ -918,19 +918,7 @@ function decoratoreMetodo(parametri) {
         }
     };
 }
-exports.mpMetRev = decoratoreMetodo;
 exports.mpMet = decoratoreMetodo;
-exports.mpM = decoratoreMetodo;
-exports.mpMetodo = decoratoreMetodo;
-exports.mpDecoratoreMetodo = decoratoreMetodo;
-exports.mpDecMetodo = decoratoreMetodo;
-exports.mpDecMet = decoratoreMetodo;
-exports.MPMetRev = decoratoreMetodo;
-exports.MPM = decoratoreMetodo;
-exports.MPMetodo = decoratoreMetodo;
-exports.MPDecoratoreMetodo = decoratoreMetodo;
-exports.MPDecMetodo = decoratoreMetodo;
-exports.MPDecMet = decoratoreMetodo;
 function mpAddCors(cors) {
     return function (target, propertyKey, descriptor) {
         const list = terminale_classe_1.GetListaClasseMetaData();

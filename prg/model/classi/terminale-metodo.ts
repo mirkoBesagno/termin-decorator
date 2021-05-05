@@ -1070,18 +1070,4 @@ export function mpAddMiddle(item: any): MethodDecorator {
 }
 
 
-export { decoratoreMetodo as mpMetRev };
 export { decoratoreMetodo as mpMet };
-export { decoratoreMetodo as mpM };
-export { decoratoreMetodo as mpMetodo };
-export { decoratoreMetodo as mpDecoratoreMetodo };
-export { decoratoreMetodo as mpDecMetodo };
-export { decoratoreMetodo as mpDecMet };
-
-
-export { decoratoreMetodo as MPMetRev };
-export { decoratoreMetodo as MPM };
-export { decoratoreMetodo as MPMetodo };
-export { decoratoreMetodo as MPDecoratoreMetodo };
-export { decoratoreMetodo as MPDecMetodo };
-export { decoratoreMetodo as MPDecMet };

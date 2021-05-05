@@ -266,15 +266,3 @@ export function GetListaClasseMetaData() {
 
 
 export { decoratoreClasse as mpClas };
-export { decoratoreClasse as mpC };
-export { decoratoreClasse as mpClasse };
-export { decoratoreClasse as mpDecoratoreClasse };
-export { decoratoreClasse as mpDecClasse };
-export { decoratoreClasse as mpDecClas };
-
-export { decoratoreClasse as MPClas };
-export { decoratoreClasse as MPC };
-export { decoratoreClasse as MPClasse };
-export { decoratoreClasse as MPDecoratoreClasse };
-export { decoratoreClasse as MPDecClasse };
-export { decoratoreClasse as MPDecClas };

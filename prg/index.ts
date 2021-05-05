@@ -18,6 +18,11 @@ import "reflect-metadata";
 import validator from "validator";
 import { INonTrovato, IParametriEstratti, ListaTerminaleParametro } from "./model/liste/lista-terminale-parametro";
 
+
+export { mpMet as mpMet };
+export { mpPar as mpPar };
+export { mpClas as mpClas };
+
 const test:IParametro = {
     nomeParametro:'nomeFuturo',
                         posizione: 'body',

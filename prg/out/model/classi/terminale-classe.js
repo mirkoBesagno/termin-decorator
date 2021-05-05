@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MPDecClas = exports.MPDecClasse = exports.MPDecoratoreClasse = exports.MPClasse = exports.MPC = exports.MPClas = exports.mpDecClas = exports.mpDecClasse = exports.mpDecoratoreClasse = exports.mpClasse = exports.mpC = exports.mpClas = exports.GetListaClasseMetaData = exports.SalvaListaClasseMetaData = exports.CheckClasseMetaData = exports.TerminaleClasse = void 0;
+exports.mpClas = exports.GetListaClasseMetaData = exports.SalvaListaClasseMetaData = exports.CheckClasseMetaData = exports.TerminaleClasse = void 0;
 const tools_1 = require("../tools");
 const express_1 = require("express");
 const prompts_1 = __importDefault(require("prompts"));
@@ -215,17 +215,6 @@ function decoratoreClasse(percorso) {
     };
 }
 exports.mpClas = decoratoreClasse;
-exports.mpC = decoratoreClasse;
-exports.mpClasse = decoratoreClasse;
-exports.mpDecoratoreClasse = decoratoreClasse;
-exports.mpDecClasse = decoratoreClasse;
-exports.mpDecClas = decoratoreClasse;
-exports.MPClas = decoratoreClasse;
-exports.MPC = decoratoreClasse;
-exports.MPClasse = decoratoreClasse;
-exports.MPDecoratoreClasse = decoratoreClasse;
-exports.MPDecClasse = decoratoreClasse;
-exports.MPDecClas = decoratoreClasse;
 function CheckClasseMetaData(nome) {
     let listClasse = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale); // vado a prendere la struttura legata alle funzioni ovvero le classi
     if (listClasse == undefined) /* se non c'è la creo*/ {

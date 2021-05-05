@@ -15,13 +15,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.mpClas = exports.mpPar = exports.mpMet = void 0;
 const prompts_1 = __importDefault(require("prompts"));
 //import { Progetto } from "./app/progetto/progetto.classe";
 require("reflect-metadata");
 const terminale_main_1 = require("./model/classi/terminale-main");
 const terminale_classe_1 = require("./model/classi/terminale-classe");
+Object.defineProperty(exports, "mpClas", { enumerable: true, get: function () { return terminale_classe_1.mpClas; } });
 const terminale_metodo_1 = require("./model/classi/terminale-metodo");
+Object.defineProperty(exports, "mpMet", { enumerable: true, get: function () { return terminale_metodo_1.mpMet; } });
 const terminale_parametro_1 = require("./model/classi/terminale-parametro");
+Object.defineProperty(exports, "mpPar", { enumerable: true, get: function () { return terminale_parametro_1.mpPar; } });
 require("reflect-metadata");
 const test = {
     nomeParametro: 'nomeFuturo',
