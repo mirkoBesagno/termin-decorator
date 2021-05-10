@@ -885,7 +885,9 @@ export interface IMetodo {
     descrizione?: string,
     /** il sommario è una versione piu semplice della descrizione */
     sommario?: string,
-    /** questa è la strada per andare ad assegnare questa funzione è piu classi o sotto percorsi */
+    /** questa è la strada per andare ad assegnare questa funzione è piu classi o sotto percorsi
+     *! momentaneamente non testata
+     */
     nomiClasseRiferimento?: string[],
 
     onChiamataCompletata?: (logOn: string, result: any, logIn: string) => void

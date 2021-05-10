@@ -70,11 +70,11 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
 }
 
 export interface IParametro {
-    /** nome del parametro */
+    /** nome del parametro, in pratica il nome della variabile o un nome assonante (parlante)*/
     nomeParametro: string,
-    /** la posizione rispetto alla chiamata */
+    /** la posizione rispetto alla chiamata, ovvero: "body" | "query" | "header" */
     posizione: TypePosizione,
-    /** fa riferimento al tipo di base */
+    /** fa riferimento al tipo di base, ovvero: "number" | "text" | "date" */
     tipoParametro?: TipoParametro,
     /** descrizione lunga */
     descrizione?: string,
