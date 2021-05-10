@@ -44,6 +44,7 @@ export class Main {
     path: string;
     serverExpressDecorato: express.Express;
     listaTerminaleClassi: ListaTerminaleClasse;
+
     constructor(path: string, server?: express.Express) {
         this.path = path;
         this.percorsi = { pathGlobal: "", patheader: "", porta: 0 };
@@ -246,6 +247,7 @@ export class Main {
             this.PrintMenu();
         }
     }
+    
     StartExpress() {
         this.AggiungiHTML();
         var httpServer = http.createServer(this.serverExpressDecorato);
