@@ -281,6 +281,70 @@ class Main {
         }
         tmp.GeneraStruttura(dir);
     }
+    InizializzaInterattivamente() {
+        console.log('Inizializzazione inizio .....');
+        prompts_1.default([{
+                message: 'Quale porta usare?(default=3030) : ',
+                type: 'number', name: 'porta'
+            }, {
+                message: 'Quale indirizzo esporre?(http://localhost) : ',
+                type: 'text', name: 'header'
+            }]).then((scelta2) => {
+            if (scelta2.porta == undefined || scelta2.porta == 0)
+                scelta2.porta = 3030;
+            if (scelta2.header == undefined || scelta2.header == 0)
+                scelta2.header = 'http://localhost';
+            this.Inizializza(scelta2.header + ":", scelta2.porta, true, true);
+            console.log('..... Inizializzazione fine.');
+            const vett = [
+                'express',
+                'superagent',
+                'aggiungi swagger',
+                'express + superagent',
+                'todo'
+            ];
+            console.log('Menu');
+            for (let index = 0; index < vett.length; index++) {
+                const element = vett[index];
+                console.log(index + ' :' + element);
+            }
+            prompts_1.default({
+                message: 'Scegli: ',
+                type: 'number',
+                name: 'scelta'
+            }).then((item) => {
+                if (item.scelta == 0) {
+                    this.StartExpress();
+                }
+                else if (item.scelta == 1) {
+                    this.PrintMenu();
+                }
+                else if (item.scelta == 2) {
+                    const scelta = prompts_1.default({
+                        message: 'Rotta dove renderli visibili: ',
+                        type: 'text', name: 'scelta'
+                    }).then((ris) => {
+                        this.AggiungiSwagger(ris.scelta);
+                        this.StartExpress();
+                    });
+                }
+                else if (item.scelta == 3) {
+                    this.StartExpress();
+                    prompts_1.default({
+                        message: 'Rotta dove renderli visibili: ',
+                        type: 'text', name: 'scelta'
+                    }).then((ris) => {
+                        this.PrintMenu();
+                    });
+                }
+                else {
+                    console.log('Ciao ciao ...');
+                }
+            }).catch(err => {
+                console.log(err);
+            });
+        });
+    }
 }
 exports.Main = Main;
 const http = __importStar(require("http"));

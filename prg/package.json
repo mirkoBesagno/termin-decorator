@@ -2,7 +2,7 @@
   "name": "mpStation",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./out/index.js",
   "scripts": {
     "start-js": "node ./out/index.js",
     "start": "ts-node ./index.ts",
