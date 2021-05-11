@@ -5,7 +5,7 @@ import superagent from "superagent";
 import express from "express";
 import { Request, Response } from "express";
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
-import * as bodyParser from 'body-parser';
+import { urlencoded, json as BodyParseJson } from 'body-parser';
 import swaggerUI from "swagger-ui-express";
 import { SalvaListaClasseMetaData, TerminaleClasse } from "./terminale-classe";
 //const swaggerUI = require('swagger-ui-express');
@@ -44,6 +44,7 @@ export class Main {
     path: string;
     serverExpressDecorato: express.Express;
     listaTerminaleClassi: ListaTerminaleClasse;
+
     constructor(path: string, server?: express.Express) {
         this.path = path;
         this.percorsi = { pathGlobal: "", patheader: "", porta: 0 };
@@ -59,9 +60,9 @@ export class Main {
         const pathGlobal = /* this.percorsi.patheader + this.percorsi.porta + */ '/' + this.path;
         this.percorsi.pathGlobal = pathGlobal;
 
-        this.serverExpressDecorato.use(bodyParser.urlencoded({ 'extended': true })); // parse application/x-www-form-urlencoded
-        this.serverExpressDecorato.use(bodyParser.json()); // parse application/json
-        this.serverExpressDecorato.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
+        this.serverExpressDecorato.use(urlencoded({ 'extended': true })); // parse application/x-www-form-urlencoded
+        
+        this.serverExpressDecorato.use(BodyParseJson({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
 
         this.serverExpressDecorato.route
         for (let index = 0; index < tmp.length; index++) {
@@ -246,6 +247,7 @@ export class Main {
             this.PrintMenu();
         }
     }
+    
     StartExpress() {
         this.AggiungiHTML();
         var httpServer = http.createServer(this.serverExpressDecorato);
