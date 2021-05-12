@@ -6,7 +6,6 @@ import express from "express";
 import { Request, Response } from "express";
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import { urlencoded, json as BodyParseJson } from 'body-parser';
-import swaggerUI from "swagger-ui-express";
 import { SalvaListaClasseMetaData, TerminaleClasse } from "./terminale-classe";
 //const swaggerUI = require('swagger-ui-express');
 import fs from "fs";
@@ -61,7 +60,7 @@ export class Main {
         this.percorsi.pathGlobal = pathGlobal;
 
         this.serverExpressDecorato.use(urlencoded({ 'extended': true })); // parse application/x-www-form-urlencoded
-        
+
         this.serverExpressDecorato.use(BodyParseJson({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
 
         this.serverExpressDecorato.route
@@ -210,7 +209,7 @@ export class Main {
     AggiungiSwagger(path: string) {
         const swaggerDocument = this.GetJSONSwagger();
 
-        this.serverExpressDecorato.use('/' + path, swaggerUI.serve, swaggerUI.setup(JSON.parse(swaggerDocument)));
+        //this.serverExpressDecorato.use('/' + path, swaggerUI.serve, swaggerUI.setup(JSON.parse(swaggerDocument)));
     }
     async PrintMenu() {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
@@ -247,7 +246,7 @@ export class Main {
             this.PrintMenu();
         }
     }
-    
+
     StartExpress() {
         this.AggiungiHTML();
         var httpServer = http.createServer(this.serverExpressDecorato);
@@ -263,6 +262,14 @@ export class Main {
             res.status(200).send(text);
             //res.status(200).send("Errore!! La richiesta non puo essere soddisfatta.");
         });
+    }
+    StartExpressConsole(porta: number, header: string) {
+        console.log('Inizializzazione inizio .....');
+
+        this.Inizializza(header + ":", porta, true, true);
+        this.StartExpress();
+        this.PrintMenu();
+        
     }
     GeneraStruttura(path: string) {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);

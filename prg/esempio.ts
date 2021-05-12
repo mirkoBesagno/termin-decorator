@@ -4,7 +4,6 @@ import "reflect-metadata";
 import superagent from "superagent";
 /* const progetto: Progetto = new Progetto(); */
 import { PromptType } from "prompts";
-import { ColumnType } from "typeorm";
 
 //import express, { request, response,  } from "express";
 import { Request, Response, NextFunction } from "express";
@@ -15,7 +14,7 @@ import { mpPar, IParametro } from "./model/classi/terminale-parametro";
 import { TipoParametro } from "./model/tools";
 
 import "reflect-metadata";
-import validator from "validator";
+
 import { INonTrovato, IParametriEstratti, ListaTerminaleParametro } from "./model/liste/lista-terminale-parametro";
 
 export { Main as Main };

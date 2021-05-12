@@ -11,11 +11,6 @@ import { INonTrovato, IParametriEstratti, ListaTerminaleParametro } from "../lis
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import cors from 'cors';
 import { IRaccoltaPercorsi } from "./terminale-main";
-import { textChangeRangeIsUnchanged } from "typescript";
-import axios from "axios";
-import validator from "validator";
-import qs from "querystring";
-import http from "http";
 
 export type TypeInterazone = "rotta" | "middleware" | 'ambo';
 

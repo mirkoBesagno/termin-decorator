@@ -36,8 +36,7 @@ const tools_1 = require("../tools");
 const prompts_1 = __importDefault(require("prompts"));
 const express_1 = __importDefault(require("express"));
 const lista_terminale_classe_1 = require("../liste/lista-terminale-classe");
-const bodyParser = __importStar(require("body-parser"));
-const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const body_parser_1 = require("body-parser");
 const terminale_classe_1 = require("./terminale-classe");
 //const swaggerUI = require('swagger-ui-express');
 const fs_1 = __importDefault(require("fs"));
@@ -80,9 +79,8 @@ class Main {
         this.percorsi.porta = porta;
         const pathGlobal = /* this.percorsi.patheader + this.percorsi.porta + */ '/' + this.path;
         this.percorsi.pathGlobal = pathGlobal;
-        this.serverExpressDecorato.use(bodyParser.urlencoded({ 'extended': true })); // parse application/x-www-form-urlencoded
-        this.serverExpressDecorato.use(bodyParser.json()); // parse application/json
-        this.serverExpressDecorato.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
+        this.serverExpressDecorato.use(body_parser_1.urlencoded({ 'extended': true })); // parse application/x-www-form-urlencoded
+        this.serverExpressDecorato.use(body_parser_1.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
         this.serverExpressDecorato.route;
         for (let index = 0; index < tmp.length; index++) {
             const element = tmp[index];
@@ -219,7 +217,7 @@ class Main {
     }
     AggiungiSwagger(path) {
         const swaggerDocument = this.GetJSONSwagger();
-        this.serverExpressDecorato.use('/' + path, swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(JSON.parse(swaggerDocument)));
+        //this.serverExpressDecorato.use('/' + path, swaggerUI.serve, swaggerUI.setup(JSON.parse(swaggerDocument)));
     }
     PrintMenu() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -272,6 +270,12 @@ class Main {
             res.status(200).send(text);
             //res.status(200).send("Errore!! La richiesta non puo essere soddisfatta.");
         });
+    }
+    StartExpressConsole(porta, header) {
+        console.log('Inizializzazione inizio .....');
+        this.Inizializza(header + ":", porta, true, true);
+        this.StartExpress();
+        this.PrintMenu();
     }
     GeneraStruttura(path) {
         let tmp = Reflect.getMetadata(lista_terminale_classe_1.ListaTerminaleClasse.nomeMetadataKeyTarget, tools_1.targetTerminale);

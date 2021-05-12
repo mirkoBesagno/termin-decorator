@@ -1,6 +1,5 @@
 
 import { Request, Response } from "express";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 export var targetTerminale = { name: 'Terminale' };
 
 export interface IPrintabile {
