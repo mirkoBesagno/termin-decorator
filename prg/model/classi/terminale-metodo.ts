@@ -46,7 +46,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
     descrizione: string;
     sommario: string;
-    nomiClassiDiRiferimento: string[] = [];
+    nomiClassiDiRiferimento: IClasseRiferimento[] = [];
 
     onChiamataCompletata?: (logOn: string, result: any, logIn: string) => void;
     onParametriNonTrovati?: (nonTrovati?: INonTrovato[]) => void;
@@ -860,12 +860,19 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
 
 export type TypeMetod = "get" | "put" | "post" | "patch" | "purge" | "delete";
+
 export interface IRitornoValidatore {
     approvato: boolean,
     stato: number,
     messaggio: string,
     terminale?: IParametro
 }
+
+export interface IClasseRiferimento {
+    nome: string,
+    listaMiddleware?: any[]
+}
+
 /**
  * 
  */
@@ -883,7 +890,7 @@ export interface IMetodo {
     /** questa è la strada per andare ad assegnare questa funzione è piu classi o sotto percorsi
      *! momentaneamente non testata
      */
-    nomiClasseRiferimento?: string[],
+    nomiClasseRiferimento?: IClasseRiferimento[],
 
     onChiamataCompletata?: (logOn: string, result: any, logIn: string) => void
 
@@ -903,6 +910,7 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
         /* inizio a lavorare sul metodo */
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.metodoAvviabile = descriptor.value;//la prendo come riferimento 
+            
             if (parametri.nomiClasseRiferimento != undefined)
                 metodo.nomiClassiDiRiferimento = parametri.nomiClasseRiferimento;
 
@@ -911,7 +919,7 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
             else if (parametri.tipo == undefined && metodo.listaParametri.length > 0) metodo.tipo = 'post';
             //else if (parametri.tipo == undefined && metodo.listaParametri.length < 0) metodo.tipo = 'post';
             else metodo.tipo = 'get';
-            
+
             if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
             else metodo.descrizione = '';
 
@@ -940,7 +948,7 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
             if (parametri.nomiClasseRiferimento != undefined && parametri.nomiClasseRiferimento.length > 0) {
                 for (let index = 0; index < parametri.nomiClasseRiferimento.length; index++) {
                     const element = parametri.nomiClasseRiferimento[index];
-                    const classeTmp = list.CercaConNomeSeNoAggiungi(element);
+                    const classeTmp = list.CercaConNomeSeNoAggiungi(element.nome);
                     const metodoTmp = classeTmp.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
                     for (let index = 0; index < metodo.listaParametri.length; index++) {
                         const element = metodo.listaParametri[index];
@@ -970,6 +978,29 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
                         if (parametri.path == undefined) metodoTmp.path = propertyKey.toString();
                         else metodoTmp.path = parametri.path;
                     }
+                    if (element.listaMiddleware) {
+                        for (let index = 0; index < element.listaMiddleware.length; index++) {
+                            const middlewareTmp = element.listaMiddleware[index];
+                            let midd = undefined;
+                            const listaMidd = GetListaMiddlewareMetaData();
+                            if (typeof middlewareTmp === 'string' || middlewareTmp instanceof String) {
+                                midd = listaMidd.CercaConNomeSeNoAggiungi(String(middlewareTmp));
+                                SalvaListaMiddlewareMetaData(listaMidd);
+                            }
+                            else {
+                                midd = middlewareTmp;
+                            }
+
+
+                            if (metodo != undefined && list != undefined && classe != undefined) {
+                                metodo.middleware.push(midd);
+                                SalvaListaClasseMetaData(list);
+                            }
+                            else {
+                                console.log("Errore mio!");
+                            }
+                        }
+                    }
                 }
             }
             SalvaListaClasseMetaData(list);
@@ -992,7 +1023,7 @@ export function mpAddCors(cors: any): MethodDecorator {
         if (metodo != undefined && list != undefined && classe != undefined && metodo.nomiClassiDiRiferimento.length > 0) {
             for (let index = 0; index < metodo.nomiClassiDiRiferimento.length; index++) {
                 const element = metodo.nomiClassiDiRiferimento[index];
-                const classe2 = list.CercaConNomeSeNoAggiungi(element);
+                const classe2 = list.CercaConNomeSeNoAggiungi(element.nome);
                 const metodo2 = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
                 if (metodo2 != undefined && list != undefined && classe2 != undefined) {
                     metodo2.cors = cors;
@@ -1023,7 +1054,7 @@ export function mpAddHelmet(helmet: any): MethodDecorator {
         if (metodo != undefined && list != undefined && classe != undefined && metodo.nomiClassiDiRiferimento.length > 0) {
             for (let index = 0; index < metodo.nomiClassiDiRiferimento.length; index++) {
                 const element = metodo.nomiClassiDiRiferimento[index];
-                const classe2 = list.CercaConNomeSeNoAggiungi(element);
+                const classe2 = list.CercaConNomeSeNoAggiungi(element.nome);
                 const metodo2 = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
                 if (metodo2 != undefined && list != undefined && classe2 != undefined) {
                     metodo.helmet = helmet;
