@@ -102,7 +102,7 @@ class TerminaleMetodo {
                         this.helmet = helmet_1.default();
                     }
                     app.get(this.percorsi.pathGlobal /* this.path */, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        return yield this.ChiamataGenerica(req, res);
+                        yield this.ChiamataGenerica(req, res);
                     }));
                     break;
                 case 'post':
@@ -117,7 +117,7 @@ class TerminaleMetodo {
                     }
                     this.metodoAvviabile.body;
                     app.post(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        return yield this.ChiamataGenerica(req, res);
+                        yield this.ChiamataGenerica(req, res);
                     }));
                     break;
                 case 'delete':
@@ -132,7 +132,7 @@ class TerminaleMetodo {
                         this.cors = cors_1.default(corsOptions);
                     }
                     app.delete(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        return yield this.ChiamataGenerica(req, res);
+                        yield this.ChiamataGenerica(req, res);
                     }));
                     break;
                 case 'patch':
@@ -147,7 +147,7 @@ class TerminaleMetodo {
                     }
                     this.metodoAvviabile.body;
                     app.patch(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        return yield this.ChiamataGenerica(req, res);
+                        yield this.ChiamataGenerica(req, res);
                     }));
                     break;
                 case 'purge':
@@ -162,7 +162,7 @@ class TerminaleMetodo {
                     }
                     this.metodoAvviabile.body;
                     app.purge(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                        return yield this.ChiamataGenerica(req, res);
+                        yield this.ChiamataGenerica(req, res);
                     }));
                     break;
                 case 'put':
@@ -176,7 +176,7 @@ class TerminaleMetodo {
                         }
                         this.metodoAvviabile.body;
                         app.put(this.percorsi.pathGlobal, this.cors, this.helmet, middlew, (req, res) => __awaiter(this, void 0, void 0, function* () {
-                            return yield this.ChiamataGenerica(req, res);
+                            yield this.ChiamataGenerica(req, res);
                         }));
                         break;
                     }
@@ -185,6 +185,7 @@ class TerminaleMetodo {
     }
     ChiamataGenerica(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            let passato = false;
             try {
                 console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
                 const logIn = tools_1.InizializzaLogbaseIn(req, this.nome.toString());
@@ -193,19 +194,31 @@ class TerminaleMetodo {
                     this.onParametriNonTrovati(tmp.nonTrovati);
                 if (this.onPrimaDiTerminareLaChiamata)
                     tmp = this.onPrimaDiTerminareLaChiamata(tmp);
-                res.status(tmp.stato).send(tmp.body);
+                try {
+                    //res.status(tmp.stato).send(tmp.body);
+                    let num = 0;
+                    num = tmp.stato;
+                    //num = 404; 
+                    res.statusCode = Number.parseInt('' + num);
+                    res.send(tmp.body);
+                    passato = true;
+                }
+                catch (error) {
+                    res.status(500).send(error);
+                }
                 const logOit = tools_1.InizializzaLogbaseOut(res, this.nome.toString());
                 if (this.onChiamataCompletata) {
                     this.onChiamataCompletata(logIn, tmp, logOit);
                 }
-                return res;
+                //return res;
             }
             catch (error) {
                 if (this.onChiamataCompletata) {
                     this.onChiamataCompletata('', { stato: 500, body: error }, '');
                 }
-                res.status(500).send(error);
-                return res;
+                if (passato == false)
+                    res.status(500).send(error);
+                //return res;
             }
         });
     }
@@ -429,13 +442,34 @@ class TerminaleMetodo {
                         let parametriTmp = parametri.valoriParametri;
                         if (this.onPrimaDiEseguireMetodo)
                             parametriTmp = this.onPrimaDiEseguireMetodo(parametri, this.listaParametri);
-                        const tmpReturn = this.metodoAvviabile.apply(this, parametriTmp);
-                        if ('body' in tmpReturn)
-                            tmp.body = tmpReturn.body;
-                        else
-                            tmp.body = tmpReturn;
-                        if ('stato' in tmpReturn)
-                            tmp.stato = tmpReturn.stato;
+                        const tmpReturn = yield this.metodoAvviabile.apply(this, parametriTmp);
+                        if (tools_1.IsJsonString(tmpReturn)) {
+                            if ('body' in tmpReturn) {
+                                tmp.body = tmpReturn.body;
+                            }
+                            else {
+                                tmp.body = tmpReturn;
+                            }
+                            if ('stato' in tmpReturn) {
+                                tmp.stato = tmpReturn.stato;
+                            }
+                            else {
+                                tmp.stato = 333;
+                            }
+                        }
+                        else {
+                            if (tmpReturn) {
+                                tmp.body = tmpReturn;
+                                tmp.stato = 333;
+                            }
+                            else {
+                                tmp = {
+                                    body: { "Errore Interno filtrato ": 'internal error!!!!' },
+                                    stato: 500,
+                                    nonTrovati: parametri.nontrovato
+                                };
+                            }
+                        }
                     }
                     catch (error) {
                         console.log("Errore : \n" + error);
@@ -877,7 +911,7 @@ function decoratoreMetodo(parametri) {
             if (parametri.nomiClasseRiferimento != undefined && parametri.nomiClasseRiferimento.length > 0) {
                 for (let index = 0; index < parametri.nomiClasseRiferimento.length; index++) {
                     const element = parametri.nomiClasseRiferimento[index];
-                    const classeTmp = list.CercaConNomeSeNoAggiungi(element);
+                    const classeTmp = list.CercaConNomeSeNoAggiungi(element.nome);
                     const metodoTmp = classeTmp.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
                     for (let index = 0; index < metodo.listaParametri.length; index++) {
                         const element = metodo.listaParametri[index];
@@ -914,6 +948,27 @@ function decoratoreMetodo(parametri) {
                         else
                             metodoTmp.path = parametri.path;
                     }
+                    if (element.listaMiddleware) {
+                        for (let index = 0; index < element.listaMiddleware.length; index++) {
+                            const middlewareTmp = element.listaMiddleware[index];
+                            let midd = undefined;
+                            const listaMidd = lista_terminale_metodo_1.GetListaMiddlewareMetaData();
+                            if (typeof middlewareTmp === 'string' || middlewareTmp instanceof String) {
+                                midd = listaMidd.CercaConNomeSeNoAggiungi(String(middlewareTmp));
+                                lista_terminale_metodo_1.SalvaListaMiddlewareMetaData(listaMidd);
+                            }
+                            else {
+                                midd = middlewareTmp;
+                            }
+                            if (metodo != undefined && list != undefined && classe != undefined) {
+                                metodo.middleware.push(midd);
+                                terminale_classe_1.SalvaListaClasseMetaData(list);
+                            }
+                            else {
+                                console.log("Errore mio!");
+                            }
+                        }
+                    }
                 }
             }
             terminale_classe_1.SalvaListaClasseMetaData(list);
@@ -932,7 +987,7 @@ function mpAddCors(cors) {
         if (metodo != undefined && list != undefined && classe != undefined && metodo.nomiClassiDiRiferimento.length > 0) {
             for (let index = 0; index < metodo.nomiClassiDiRiferimento.length; index++) {
                 const element = metodo.nomiClassiDiRiferimento[index];
-                const classe2 = list.CercaConNomeSeNoAggiungi(element);
+                const classe2 = list.CercaConNomeSeNoAggiungi(element.nome);
                 const metodo2 = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
                 if (metodo2 != undefined && list != undefined && classe2 != undefined) {
                     metodo2.cors = cors;
@@ -960,7 +1015,7 @@ function mpAddHelmet(helmet) {
         if (metodo != undefined && list != undefined && classe != undefined && metodo.nomiClassiDiRiferimento.length > 0) {
             for (let index = 0; index < metodo.nomiClassiDiRiferimento.length; index++) {
                 const element = metodo.nomiClassiDiRiferimento[index];
-                const classe2 = list.CercaConNomeSeNoAggiungi(element);
+                const classe2 = list.CercaConNomeSeNoAggiungi(element.nome);
                 const metodo2 = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
                 if (metodo2 != undefined && list != undefined && classe2 != undefined) {
                     metodo.helmet = helmet;

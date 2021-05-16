@@ -96,3 +96,22 @@ export function InizializzaLogbaseOut(req: Response, nomeMetodo?: string): strin
         + "remote : " + t2 + "\n";
     return tmp;
 }
+export function IsJsonString(str: string): boolean {
+    try {
+        if (/^[\],:{}\s]*$/.test(str.replace(/\\["\\\/bfnrtu]/g, '@').
+            replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
+            replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+            //the json is ok 
+            if (typeof str === 'object') {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            //the json is not ok
+            return false;
+        }
+    } catch (e) {
+        return false;
+    }
+}

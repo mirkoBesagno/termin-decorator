@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InizializzaLogbaseOut = exports.InizializzaLogbaseIn = exports.targetTerminale = void 0;
+exports.IsJsonString = exports.InizializzaLogbaseOut = exports.InizializzaLogbaseIn = exports.targetTerminale = void 0;
 exports.targetTerminale = { name: 'Terminale' };
 /* @Entity()
 export class LogBaseIn {
@@ -82,4 +82,27 @@ function InizializzaLogbaseOut(req, nomeMetodo) {
     return tmp;
 }
 exports.InizializzaLogbaseOut = InizializzaLogbaseOut;
+function IsJsonString(str) {
+    try {
+        if (/^[\],:{}\s]*$/.test(str.replace(/\\["\\\/bfnrtu]/g, '@').
+            replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
+            replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+            //the json is ok 
+            if (typeof str === 'object') {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            //the json is not ok
+            return false;
+        }
+    }
+    catch (e) {
+        return false;
+    }
+}
+exports.IsJsonString = IsJsonString;
 //# sourceMappingURL=tools.js.map

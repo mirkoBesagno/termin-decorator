@@ -86,7 +86,7 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
             if (element.posizione == 'query') {
-                if (index != this.length - 1 && primo == true) {
+                if (primo == true) {
                     query = query + ', ';
                 }
                 primo = true;

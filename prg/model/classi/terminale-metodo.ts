@@ -1,4 +1,4 @@
-import { IDescrivibile, InizializzaLogbaseIn, InizializzaLogbaseOut, IPrintabile, targetTerminale, TipoParametro } from "../tools";
+import { IDescrivibile, InizializzaLogbaseIn, InizializzaLogbaseOut, IPrintabile, IsJsonString, targetTerminale, TipoParametro } from "../tools";
 import { CheckClasseMetaData, GetListaClasseMetaData, SalvaListaClasseMetaData, TerminaleClasse } from "./terminale-classe";
 import { TypePosizione, TerminaleParametro, IParametro } from "./terminale-parametro";
 import chiedi from "prompts";
@@ -143,7 +143,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
-                            return await this.ChiamataGenerica(req, res);
+                            await this.ChiamataGenerica(req, res);
                         });
                     break;
                 case 'post':
@@ -162,7 +162,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
-                            return await this.ChiamataGenerica(req, res);
+                            await this.ChiamataGenerica(req, res);
                         });
                     break;
                 case 'delete':
@@ -181,7 +181,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
-                            return await this.ChiamataGenerica(req, res);
+                            await this.ChiamataGenerica(req, res);
                         });
                     break;
                 case 'patch':
@@ -200,7 +200,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
-                            return await this.ChiamataGenerica(req, res);
+                            await this.ChiamataGenerica(req, res);
                         });
                     break;
                 case 'purge':
@@ -219,7 +219,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         this.helmet,
                         middlew,
                         async (req: Request, res: Response) => {
-                            return await this.ChiamataGenerica(req, res);
+                            await this.ChiamataGenerica(req, res);
                         });
                     break;
                 case 'put':
@@ -237,7 +237,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                             this.helmet,
                             middlew,
                             async (req: Request, res: Response) => {
-                                return await this.ChiamataGenerica(req, res);
+                                await this.ChiamataGenerica(req, res);
                             });
                         break;
                     }
@@ -245,24 +245,36 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         }
     }
     async ChiamataGenerica(req: Request, res: Response) {
+        let passato: boolean = false;
         try {
             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
             const logIn = InizializzaLogbaseIn(req, this.nome.toString());
             let tmp: IReturn = await this.Esegui(req);
             if (this.onParametriNonTrovati) this.onParametriNonTrovati(tmp.nonTrovati);
             if (this.onPrimaDiTerminareLaChiamata) tmp = this.onPrimaDiTerminareLaChiamata(tmp);
-            res.status(tmp.stato).send(tmp.body);
+            try {
+                //res.status(tmp.stato).send(tmp.body);
+                let num : number =0;
+                num = tmp.stato;
+                //num = 404; 
+                res.statusCode = Number.parseInt(''+num);
+                res.send(tmp.body);
+                passato = true;
+            } catch (error) {
+                res.status(500).send(error);
+            }
             const logOit = InizializzaLogbaseOut(res, this.nome.toString());
             if (this.onChiamataCompletata) {
                 this.onChiamataCompletata(logIn, tmp, logOit);
             }
-            return res;
+            //return res;
         } catch (error) {
             if (this.onChiamataCompletata) {
                 this.onChiamataCompletata('', { stato: 500, body: error }, '');
             }
-            res.status(500).send(error);
-            return res;
+            if (passato == false)
+                res.status(500).send(error);
+            //return res;
         }
     }
     async ChiamaLaRotta(headerpath?: string) {
@@ -481,10 +493,27 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     let parametriTmp = parametri.valoriParametri;
                     if (this.onPrimaDiEseguireMetodo) parametriTmp = this.onPrimaDiEseguireMetodo(parametri,
                         this.listaParametri);
-                    const tmpReturn = this.metodoAvviabile.apply(this, parametriTmp);
-                    if ('body' in tmpReturn) tmp.body = tmpReturn.body;
-                    else tmp.body = tmpReturn;
-                    if ('stato' in tmpReturn) tmp.stato = tmpReturn.stato;
+                    const tmpReturn = await this.metodoAvviabile.apply(this, parametriTmp);
+                    if (IsJsonString(tmpReturn)) {
+                        if ('body' in tmpReturn) { tmp.body = tmpReturn.body; }
+                        else { tmp.body = tmpReturn; }
+                        if ('stato' in tmpReturn) { tmp.stato = tmpReturn.stato; }
+                        else { tmp.stato = 333; }
+                    }
+                    else {
+                        if (tmpReturn) {
+                            tmp.body = tmpReturn;
+                            tmp.stato = 333;
+                        }
+                        else {
+                            tmp = {
+                                body: { "Errore Interno filtrato ": 'internal error!!!!' },
+                                stato: 500,
+                                nonTrovati: parametri.nontrovato
+                            };
+                        }
+
+                    }
 
                 } catch (error) {
                     console.log("Errore : \n" + error);
@@ -910,7 +939,7 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
         /* inizio a lavorare sul metodo */
         if (metodo != undefined && list != undefined && classe != undefined) {
             metodo.metodoAvviabile = descriptor.value;//la prendo come riferimento 
-            
+
             if (parametri.nomiClasseRiferimento != undefined)
                 metodo.nomiClassiDiRiferimento = parametri.nomiClasseRiferimento;
 
