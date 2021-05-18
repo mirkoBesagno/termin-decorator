@@ -254,10 +254,10 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             if (this.onPrimaDiTerminareLaChiamata) tmp = this.onPrimaDiTerminareLaChiamata(tmp);
             try {
                 //res.status(tmp.stato).send(tmp.body);
-                let num : number =0;
+                let num: number = 0;
                 num = tmp.stato;
                 //num = 404; 
-                res.statusCode = Number.parseInt(''+num);
+                res.statusCode = Number.parseInt('' + num);
                 res.send(tmp.body);
                 passato = true;
             } catch (error) {
@@ -979,6 +979,24 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
                     const element = parametri.nomiClasseRiferimento[index];
                     const classeTmp = list.CercaConNomeSeNoAggiungi(element.nome);
                     const metodoTmp = classeTmp.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
+                    /* configuro il metodo */
+                    metodoTmp.metodoAvviabile = descriptor.value;
+                    
+                    if (parametri.tipo != undefined) metodoTmp.tipo = parametri.tipo;
+                    else metodoTmp.tipo = 'get';
+
+                    if (parametri.descrizione != undefined) metodoTmp.descrizione = parametri.descrizione;
+                    else metodoTmp.descrizione = '';
+
+                    if (parametri.sommario != undefined) metodoTmp.sommario = parametri.sommario;
+                    else metodoTmp.sommario = '';
+
+                    if (parametri.interazione != undefined) metodoTmp.tipoInterazione = parametri.interazione;
+                    else metodoTmp.tipoInterazione = 'rotta';
+
+                    if (parametri.path == undefined) metodoTmp.path = propertyKey.toString();
+                    else metodoTmp.path = parametri.path;
+                    
                     for (let index = 0; index < metodo.listaParametri.length; index++) {
                         const element = metodo.listaParametri[index];
                         /* configuro i parametri */
@@ -989,25 +1007,9 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
 
                         if (parametri.sommario != undefined) paramestro.sommario = element.sommario;
                         else paramestro.sommario = '';
-                        /* configuro il metodo */
-                        metodoTmp.metodoAvviabile = descriptor.value;
 
-                        if (parametri.tipo != undefined) metodoTmp.tipo = parametri.tipo;
-                        else metodoTmp.tipo = 'get';
-
-                        if (parametri.descrizione != undefined) metodoTmp.descrizione = parametri.descrizione;
-                        else metodoTmp.descrizione = '';
-
-                        if (parametri.sommario != undefined) metodoTmp.sommario = parametri.sommario;
-                        else metodoTmp.sommario = '';
-
-                        if (parametri.interazione != undefined) metodoTmp.tipoInterazione = parametri.interazione;
-                        else metodoTmp.tipoInterazione = 'rotta';
-
-                        if (parametri.path == undefined) metodoTmp.path = propertyKey.toString();
-                        else metodoTmp.path = parametri.path;
                     }
-                    if (element.listaMiddleware) {
+                    /* if (element.listaMiddleware) {
                         for (let index = 0; index < element.listaMiddleware.length; index++) {
                             const middlewareTmp = element.listaMiddleware[index];
                             let midd = undefined;
@@ -1029,7 +1031,7 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
                                 console.log("Errore mio!");
                             }
                         }
-                    }
+                    } */
                 }
             }
             SalvaListaClasseMetaData(list);

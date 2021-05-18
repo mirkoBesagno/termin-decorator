@@ -11,6 +11,22 @@ export { mpMet as mpMet };
 export { mpPar as mpPar };
 export { mpClas as mpClas };
 
+@mpClas()
+class ClassUno {
+    @mpMet({ nomiClasseRiferimento: [{ nome: 'ClassDue' }] })
+    MetodoPrimo() {
+        return 'metodo primo ciao';
+    }
+}
+@mpClas()
+class ClassDue {
+
+}
+
+const main = new Main('app');
+
+main.Inizializza("http://localhost", 3030, true,true);
+main.StartExpressConsole(3030, "http://localhost");
         /*console.log('Inizializzazione inizio .....');
         
          chiedi([{

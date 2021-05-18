@@ -59,6 +59,7 @@ const VerificaToken = (request: Request, response: Response, next: NextFunction)
     }
 };
 
+
 @mpClas()
 class ClasseTest {
     nomeTest: string;
@@ -184,6 +185,29 @@ class ClasseTest {
 
 }
 
+@mpClas()
+class ClassUno {
+
+    @mpMet({ interazione: 'middleware' })
+    middleClasseUno() {
+        console.log('Hei sono la classe uno');
+
+    }
+
+    @mpMet({ nomiClasseRiferimento: [{ nome: 'ClassDue', listaMiddleware: ['middleClasseDue'] }] })
+    @mpAddMiddle('middleClasseUno')
+    MetodoPrimo() {
+        return 'metodo primo ciao';
+    }
+}
+@mpClas()
+class ClassDue {
+    @mpMet({ interazione: 'middleware' })
+    middleClasseDue() {
+        console.log('Hei sono la classe due');
+
+    }
+}
 
 
 const classecosi = new ClasseTest("prima classe!!", 'cognome prima classe?!??!');
