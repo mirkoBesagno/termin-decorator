@@ -200,6 +200,7 @@ class ClassUno {
         return 'metodo primo ciao';
     }
 }
+/* ciao */
 @mpClas()
 class ClassDue {
     @mpMet({ interazione: 'middleware' })
