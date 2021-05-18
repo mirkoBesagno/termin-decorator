@@ -483,7 +483,6 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             const parametri = this.listaParametri.EstraiParametriDaRequest(req);
             let valido: IRitornoValidatore | undefined = { approvato: true, stato: 200, messaggio: '' };
             if (this.Validatore) valido = this.Validatore(parametri, this.listaParametri);
-            else valido = undefined;
             if ((valido && valido.approvato) || (!valido && parametri.errori.length == 0)) {
                 let tmp: IReturn = {
                     body: {}, nonTrovati: parametri.nontrovato,
@@ -498,12 +497,12 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                         if ('body' in tmpReturn) { tmp.body = tmpReturn.body; }
                         else { tmp.body = tmpReturn; }
                         if ('stato' in tmpReturn) { tmp.stato = tmpReturn.stato; }
-                        else { tmp.stato = 333; }
+                        else { tmp.stato = 299; }
                     }
                     else {
                         if (tmpReturn) {
                             tmp.body = tmpReturn;
-                            tmp.stato = 333;
+                            tmp.stato = 299;
                         }
                         else {
                             tmp = {
@@ -1009,7 +1008,7 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
                         else paramestro.sommario = '';
 
                     }
-                    /* if (element.listaMiddleware) {
+                    if (element.listaMiddleware) {
                         for (let index = 0; index < element.listaMiddleware.length; index++) {
                             const middlewareTmp = element.listaMiddleware[index];
                             let midd = undefined;
@@ -1023,15 +1022,15 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
                             }
 
 
-                            if (metodo != undefined && list != undefined && classe != undefined) {
-                                metodo.middleware.push(midd);
+                            if (metodoTmp != undefined && list != undefined && classeTmp != undefined) {
+                                metodoTmp.middleware.push(midd);
                                 SalvaListaClasseMetaData(list);
                             }
                             else {
                                 console.log("Errore mio!");
                             }
                         }
-                    } */
+                    } 
                 }
             }
             SalvaListaClasseMetaData(list);

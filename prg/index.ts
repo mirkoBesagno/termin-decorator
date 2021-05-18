@@ -11,16 +11,30 @@ export { mpMet as mpMet };
 export { mpPar as mpPar };
 export { mpClas as mpClas };
 
+
 @mpClas()
 class ClassUno {
-    @mpMet({ nomiClasseRiferimento: [{ nome: 'ClassDue' }] })
+
+    @mpMet({ interazione: 'middleware' })
+    middleClasseUno() {
+        console.log('Hei sono la classe uno');
+        return true;
+    }
+
+    @mpMet({ nomiClasseRiferimento: [{ nome: 'ClassDue', listaMiddleware: ['middleClasseDue'] }] })
+    @mpAddMiddle('middleClasseUno')
     MetodoPrimo() {
         return 'metodo primo ciao';
     }
 }
+/* ciao */
 @mpClas()
 class ClassDue {
-
+    @mpMet({ interazione: 'middleware' })
+    middleClasseDue() {
+        console.log('Hei sono la classe due');
+        return true;
+    }
 }
 
 const main = new Main('app');
