@@ -2,3 +2,7 @@
 node_modules
 .vscode
 ./prg/out
+prg/out/*
+*/out/*
+/prg/out/
+/out/
