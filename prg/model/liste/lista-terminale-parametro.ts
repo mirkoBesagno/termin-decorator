@@ -2,7 +2,7 @@
 import { Router, Request, Response } from "express";
 
 import chiedi from "prompts";
-import { IRitornoValidatore } from "../classi/terminale-metodo";
+import { IRitornoValidatore, TypeInterazone } from "../classi/terminale-metodo";
 
 import { TypePosizione, TerminaleParametro } from "../classi/terminale-parametro";
 
@@ -12,9 +12,7 @@ export interface IParametri {
 export interface INonTrovato {
     nomeParametro: string, posizioneParametro: number
 }
-export interface IErroreEstrazione {
 
-}
 export interface IParametriEstratti {
     valoriParametri: any[], nontrovato: INonTrovato[], errori: IRitornoValidatore[]
 }
@@ -61,13 +59,13 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
 
         return ritorno;
     }
-    async SoddisfaParamtri(): Promise<IParametri> {
+    async SoddisfaParamtri(chiSei: TypeInterazone): Promise<IParametri> {
         let body = '';
         let primo = false;
         console.log('Soddisfa il body:');
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
-            if (element.posizione == 'body') {
+            if (element.posizione == 'body' && (element.dovePossoTrovarlo == chiSei || element.dovePossoTrovarlo == 'qui')) {
                 if (index != this.length - 1 && primo == true) {
                     body = body + ', ';
                 }
@@ -85,7 +83,7 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
         console.log('Soddisfa le query:');
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
-            if (element.posizione == 'query') {
+            if (element.posizione == 'query' && (element.dovePossoTrovarlo == chiSei || element.dovePossoTrovarlo == 'qui')) {
                 if (primo == true) {
                     query = query + ', ';
                 }
@@ -104,7 +102,7 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
         console.log("Soddisfa l'header:");
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
-            if (element.posizione == 'header') {
+            if (element.posizione == 'header' && (element.dovePossoTrovarlo == chiSei || element.dovePossoTrovarlo == 'qui')) {
                 if (index != this.length - 1 && primo == true) {
                     header = header + ', ';
                 }

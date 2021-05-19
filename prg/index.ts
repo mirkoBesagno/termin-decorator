@@ -16,23 +16,23 @@ export { mpClas as mpClas };
 class ClassUno {
 
     @mpMet({ interazione: 'middleware' })
-    middleClasseUno() {
-        console.log('Hei sono la classe uno');
+    middleClasseUno(@mpPar({nomeParametro:'nome',posizione:'query'}) nome:string) {
+        console.log('Hei sono la classe uno, hai il nome: '+nome);
         return true;
     }
 
-    @mpMet({ nomiClasseRiferimento: [{ nome: 'ClassDue', listaMiddleware: ['middleClasseDue'] }] })
+    @mpMet({ nomiClasseRiferimento: [{ nome: 'ClassDue', listaMiddleware: ['middleClasseDue', 'middleClasseUno'] }] })
     @mpAddMiddle('middleClasseUno')
-    MetodoPrimo() {
-        return 'metodo primo ciao';
+    MetodoPrimo(@mpPar({nomeParametro:'nome',posizione:'query'}) nome:string) {
+        return 'metodo primo ciao, sei : '+nome;
     }
 }
 /* ciao */
 @mpClas()
 class ClassDue {
     @mpMet({ interazione: 'middleware' })
-    middleClasseDue() {
-        console.log('Hei sono la classe due');
+    middleClasseDue(@mpPar({nomeParametro:'nome',posizione:'query'}) nome:string) {
+        console.log('Hei sono la classe due, hai il nome: '+nome);
         return true;
     }
 }

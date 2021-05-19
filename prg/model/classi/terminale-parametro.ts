@@ -1,6 +1,6 @@
 
 import { IDescrivibile, IPrintabile, targetTerminale, TipoParametro } from "../tools";
-import { IRitornoValidatore, TerminaleMetodo } from "./terminale-metodo";
+import { IRitornoValidatore, TerminaleMetodo, TypeInterazone } from "./terminale-metodo";
 
 
 import superagent, { post } from "superagent";
@@ -12,7 +12,12 @@ import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 export type TypePosizione = "body" | "query" | 'header';
 
 
+export type TypeDovePossoTrovarlo = TypeInterazone |  "qui" | 'non-qui';
+
+
 export class TerminaleParametro implements IDescrivibile, IParametro {
+
+    dovePossoTrovarlo: TypeDovePossoTrovarlo = 'rotta';
     nomeParametro: string;
     tipoParametro: TipoParametro;
     posizione: TypePosizione;
@@ -80,7 +85,7 @@ export interface IParametro {
     descrizione?: string,
     /** descrizione breve */
     sommario?: string,
-    
+    dovePossoTrovarlo?: TypeDovePossoTrovarlo,
     Validatore?: (parametro: any) => IRitornoValidatore
 }
 
@@ -100,6 +105,9 @@ function decoratoreParametroGenerico(parametri: IParametro)/* (nomeParametro: st
 
         if (parametri.sommario != undefined) paramestro.sommario = parametri.sommario;
         else paramestro.sommario = '';
+
+        if (parametri.dovePossoTrovarlo != undefined) paramestro.dovePossoTrovarlo = parametri.dovePossoTrovarlo;
+        else paramestro.dovePossoTrovarlo = 'rotta';
 
         if (parametri.Validatore != undefined) paramestro.Validatore = parametri.Validatore;
 

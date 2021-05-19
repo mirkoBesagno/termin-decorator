@@ -110,8 +110,8 @@ export class TerminaleClasse implements IPrintabile {
         }
     }
     GeneraStruttura(path: string) {
-        const fileHTML: string = '';
-        const fileTypeScript: string = '';
+        /* const fileHTML: string = '';
+        const fileTypeScript: string = ''; */
 
     }
     PrintCredenziali() {
@@ -182,9 +182,9 @@ export class TerminaleClasse implements IPrintabile {
         let listaNomi = '';
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
-            let bodyStart = `<button class="accordion">${element.nome}</button>
+            const bodyStart = `<button class="accordion">${element.nome}</button>
                          <div class="panel">`;
-            let bodyEnd = '</div>';
+            const bodyEnd = '</div>';
             const tmp = `
            <p>${element.nome}</p>
            <!-- <p>${element.PrintStamp()}</p> --> 
@@ -206,7 +206,7 @@ export class TerminaleClasse implements IPrintabile {
  */
 function decoratoreClasse(percorso?: string): any {
     return (ctr: Function) => {
-        let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
+        const tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         const classe = CheckClasseMetaData(ctr.name);
         if (percorso) classe.SetPath = percorso;
         else classe.SetPath = ctr.name;

@@ -104,9 +104,9 @@ export class Main {
     GetJSONSwagger() {
         const swaggerJson = ``;
 
-        let tmp2: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
+        const tmp2: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         let ritorno = '';
-        let rr: object = {};
+        const rr: object = {};
         /* let rr: object = {
             openapi: "3.0.0",
             servers: [

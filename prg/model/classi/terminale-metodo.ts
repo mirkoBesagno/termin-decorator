@@ -23,9 +23,9 @@ export interface IReturn {
 export interface IResponse {
     body: string
 }
-export interface ITerminaleMetodo {
+/* export interface ITerminaleMetodo {
 
-}
+} */
 export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
     static nomeMetadataKeyTarget = "MetodoTerminaleTarget";
@@ -245,7 +245,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         }
     }
     async ChiamataGenerica(req: Request, res: Response) {
-        let passato: boolean = false;
+        let passato = false;
         try {
             console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
             const logIn = InizializzaLogbaseIn(req, this.nome.toString());
@@ -254,7 +254,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             if (this.onPrimaDiTerminareLaChiamata) tmp = this.onPrimaDiTerminareLaChiamata(tmp);
             try {
                 //res.status(tmp.stato).send(tmp.body);
-                let num: number = 0;
+                let num = 0;
                 num = tmp.stato;
                 //num = 404; 
                 res.statusCode = Number.parseInt('' + num);
@@ -280,16 +280,16 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
     async ChiamaLaRotta(headerpath?: string) {
         try {
 
-            let body: string = "";
-            let query: string = "";
-            let header: string = "";
+            let body = "";
+            let query = "";
+            let header = "";
             for (let index = 0; index < this.middleware.length; index++) {
                 const element = this.middleware[index];
 
                 if (element instanceof TerminaleMetodo) {
                     const listaMidd = GetListaMiddlewareMetaData();
                     const midd = listaMidd.CercaConNomeSeNoAggiungi(element.nome.toString());
-                    const rit = await midd.listaParametri.SoddisfaParamtri();
+                    const rit = await midd.listaParametri.SoddisfaParamtri('middleware');
 
                     if (rit.body != "") {
                         if (body != "") {
@@ -315,7 +315,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
             if (headerpath == undefined) headerpath = "http://localhost:3000";
             console.log('chiamata per : ' + this.percorsi.pathGlobal + ' | Verbo: ' + this.tipo);
-            let parametri = await this.listaParametri.SoddisfaParamtri();
+            const parametri = await this.listaParametri.SoddisfaParamtri('rotta');
 
             if (parametri.body != "") {
                 if (body != "") {
@@ -339,50 +339,6 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
             let ritorno;
             let gg = this.percorsi.patheader + this.percorsi.porta + this.percorsi.pathGlobal
-            /*  */
-            /* ritorno = await axios({
-                method: this.tipo,
-                url: gg,
-                headers: header,
-                params: query,
-                data: '{' + body + '}'
-            }); */
-
-            /*  */
-
-            /* // Build the post string from an object
-            var post_data = qs.stringify({
-                'compilation_level': 'ADVANCED_OPTIMIZATIONS',
-                'output_format': 'json',
-                'output_info': 'compiled_code',
-                'warning_level': 'QUIET',
-                'js_code': JSON.parse('{ ' + body + ' }')
-            });
-
-            var post_options = {
-                host: this.percorsi.patheader,
-                port: this.percorsi.porta,
-                path: this.percorsi.pathGlobal,
-                method: this.tipo,
-                query: JSON.parse('{ ' + query + ' }'),
-                header: Object.assign({
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Content-Length': Buffer.byteLength(post_data),
-                }, JSON.parse('{ ' + header + ' }'))
-            };
-
-            // Set up the request
-            var post_req = await http.request(post_options);
-             , function (res) {
-            res.setEncoding('utf8');
-            res.on('data', function (chunk) {
-                console.log('Response: ' + chunk);
-            });
-        }); 
-
-            // post the data
-            post_req.write(post_data);
-            post_req.end(); */
 
             switch (this.tipo) {
                 case 'get':
@@ -466,7 +422,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                 return ritorno.body;
             } else {
                 return '';
-            };
+            }
             /*  */
         } catch (error) {
             throw new Error("Errore :" + error);
@@ -593,7 +549,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
 
     }
-    PrintStamp() {
+    PrintStamp():string {
         let parametri = "";
         for (let index = 0; index < this.listaParametri.length; index++) {
             const element = this.listaParametri[index];
@@ -603,7 +559,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         //console.log(tmp);
         return tmp;
     }
-    GeneraHTML() {
+    GeneraHTML():string {
         let listaNomi = `
             <table>
                 <tr>
@@ -615,7 +571,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     <th>tipo</th>
                     <th>#INPUT#</th>
                 </tr>`;
-        let tt = `</table>`
+        const tt = `</table>`
 
         let param = ``;
         for (let index = 0; index < this.listaParametri.length; index++) {
@@ -700,8 +656,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
         if (tipoInterazione == 'middleware') {
             //questo deve restituire un oggetto
-            let tmp: any[] = [];
-            let primo: boolean = false;
+            let primo = false;
             let ritorno = '';
             for (let index = 0; index < this.middleware.length; index++) {
                 const element = this.middleware[index];
@@ -818,8 +773,8 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             }
         }
         else {
-            let primo: boolean = false;
-            let ritornoTesta = `"${this.percorsi.pathGlobal}" : { 
+            let primo = false;
+            const ritornoTesta = `"${this.percorsi.pathGlobal}" : { 
                 "${this.tipo}" : 
                 {
                     "tags": [
@@ -827,13 +782,13 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                     "summary": "${this.sommario}",
                     "description": "${this.descrizione}",
                     "parameters": [ `;
-            let ritornoCoda = `
+            const ritornoCoda = `
                 ]
             }
         }
 `;
             let ritorno = '';
-            let tmp2: any[] = [];
+            const tmp2: any[] = [];
             const gg = this.percorsi.pathGlobal;
 
             for (let index = 0; index < this.middleware.length; index++) {
@@ -865,7 +820,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             } catch (error) {
                 console.log(error);
             }
-            let tmp = {
+            const tmp = {
                 gg: {
                     "summary": this.sommario,
                     "description": this.descrizione,
@@ -873,7 +828,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                 }
             };
 
-            let tmp3 = `${gg}: {
+            const tmp3 = `${gg}: {
                 "summary": ${this.sommario},
                 "description": ${this.descrizione},
                 "parameters": [${tmp2}]
@@ -980,7 +935,7 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
                     const metodoTmp = classeTmp.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
                     /* configuro il metodo */
                     metodoTmp.metodoAvviabile = descriptor.value;
-                    
+
                     if (parametri.tipo != undefined) metodoTmp.tipo = parametri.tipo;
                     else metodoTmp.tipo = 'get';
 
@@ -995,7 +950,7 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
 
                     if (parametri.path == undefined) metodoTmp.path = propertyKey.toString();
                     else metodoTmp.path = parametri.path;
-                    
+
                     for (let index = 0; index < metodo.listaParametri.length; index++) {
                         const element = metodo.listaParametri[index];
                         /* configuro i parametri */
@@ -1030,7 +985,7 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
                                 console.log("Errore mio!");
                             }
                         }
-                    } 
+                    }
                 }
             }
             SalvaListaClasseMetaData(list);
