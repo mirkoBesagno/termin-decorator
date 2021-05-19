@@ -871,7 +871,6 @@ export interface IMetodo {
     /** il sommario è una versione piu semplice della descrizione */
     sommario?: string,
     /** questa è la strada per andare ad assegnare questa funzione è piu classi o sotto percorsi
-     *! momentaneamente non testata
      */
     nomiClasseRiferimento?: IClasseRiferimento[],
 
