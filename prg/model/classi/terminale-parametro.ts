@@ -48,14 +48,6 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
         return "tipoParametro:" + this.tipoParametro.toString() + ";" + "nomeParametro:" + this.nomeParametro;
     }
     SettaSwagger() {
-        /* const tmp = {
-            name: this.nomeParametro,
-            in: this.posizione,
-            required: false,
-            type: this.tipoParametro,
-            description: this.descrizione,
-            summary: this.sommario
-        }; */
         const ritorno =
             `{
                 "name": "${this.nomeParametro}",

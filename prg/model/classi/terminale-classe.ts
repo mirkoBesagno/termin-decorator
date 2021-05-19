@@ -228,29 +228,6 @@ export function CheckClasseMetaData(nome: string) {
         Reflect.defineMetadata(TerminaleClasse.nomeMetadataKeyTarget, classe, targetTerminale); //e lo vado a salvare nel meta data
     }
     return classe;
-
-    /* let classePath = listClasse.CercaConPath(path);
-    if (classe == undefined && classePath == undefined) {
-        classe = new TerminaleClasse(nome); //se il metodo non c'è lo creo
-        listClasse.AggiungiElemento(classe);
-        Reflect.defineMetadata(TerminaleClasse.nomeMetadataKeyTarget, classe, targetTerminale); //e lo vado a salvare nel meta data
-    }
-    else {
-        if (classePath != undefined && classe != undefined) {
-            for (let index = 0; index < classePath.listaMetodi.length; index++) {
-                const element = classePath.listaMetodi[index];
-                classe.listaMetodi.AggiungiElemento(element);
-            }
-            return classe;
-        }
-        else if(classePath != undefined && classe == undefined){
-            return classePath;
-        }
-        else if(){
-            
-        }
-        return classe;
-    } */
 }
 
 export function SalvaListaClasseMetaData(tmp: ListaTerminaleClasse) {

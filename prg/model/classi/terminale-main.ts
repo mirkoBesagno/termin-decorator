@@ -56,7 +56,7 @@ export class Main {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         this.percorsi.patheader = patheader;
         this.percorsi.porta = porta;
-        const pathGlobal = /* this.percorsi.patheader + this.percorsi.porta + */ '/' + this.path;
+        const pathGlobal =  '/' + this.path;
         this.percorsi.pathGlobal = pathGlobal;
 
         this.serverExpressDecorato.use(urlencoded({ 'extended': true })); // parse application/x-www-form-urlencoded
@@ -76,31 +76,13 @@ export class Main {
 
             //this.serverExpressDecorato.use(element.GetPath, element.rotte);
         }
-        /* if (rottaBase)
-            this.serverExpressDecorato.all('/*', (req: Request, res: Response) => {
-                console.log('Risposta a chiamata : ' + '/*');
-                InizializzaLogbaseIn(req, 'IN_GENERICA');
-                res.status(555).send('No found');
-                InizializzaLogbaseOut(res, 'OUT_GENERICA');
-                return res;
-            }); */
 
         SalvaListaClasseMetaData(tmp);
-
-        /* if (creaFile == true) {
-           console.log("ciao");
-           const dir = './mpExpress';
-           if (!fs.existsSync(dir)) {
-               fs.mkdirSync(dir);
-           }
-           tmp.forEach(classe => {
-                classe.listaMetodi.forEach(metodo =>{
-                    metodo.
-                });
-                fs.writeFileSync(dir + '/' + classe.nome, 'Hey there!');
-            }); 
-       }*/
     }
+    /**
+     * !! assolutamente da vedere, rifare !
+     * @returns 
+     */
     GetJSONSwagger() {
         const swaggerJson = ``;
 
@@ -254,13 +236,10 @@ export class Main {
         //this.serverExpressDecorato.listen(this.percorsi.porta);
     }
     AggiungiHTML() {
-        this.serverExpressDecorato/* .use(express.static(__dirname+'../../../mpHTML/server.html')) */.get("/server", function (req, res) {
+        this.serverExpressDecorato.get("/server", function (req, res) {
             let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
             const text = tmp.GeneraHTML();
-            /* fs.writeFileSync(__dirname+'../../../mpHTML/server.html',text)
-            res.status(200).sendFile(__dirname+'../../../mpHTML/server.html'); */
             res.status(200).send(text);
-            //res.status(200).send("Errore!! La richiesta non puo essere soddisfatta.");
         });
     }
     StartExpressConsole(porta: number, header: string) {
