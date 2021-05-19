@@ -21,11 +21,9 @@ export class TerminaleClasse implements IPrintabile {
     rotte: Router;
 
     private path: string;
-
     public get GetPath(): string {
         return this.path;
     }
-
     public set SetPath(v: string) {
         this.path = v;
         const pathGlobal = '/' + this.path;
@@ -52,21 +50,7 @@ export class TerminaleClasse implements IPrintabile {
         const pathGlobal = '/' + this.path;
         this.percorsi.pathGlobal = pathGlobal;
     }
-    /* async PrintMenu() {
-            console.log("Scegli un metodo:");
-    
-            for (let index = 0; index < this.listaMetodi.length; index++) {
-                const element = this.listaMetodi[index];
-                console.log(index + 1 + ":\n");
-                element.PrintCredenziali();
-            }
-            const risultato = await chiedi({ name: "scelta", message: "Digita la scelta :", type: "number" });
-            if (risultato.scelta != 0) {
-                this.listaMetodi[risultato.scelta].PrintMenu();
-            } else {
-    
-            }
-        } */
+
     async PrintMenu() {
         const tab = '\t\t';
         console.log(tab + 'TerminaleClasse' + '->' + 'PrintMenu');
@@ -79,6 +63,7 @@ export class TerminaleClasse implements IPrintabile {
         const scelta = await chiedi({ message: 'Premi invio per continuare', type: 'number', name: 'scelta' });
 
     }
+
     async PrintMenuClasse() {
         console.log('Classe :' + this.nome);
         let index = 0;
@@ -109,17 +94,20 @@ export class TerminaleClasse implements IPrintabile {
             }
         }
     }
+
     GeneraStruttura(path: string) {
         /* const fileHTML: string = '';
         const fileTypeScript: string = ''; */
 
     }
+
     PrintCredenziali() {
         const tmp = "nome:" + this.nome + ":;:" +
             "id:" + this.id + ":;:" +
             "listaMetodi.length:" + this.listaMetodi.length + ":;:";
         //console.log(tmp);
     }
+
     SettaPathRoot_e_Global(item: string, percorsi: IRaccoltaPercorsi, app: any) {
 
         if (percorsi.patheader == undefined) this.percorsi.patheader = "http://localhost:";
@@ -139,6 +127,7 @@ export class TerminaleClasse implements IPrintabile {
             //element.listaRotteGeneraChiavi=this.listaMetodiGeneraKey;
         }
     }
+
     SettaSwagger() {
 
         const swaggerJson = `"paths": {    
@@ -169,6 +158,7 @@ export class TerminaleClasse implements IPrintabile {
         }
         return tmp;
     }
+
     CercaMetodoSeNoAggiungiMetodo(nome: string) {
         let terminale = this.listaMetodi.CercaConNome(nome)
 
@@ -178,6 +168,7 @@ export class TerminaleClasse implements IPrintabile {
         }
         return terminale;
     }
+
     GeneraHTML() {
         let listaNomi = '';
         for (let index = 0; index < this.listaMetodi.length; index++) {
@@ -202,7 +193,8 @@ export class TerminaleClasse implements IPrintabile {
 }
 
 /**
- * @param percorso : questo inizializza
+ * inizializza la classe, crea un rotta in express mediante il percorso specificato. 
+ * @param percorso : di default il nome della classe
  */
 function decoratoreClasse(percorso?: string): any {
     return (ctr: Function) => {
@@ -214,6 +206,11 @@ function decoratoreClasse(percorso?: string): any {
     }
 }
 
+/**
+ * 
+ * @param nome 
+ * @returns 
+ */
 export function CheckClasseMetaData(nome: string) {
     let listClasse: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale); // vado a prendere la struttura legata alle funzioni ovvero le classi
     if (listClasse == undefined)/* se non c'è la creo*/ {
@@ -230,9 +227,18 @@ export function CheckClasseMetaData(nome: string) {
     return classe;
 }
 
+/**
+ * 
+ * @param tmp 
+ */
 export function SalvaListaClasseMetaData(tmp: ListaTerminaleClasse) {
     Reflect.defineMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, tmp, targetTerminale);
 }
+
+/**
+ * 
+ * @returns 
+ */
 export function GetListaClasseMetaData() {
     let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
     if (tmp == undefined) {
@@ -240,6 +246,5 @@ export function GetListaClasseMetaData() {
     }
     return tmp;
 }
-
 
 export { decoratoreClasse as mpClas };

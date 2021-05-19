@@ -80,7 +80,18 @@ export interface IParametro {
     dovePossoTrovarlo?: TypeDovePossoTrovarlo,
     Validatore?: (parametro: any) => IRitornoValidatore
 }
-
+/**
+ * 
+ * @param parametri 
+ *  nomeParametro: nome del parametro, in pratica il nome della variabile o un nome assonante (parlante) 
+ *  posizione: la posizione rispetto alla chiamata, ovvero: "body" | "query" | "header" 
+ *  tipoParametro?: fa riferimento al tipo di base, ovvero: "number" | "text" | "date" 
+ *  descrizione?: descrizione lunga  
+ *  sommario?: descrizione breve  
+ *  dovePossoTrovarlo?: TypeDovePossoTrovarlo,
+ *  Validatore?: (parametro: any) => IRitornoValidatore
+ * @returns 
+ */
 function decoratoreParametroGenerico(parametri: IParametro)/* (nomeParametro: string, posizione: TypePosizione, tipoParametro?: TipoParametro, descrizione?: string, sommario?: string) */ {
     return function (target: any, propertyKey: string | symbol, parameterIndex: number) {
         if (parametri.tipoParametro == undefined) parametri.tipoParametro = 'text';

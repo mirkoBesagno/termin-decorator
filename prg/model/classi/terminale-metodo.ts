@@ -549,7 +549,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
 
 
     }
-    PrintStamp():string {
+    PrintStamp(): string {
         let parametri = "";
         for (let index = 0; index < this.listaParametri.length; index++) {
             const element = this.listaParametri[index];
@@ -559,7 +559,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         //console.log(tmp);
         return tmp;
     }
-    GeneraHTML():string {
+    GeneraHTML(): string {
         let listaNomi = `
             <table>
                 <tr>
@@ -857,7 +857,22 @@ export interface IClasseRiferimento {
 }
 
 /**
- * 
+ * Specifica il tipo, questo puo essere: "get" | "put" | "post" | "patch" | "purge" | "delete" 
+ * tipo?: TypeMetod,
+ * specifica il percorso di una particolare, se non impostato prende il nome della classe 
+ * path?: string,
+ * l'interazione è come viene gestito il metodo, puo essere : "rotta" | "middleware" | "ambo" 
+ * interazione?: TypeInterazone,
+ * la descrizione è utile piu nel menu o in caso di output 
+ * descrizione?: string,
+ * il sommario è una versione piu semplice della descrizione 
+ * sommario?: string,
+ * questa è la strada per andare ad assegnare questa funzione è piu classi o sotto percorsi
+ * nomiClasseRiferimento?: IClasseRiferimento[],
+
+ * onChiamataCompletata?: (logOn: string, result: any, logIn: string) => void
+
+ * Validatore?: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => IRitornoValidatore;
  */
 export interface IMetodo {
     /** Specifica il tipo, questo puo essere: "get" | "put" | "post" | "patch" | "purge" | "delete" */
@@ -878,9 +893,18 @@ export interface IMetodo {
 
     Validatore?: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => IRitornoValidatore;
 }
+
 /**
- * Decoratore di metodo,
- * @param parametri 
+ * crea una rotta con il nome della classe e la aggiunge alla classe di riferimento, il tipo del metodo dipende dal tipo di parametro.
+ * @param parametri : 
+ * tipo?: Specifica il tipo, questo puo essere: "get" | "put" | "post" | "patch" | "purge" | "delete" 
+ * path?: specifica il percorso di una particolare, se non impostato prende il nome della classe  
+ * interazione?: l'interazione è come viene gestito il metodo, puo essere : "rotta" | "middleware" | "ambo"  
+ * descrizione?: la descrizione è utile piu nel menu o in caso di output  
+ * sommario?: il sommario è una versione piu semplice della descrizione  
+ * nomiClasseRiferimento?: questa è la strada per andare ad assegnare questa funzione è piu classi o sotto percorsi  
+ * onChiamataCompletata?: (logOn: string, result: any, logIn: string) => void 
+ * Validatore?: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => IRitornoValidatore;
  * @returns 
  */
 function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
