@@ -12,7 +12,7 @@ export { mpPar as mpPar };
 export { mpClas as mpClas };
 
 
-@mpClas()
+/* @mpClas()
 class ClassUno {
 
     @mpMet({ interazione: 'middleware' })
@@ -27,7 +27,8 @@ class ClassUno {
         return 'metodo primo ciao, sei : ' + nome;
     }
 }
-/* ciao */
+
+
 @mpClas()
 class ClassDue {
     @mpMet({ interazione: 'middleware' })
@@ -40,4 +41,4 @@ class ClassDue {
 const main = new Main('app');
 
 main.Inizializza("http://localhost", 3030, true, true);
-main.StartExpressConsole(3030, "http://localhost");
+main.StartExpressConsole(3030, "http://localhost"); */
