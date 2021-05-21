@@ -210,7 +210,7 @@ class ClassDue {
     }
 }
 
-
+/* 
 const classecosi = new ClasseTest("prima classe!!", 'cognome prima classe?!??!');
 
-const main = new Main("app");
+const main = new Main("app"); */

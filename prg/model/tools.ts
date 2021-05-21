@@ -13,7 +13,7 @@ export interface IDescrivibile {
 export type TipoParametro = "number" | "text" | "date";
 
 export function InizializzaLogbaseIn(req: Request, nomeMetodo?: string): string {
-    console.log("InizializzaLogbaseIn - Arrivato in : " + nomeMetodo + "\n"
+    /* console.log("InizializzaLogbaseIn - Arrivato in : " + nomeMetodo + "\n"
         + "Data : " + new Date(Date.now()) + "\n"
         + "url : " + req.originalUrl + "\n"
         + "query : " + JSON.stringify(req.query) + "\n"
@@ -22,7 +22,8 @@ export function InizializzaLogbaseIn(req: Request, nomeMetodo?: string): string 
         + "soket : " + "\n"
         + "local : " + req.socket.localAddress + " : " + req.socket.localPort + "\n"
         + "remote : " + req.socket.remoteAddress + " : " + req.socket.remotePort + "\n"
-    );
+    ); */
+    
     const body = req.body;
     const data = new Date(Date.now());
     const header = JSON.parse(JSON.stringify(req.headers));
@@ -48,7 +49,7 @@ export function InizializzaLogbaseOut(req: Response, nomeMetodo?: string): strin
         t1 = req.socket.localAddress + " : " + req.socket.localPort;
         t2 = req.socket.remoteAddress + " : " + req.socket.remotePort;
     }
-    console.log("InizializzaLogbaseOut - Arrivato in : " + nomeMetodo + "\n"
+    /* console.log("InizializzaLogbaseOut - Arrivato in : " + nomeMetodo + "\n"
         + "Data : " + new Date(Date.now()) + "\n"
         + "headersSent : " + req.headersSent + "\n"
         // + "json : " + req.json + "\n"
@@ -59,7 +60,7 @@ export function InizializzaLogbaseOut(req: Response, nomeMetodo?: string): strin
         + "soket : " + "\n"
         + "local : " + t1 + "\n"
         + "remote : " + t2 + "\n"
-    );
+    ); */
 
 
     const tmp = "Arrivato in : " + nomeMetodo + "\n"
@@ -92,5 +93,15 @@ export function IsJsonString(str: string): boolean {
         }
     } catch (e) {
         return false;
+    }
+}
+export class ErroreMio extends Error {
+    codiceErrore: number = 500;
+    percorsoErrore;
+    constructor(messaggio: string, codiceErrore: number, nomeErrore: string, percorsoErrore:string) {
+        super(messaggio);
+        this.codiceErrore = codiceErrore;
+        this.name = nomeErrore != undefined ? nomeErrore : "ErroreGenerico";
+        this.percorsoErrore = percorsoErrore;
     }
 }
