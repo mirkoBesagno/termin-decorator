@@ -435,7 +435,6 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
     }
     async Esegui(req: Request): Promise<IReturn> {
         try {
-            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
             const parametri = this.listaParametri.EstraiParametriDaRequest(req);
             let valido: IRitornoValidatore | undefined = { approvato: true, stato: 200, messaggio: '' };
             if (this.Validatore) valido = this.Validatore(parametri, this.listaParametri);
@@ -559,286 +558,6 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
         //console.log(tmp);
         return tmp;
     }
-    GeneraHTML(): string {
-        let listaNomi = `
-            <table>
-                <tr>
-                    <th>nome</th>
-                    <th>posizione</th>
-                    <th>sommario</th>
-                    <th>descrizione</th>
-                    <th>indexParameter</th>
-                    <th>tipo</th>
-                    <th>#INPUT#</th>
-                </tr>`;
-        const tt = `</table>`
-
-        let param = ``;
-        for (let index = 0; index < this.listaParametri.length; index++) {
-            const element = this.listaParametri[index];
-            let inputhtml = '';
-            let bodyStart = '';
-            switch (element.tipoParametro) {
-                case 'text':
-                    inputhtml = '<input type="text" name="" id="">';
-                    break;
-                case 'date':
-                    inputhtml = '<input type="date" name="" id="">';
-                    break;
-                case 'number':
-                    inputhtml = '<input type="number" name="" id="">';
-                    break;
-            }
-            param = param + `
-                <tr>
-                    <td>${element.nomeParametro}</td>
-                    <td>${element.posizione}</td>
-                    <td>${element.sommario}</td>
-                    <td>${element.descrizione}</td>
-                    <td>${element.indexParameter}</td>
-                    <td>${element.tipoParametro}</td>
-                    <td>${inputhtml}</td>
-                </tr>`
-                ;
-            bodyStart = `<script type="text/javascript">
-            function UserAction() {
-                var passw = document.getElementById("password").value;
-                if (passw.length >= 8) {
-    
-                    var x = document.URL;
-                    var vettore = x.split('/');
-                    var body = vettore[vettore.length - 1];
-                    var gg = body.split('?', 2);
-                    gg = gg[1].substring(3);
-                    var xhttp = new XMLHttpRequest();
-                    let url
-                    if (process.env.NODE_ENV == "test") {
-                        url = new URL('https://ss-test.medicaltech.it/api/medico/reimposta-password-medico');
-                    }
-                    else if (process.env.NODE_ENV == "production") {
-                        url = new URL('https://staisicuro.medicaltech.it/api/medico/reimposta-password-medico');
-                    }
-                    let json = JSON.stringify({
-                        password: passw,
-                        token: gg
-                    });
-    
-                    xhttp.onreadystatechange = function () {
-                        if (this.readyState == 4 && this.status == 200) {
-                            alert('Richiesta accettata. 4\n' + this.responseText);
-                            window.close();
-                        }
-                        if (this.readyState == 4 && this.status == 500) {
-                            alert("Richiesta respinta. 4\n" + this.responseText);
-                        }
-                        if (this.readyState == 4 && this.status == 502) {
-                            alert("Richiesta potrebbe essere accettata ma c'è stato un errore nel proxy.");
-                            window.close();
-                        }
-                    };
-    
-                    xhttp.open("POST", url, true);
-                    xhttp.setRequestHeader("Content-type", "application/json; charset=utf-8");
-                    xhttp.send(json);
-                    //window.close();   
-                }
-                else {
-                    alert("Attenzione almeno 8 caratteri");
-                }
-            }
-        </script>`;
-        }
-        param = param + tt;
-        listaNomi = listaNomi + '\n' + param;
-        return listaNomi;
-    }
-    SettaSwagger(tipoInterazione: 'rotta' | 'middleware') {
-
-        if (tipoInterazione == 'middleware') {
-            //questo deve restituire un oggetto
-            let primo = false;
-            let ritorno = '';
-            for (let index = 0; index < this.middleware.length; index++) {
-                const element = this.middleware[index];
-                if (element instanceof TerminaleMetodo) {
-                    const tt = element.SettaSwagger('middleware');
-                    /* tmp.push(tt); */
-                    if (primo == false && tt != undefined) {
-                        primo = true;
-                        ritorno = tt + '';
-                    } else if (tt != undefined) {
-                        ritorno = ritorno + ',' + tt;
-                    }
-                }
-            }
-            for (let index = 0; index < this.listaParametri.length; index++) {
-                const element = this.listaParametri[index];
-                const tt = element.SettaSwagger();
-                /* tmp.push(tt); */
-                if (index == 0)
-                    if (primo == false) ritorno = tt;
-                    else ritorno = ritorno + ',' + tt;
-                else ritorno = ritorno + ',' + tt;
-                if (primo == false) primo = true;
-            }
-            ritorno = ritorno;
-            try {
-                JSON.parse(ritorno)
-            } catch (error) {
-                console.log(error);
-            }
-            if (primo) return undefined;
-            else return ritorno;
-        }
-        else {
-            let primo: boolean = false;
-            let ritornoTesta = `"${this.percorsi.pathGlobal}" : { 
-                "${this.tipo}" : 
-                {
-                    "tags": [
-                    ],
-                    "summary": "${this.sommario}",
-                    "description": "${this.descrizione}",
-                    "parameters": [ `;
-            let ritornoCoda = `
-                ]
-            }
-        }
-`;
-            let ritorno = '';
-            let tmp2: any[] = [];
-            const gg = this.percorsi.pathGlobal;
-
-            for (let index = 0; index < this.middleware.length; index++) {
-                const element = this.middleware[index];
-                if (element instanceof TerminaleMetodo) {
-                    const tt = element.SettaSwagger('middleware');
-                    /* tmp2.push(tt); */
-                    if (primo == false && tt != undefined) {
-                        primo = true;
-                        ritorno = tt + '';
-                    } else if (tt != undefined) {
-                        ritorno = ritorno + ',' + tt;
-                    }
-                }
-            }
-            for (let index = 0; index < this.listaParametri.length; index++) {
-                const element = this.listaParametri[index];
-                const tt = element.SettaSwagger();
-                /* tmp2.push(tt); */
-                if (index == 0)
-                    if (primo == false) ritorno = tt;
-                    else ritorno = ritorno + ',' + tt;
-                else ritorno = ritorno + ',' + tt;
-                if (primo == false) primo = true;
-            }
-            ritorno = ritornoTesta + ritorno + ritornoCoda;
-            try {
-                JSON.parse('{' + ritorno + '}')
-            } catch (error) {
-                console.log(error);
-            }
-            let tmp = {
-                gg: {
-                    "summary": this.sommario,
-                    "description": this.descrizione,
-                    "parameters": tmp2
-                }
-            };
-
-            let tmp3 = `${gg}: {
-                "summary": ${this.sommario},
-                "description": ${this.descrizione},
-                "parameters": [${tmp2}]
-            }`;
-            /* if (primo) return undefined;
-            else return ritorno; */
-
-            return ritorno;
-        }
-    }
-
-    SettaHTML(tipoInterazione: 'rotta' | 'middleware') {
-
-        if (tipoInterazione == 'middleware') {
-            //questo deve restituire un oggetto
-            let tmp: any[] = [];
-            for (let index = 0; index < this.middleware.length; index++) {
-                const element = this.middleware[index];
-
-            }
-            for (let index = 0; index < this.listaParametri.length; index++) {
-                const element = this.listaParametri[index];
-
-            }
-        }
-        else {
-            let primo = false;
-            const ritornoTesta = `"${this.percorsi.pathGlobal}" : { 
-                "${this.tipo}" : 
-                {
-                    "tags": [
-                    ],
-                    "summary": "${this.sommario}",
-                    "description": "${this.descrizione}",
-                    "parameters": [ `;
-            const ritornoCoda = `
-                ]
-            }
-        }
-`;
-            let ritorno = '';
-            const tmp2: any[] = [];
-            const gg = this.percorsi.pathGlobal;
-
-            for (let index = 0; index < this.middleware.length; index++) {
-                const element = this.middleware[index];
-                if (element instanceof TerminaleMetodo) {
-                    const tt = element.SettaSwagger('middleware');
-                    /* tmp2.push(tt); */
-                    if (primo == false && tt != undefined) {
-                        primo = true;
-                        ritorno = tt + '';
-                    } else if (tt != undefined) {
-                        ritorno = ritorno + ',' + tt;
-                    }
-                }
-            }
-            for (let index = 0; index < this.listaParametri.length; index++) {
-                const element = this.listaParametri[index];
-                const tt = element.SettaSwagger();
-                /* tmp2.push(tt); */
-                if (index == 0)
-                    if (primo == false) ritorno = tt;
-                    else ritorno = ritorno + ',' + tt;
-                else ritorno = ritorno + ',' + tt;
-                if (primo == false) primo = true;
-            }
-            ritorno = ritornoTesta + ritorno + ritornoCoda;
-            try {
-                JSON.parse('{' + ritorno + '}')
-            } catch (error) {
-                console.log(error);
-            }
-            const tmp = {
-                gg: {
-                    "summary": this.sommario,
-                    "description": this.descrizione,
-                    "parameters": tmp2
-                }
-            };
-
-            const tmp3 = `${gg}: {
-                "summary": ${this.sommario},
-                "description": ${this.descrizione},
-                "parameters": [${tmp2}]
-            }`;
-            /* if (primo) return undefined;
-            else return ritorno; */
-
-            return ritorno;
-        }
-    }
 }
 
 
@@ -920,23 +639,7 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
             if (parametri.nomiClasseRiferimento != undefined)
                 metodo.nomiClassiDiRiferimento = parametri.nomiClasseRiferimento;
 
-            if (parametri.tipo != undefined) metodo.tipo = parametri.tipo;
-            else if (parametri.tipo == undefined && metodo.listaParametri.length == 0) metodo.tipo = 'get';
-            else if (parametri.tipo == undefined && metodo.listaParametri.length > 0) metodo.tipo = 'post';
-            //else if (parametri.tipo == undefined && metodo.listaParametri.length < 0) metodo.tipo = 'post';
-            else metodo.tipo = 'get';
-
-            if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
-            else metodo.descrizione = '';
-
-            if (parametri.sommario != undefined) metodo.sommario = parametri.sommario;
-            else metodo.sommario = '';
-
-            if (parametri.interazione != undefined) metodo.tipoInterazione = parametri.interazione;
-            else metodo.tipoInterazione = 'rotta';
-
-            if (parametri.path == undefined) metodo.path = propertyKey.toString();
-            else metodo.path = parametri.path;
+            SettaMetodo(parametri, metodo, propertyKey.toString());
 
             if (parametri.onChiamataCompletata != null) metodo.onChiamataCompletata = parametri.onChiamataCompletata;
 
@@ -959,33 +662,26 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
                     /* configuro il metodo */
                     metodoTmp.metodoAvviabile = descriptor.value;
 
-                    if (parametri.tipo != undefined) metodoTmp.tipo = parametri.tipo;
-                    else metodoTmp.tipo = 'get';
-
-                    if (parametri.descrizione != undefined) metodoTmp.descrizione = parametri.descrizione;
-                    else metodoTmp.descrizione = '';
-
-                    if (parametri.sommario != undefined) metodoTmp.sommario = parametri.sommario;
-                    else metodoTmp.sommario = '';
-
-                    if (parametri.interazione != undefined) metodoTmp.tipoInterazione = parametri.interazione;
-                    else metodoTmp.tipoInterazione = 'rotta';
-
-                    if (parametri.path == undefined) metodoTmp.path = propertyKey.toString();
-                    else metodoTmp.path = parametri.path;
-
                     for (let index = 0; index < metodo.listaParametri.length; index++) {
                         const element = metodo.listaParametri[index];
                         /* configuro i parametri */
                         const paramestro = metodoTmp.CercaParametroSeNoAggiungi(element.nomeParametro, element.indexParameter,
                             element.tipoParametro, element.posizione);
-                        if (parametri.descrizione != undefined) paramestro.descrizione = element.descrizione;
+
+                        if (element.descrizione != undefined) paramestro.descrizione = element.descrizione;
                         else paramestro.descrizione = '';
 
-                        if (parametri.sommario != undefined) paramestro.sommario = element.sommario;
+                        if (element.sommario != undefined) paramestro.sommario = element.sommario;
                         else paramestro.sommario = '';
 
+                        if (element.dovePossoTrovarlo != undefined) paramestro.dovePossoTrovarlo = element.dovePossoTrovarlo;
+                        else paramestro.dovePossoTrovarlo = 'rotta';
+
+                        if (element.Validatore != undefined) paramestro.Validatore = element.Validatore;
                     }
+
+                    SettaMetodo(parametri, metodoTmp, propertyKey.toString());
+
                     if (element.listaMiddleware) {
                         for (let index = 0; index < element.listaMiddleware.length; index++) {
                             const middlewareTmp = element.listaMiddleware[index];
@@ -999,10 +695,8 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
                                 midd = middlewareTmp;
                             }
 
-
                             if (metodoTmp != undefined && list != undefined && classeTmp != undefined) {
                                 metodoTmp.middleware.push(midd);
-                                SalvaListaClasseMetaData(list);
                             }
                             else {
                                 console.log("Errore mio!");
@@ -1017,6 +711,28 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
             console.log("Errore mio!");
         }
     }
+}
+
+function SettaMetodo(parametri: IMetodo, metodo: TerminaleMetodo, propertyKey: string) {
+    if (parametri.tipo != undefined) metodo.tipo = parametri.tipo;
+    else if (parametri.tipo == undefined && metodo.listaParametri.length == 0) metodo.tipo = 'get';
+    else if (parametri.tipo == undefined && metodo.listaParametri.length > 0) metodo.tipo = 'post';
+    //else if (parametri.tipo == undefined && metodo.listaParametri.length < 0) metodo.tipo = 'post';
+    else metodo.tipo = 'get';
+
+    if (parametri.descrizione != undefined) metodo.descrizione = parametri.descrizione;
+    else metodo.descrizione = '';
+
+    if (parametri.sommario != undefined) metodo.sommario = parametri.sommario;
+    else metodo.sommario = '';
+
+    if (parametri.interazione != undefined) metodo.tipoInterazione = parametri.interazione;
+    else metodo.tipoInterazione = 'rotta';
+
+    if (parametri.path == undefined) metodo.path = propertyKey;
+    else metodo.path = parametri.path;
+
+    return metodo;
 }
 
 export function mpAddCors(cors: any): MethodDecorator {

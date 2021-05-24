@@ -95,11 +95,6 @@ export class TerminaleClasse implements IPrintabile {
         }
     }
 
-    GeneraStruttura(path: string) {
-        /* const fileHTML: string = '';
-        const fileTypeScript: string = ''; */
-
-    }
 
     PrintCredenziali() {
         const tmp = "nome:" + this.nome + ":;:" +
@@ -128,36 +123,6 @@ export class TerminaleClasse implements IPrintabile {
         }
     }
 
-    SettaSwagger() {
-
-        const swaggerJson = `"paths": {    
-        `;
-        let ritorno = '';
-        let primo = false;
-        for (let index = 0; index < this.listaMetodi.length; index++) {
-            const element = this.listaMetodi[index];
-            if (element.tipoInterazione != 'middleware') {
-                const tt = element.SettaSwagger('rotta');
-                if (tt) {
-                    if (primo == false && tt != undefined) {
-                        primo = true;
-                        ritorno = tt + '';
-                    } else if (tt != undefined) {
-                        ritorno = ritorno + ',' + tt;
-                    }
-                }
-            }
-        }
-        const tmp = swaggerJson + ritorno + '}';
-
-        try {
-            const hhh = tmp.toString();
-            JSON.parse(tmp)
-        } catch (error) {
-            console.log(error);
-        }
-        return tmp;
-    }
 
     CercaMetodoSeNoAggiungiMetodo(nome: string) {
         let terminale = this.listaMetodi.CercaConNome(nome)
@@ -167,28 +132,6 @@ export class TerminaleClasse implements IPrintabile {
             this.listaMetodi.AggiungiElemento(terminale);
         }
         return terminale;
-    }
-
-    GeneraHTML() {
-        let listaNomi = '';
-        for (let index = 0; index < this.listaMetodi.length; index++) {
-            const element = this.listaMetodi[index];
-            const bodyStart = `<button class="accordion">${element.nome}</button>
-                         <div class="panel">`;
-            const bodyEnd = '</div>';
-            const tmp = `
-           <p>${element.nome}</p>
-           <!-- <p>${element.PrintStamp()}</p> --> 
-            <div>${element.GeneraHTML()}</div>        
-             </br>
-             <button onclick="UserAction()">Invia</button>
-             <p>Ritorno :</p>
-             <textarea name="" id="" style="width:100%" rows="10"></textarea>
-             `;
-            listaNomi = listaNomi + '\n' + bodyStart + tmp + bodyEnd;
-        }
-
-        return listaNomi;
     }
 }
 

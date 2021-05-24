@@ -84,120 +84,6 @@ export class Main {
             console.log("Attenzione non vi sono rotte e quantaltro.");
         }
     }
-    /**
-     * !! assolutamente da vedere, rifare !
-     * @returns 
-     */
-    GetJSONSwagger() {
-        const swaggerJson = ``;
-
-        const tmp2: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-        let ritorno = '';
-        const rr: object = {};
-        /* let rr: object = {
-            openapi: "3.0.0",
-            servers: [
-                {
-                    url: "https://staisicuro.medicaltech.it/",
-                    variables: {},
-                    description: "indirizzo principale"
-                },
-                {
-                    url: "http://ss-test.medicaltech.it/",
-                    description: "indirizzo secondario nel caso quello principale non dovesse funzionare."
-                }
-            ],
-            info: {
-                description: "Documentazione delle API con le quali interrogare il server dell'applicazione STAI sicuro, per il momento qui troverai solo le api con le quali interfacciarti alla parte relativa al paziente. \nSe vi sono problemi sollevare degli issues o problemi sulla pagina di github oppure scrivere direttamente una email.",
-                version: "1.0.0",
-                title: "STAI sicuro",
-                termsOfService: "https://github.com/MedicaltechTM/STAI_sicuro",
-                contact: {
-                    email: "mirkopizzini93@gmail.com",
-                    name: "mirko pizzini",
-                    url: "-"
-                },
-                license: {
-                    name: "MIT",
-                    url: "https://opensource.org/licenses/MIT"
-                }
-            }
-        }; */
-
-        for (let index = 0; index < tmp2.length; index++) {
-            const element: TerminaleClasse = tmp2[index];
-            const tt = element.SettaSwagger();
-            /* rr = { rr, th }; */
-            if (index == 0) ritorno = tt;
-            else ritorno = ritorno + ',' + tt;
-        }
-
-        let tmp = `{
-        "openapi": "3.0.0",
-            "servers": [
-                {
-                    "url": "https://staisicuro.medicaltech.it/",
-                    "variables": {},
-                    "description": "indirizzo principale"
-                },
-                {
-                    "url": "http://ss-test.medicaltech.it/",
-                    "description": "indirizzo secondario nel caso quello principale non dovesse funzionare."
-                }
-            ],
-            "info": {
-                "description": "Documentazione delle API con le quali interrogare il server dell'applicazione STAI sicuro, per il momento qui troverai solo le api con le quali interfacciarti alla parte relativa al paziente. \nSe vi sono problemi sollevare degli issues o problemi sulla pagina di github oppure scrivere direttamente una email.",
-                "version": "1.0.0",
-                "title": "STAI sicuro",
-                "termsOfService": "https://github.com/MedicaltechTM/STAI_sicuro"
-            },
-            "tags": [
-
-            ],   
-        `+ ritorno +
-            '}';
-
-        let gg = {
-            "openapi": "3.0.0",
-            "servers": [
-                {
-                    "url": "https://staisicuro.medicaltech.it/",
-                    "variables": {},
-                    "description": "indirizzo principale"
-                },
-                {
-                    "url": "http://ss-test.medicaltech.it/",
-                    "description": "indirizzo secondario nel caso quello principale non dovesse funzionare."
-                }
-            ],
-            "info": {
-                "description": "Documentazione delle API con le quali interrogare il server dell'applicazione STAI sicuro, per il momento qui troverai solo le api con le quali interfacciarti alla parte relativa al paziente. \nSe vi sono problemi sollevare degli issues o problemi sulla pagina di github oppure scrivere direttamente una email.",
-                "version": "1.0.0",
-                "title": "STAI sicuro",
-                "termsOfService": "https://github.com/MedicaltechTM/STAI_sicuro"
-            },
-            "tags": [
-
-            ],
-            paths: {
-
-            }
-        };
-        try {
-            const hhh = tmp.toString();
-            console.log(hhh);
-
-            JSON.parse(tmp)
-        } catch (error) {
-            console.log(error);
-        }
-        return tmp;
-    }
-    AggiungiSwagger(path: string) {
-        const swaggerDocument = this.GetJSONSwagger();
-
-        //this.serverExpressDecorato.use('/' + path, swaggerUI.serve, swaggerUI.setup(JSON.parse(swaggerDocument)));
-    }
     async PrintMenu() {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         //console.log("Menu main, digita il numero della la tua scelta: ");
@@ -235,33 +121,14 @@ export class Main {
     }
 
     StartExpress() {
-        this.AggiungiHTML();
         var httpServer = http.createServer(this.serverExpressDecorato);
         httpServer.listen(this.percorsi.porta);
-        //this.serverExpressDecorato.listen(this.percorsi.porta);
     }
-    AggiungiHTML() {
-        this.serverExpressDecorato.get("/server", function (req, res) {
-            let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-            const text = tmp.GeneraHTML();
-            res.status(200).send(text);
-        });
-    }
-    StartExpressConsole(porta: number, header: string) {
+    StartExpressConsole() {
         console.log('Inizializzazione inizio .....');
-
-        this.Inizializza(header + ":", porta, true, true);
         this.StartExpress();
         this.PrintMenu();
 
-    }
-    GeneraStruttura(path: string) {
-        let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-        var dir = path + '/component-main';
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir);
-        }
-        tmp.GeneraStruttura(dir);
     }
 
     InizializzaInterattivamente() {
@@ -281,7 +148,6 @@ export class Main {
             const vett: string[] = [
                 'express',
                 'superagent',
-                'aggiungi swagger',
                 'express + superagent',
                 'todo'
             ];
@@ -299,16 +165,13 @@ export class Main {
                 if (item.scelta == 0) {
                     this.StartExpress();
                 } else if (item.scelta == 1) {
-                    this.PrintMenu();
-                } else if (item.scelta == 2) {
                     const scelta = chiedi({
                         message: 'Rotta dove renderli visibili: ',
                         type: 'text', name: 'scelta'
                     }).then((ris) => {
-                        this.AggiungiSwagger(ris.scelta);
                         this.StartExpress();
                     })
-                } else if (item.scelta == 3) {
+                } else if (item.scelta == 2) {
                     this.StartExpress();
                     chiedi({
                         message: 'Rotta dove renderli visibili: ',

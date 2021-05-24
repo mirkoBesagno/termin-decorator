@@ -12,7 +12,7 @@ import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 export type TypePosizione = "body" | "query" | 'header';
 
 
-export type TypeDovePossoTrovarlo = TypeInterazone |  "qui" | 'non-qui';
+export type TypeDovePossoTrovarlo = TypeInterazone | "qui" | 'non-qui';
 
 
 export class TerminaleParametro implements IDescrivibile, IParametro {
@@ -47,30 +47,13 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
     PrintParametro() {
         return "tipoParametro:" + this.tipoParametro.toString() + ";" + "nomeParametro:" + this.nomeParametro;
     }
-    SettaSwagger() {
-        const ritorno =
-            `{
-                "name": "${this.nomeParametro}",
-                "in": "${this.posizione}",
-                "required": false,
-                "type": "${this.tipoParametro}",
-                "description": "${this.descrizione}",
-                "summary":"${this.sommario}"
-            }`;
-        try {
-            JSON.parse(ritorno)
-        } catch (error) {
-            console.log(error);
-        }
-        return ritorno;
-    }
 }
 
 export interface IParametro {
     /** nome del parametro, in pratica il nome della variabile o un nome assonante (parlante)*/
-    nomeParametro: string,
+    nomeParametro?: string,
     /** la posizione rispetto alla chiamata, ovvero: "body" | "query" | "header" */
-    posizione: TypePosizione,
+    posizione?: TypePosizione,
     /** fa riferimento al tipo di base, ovvero: "number" | "text" | "date" */
     tipoParametro?: TipoParametro,
     /** descrizione lunga */
@@ -97,12 +80,15 @@ function decoratoreParametroGenerico(parametri: IParametro)/* (nomeParametro: st
         if (parametri.tipoParametro == undefined) parametri.tipoParametro = 'text';
         if (parametri.descrizione == undefined) parametri.descrizione = '';
         if (parametri.sommario == undefined) parametri.sommario = '';
+        if (parametri.nomeParametro == undefined) parametri.nomeParametro = '';
+        if (parametri.posizione == undefined) parametri.posizione = 'query';
 
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
         const paramestro = metodo.CercaParametroSeNoAggiungi(parametri.nomeParametro, parameterIndex,
             parametri.tipoParametro, parametri.posizione);
+
         if (parametri.descrizione != undefined) paramestro.descrizione = parametri.descrizione;
         else paramestro.descrizione = '';
 
