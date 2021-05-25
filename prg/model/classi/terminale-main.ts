@@ -54,7 +54,7 @@ export class Main {
 
     Inizializza(patheader: string, porta: number, rottaBase: boolean, creaFile?: boolean) {
         let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-        if (tmp.length > 0) {
+        if (tmp && 'length' in tmp && tmp.length > 0) {
             this.percorsi.patheader = patheader;
             this.percorsi.porta = porta;
             const pathGlobal = '/' + this.path;

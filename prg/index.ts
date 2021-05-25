@@ -11,31 +11,30 @@ export { mpMet as mpMet };
 export { mpPar as mpPar };
 export { mpClas as mpClas };
 export { ErroreMio as ErroreMio };
-/* 
+export { IRitornoValidatore as IRitornoValidatore };
+
+
+/* @mpClas()
+class ClassDue {
+
+}
+
 @mpClas()
 class ClassUno {
 
 
-    @mpMet({ nomiClasseRiferimento: [{ nome: 'ClassDue' }] })
-    MetodoPrimo(@mpPar({
-        nomeParametro: 'nome', posizione: 'query',
-        Validatore: (item: any) => {
-            let tmp: IRitornoValidatore = { approvato: true, messaggio: '', stato: 300 };
-
-            return tmp;
-        }
-    }) nome: string) {
+    @mpMet({})
+    MetodoPrimo(@mpPar({nomeParametro:'nome'}) nome: string) {
         return 'metodo primo ciao, sei : ' + nome;
     }
 }
 
 
-@mpClas()
-class ClassDue {
-
-}
 
 const main = new Main('app');
 
-main.Inizializza("http://localhost", 3030, true, true);
-main.StartExpressConsole(); */
+main.Inizializza("http://localhost", 3040, true, true);
+main.StartExpressConsole();
+
+*/
+

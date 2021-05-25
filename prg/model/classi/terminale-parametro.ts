@@ -28,14 +28,21 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
 
 
     Validatore?: (parametro: any) => IRitornoValidatore
-    constructor(nomeParametro: string, tipoParametro: TipoParametro, posizione: TypePosizione, indexParameter: number) {
-        this.nomeParametro = nomeParametro;
-        this.tipoParametro = tipoParametro;
-        this.posizione = posizione;
+    constructor(parametri: IParametro, indexParameter: number) {
+
+        if (parametri.tipoParametro == undefined) parametri.tipoParametro = 'text';
+        if (parametri.descrizione == undefined) parametri.descrizione = '';
+        if (parametri.sommario == undefined) parametri.sommario = '';
+        if (parametri.nomeParametro == undefined) parametri.nomeParametro = indexParameter.toString();
+        if (parametri.posizione == undefined) parametri.posizione = 'query';
+
+        this.nomeParametro = parametri.nomeParametro;
+        this.tipoParametro = parametri.tipoParametro;
+        this.posizione = parametri.posizione;
         this.indexParameter = indexParameter;
 
-        this.descrizione = "";
-        this.sommario = "";
+        this.descrizione = parametri.descrizione;
+        this.sommario = parametri.sommario;
     }
 
     PrintMenu() {
@@ -80,14 +87,13 @@ function decoratoreParametroGenerico(parametri: IParametro)/* (nomeParametro: st
         if (parametri.tipoParametro == undefined) parametri.tipoParametro = 'text';
         if (parametri.descrizione == undefined) parametri.descrizione = '';
         if (parametri.sommario == undefined) parametri.sommario = '';
-        if (parametri.nomeParametro == undefined) parametri.nomeParametro = '';
+        if (parametri.nomeParametro == undefined) parametri.nomeParametro = parameterIndex.toString();
         if (parametri.posizione == undefined) parametri.posizione = 'query';
 
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
-        const paramestro = metodo.CercaParametroSeNoAggiungi(parametri.nomeParametro, parameterIndex,
-            parametri.tipoParametro, parametri.posizione);
+        const paramestro = metodo.CercaParametroSeNoAggiungi(parametri, parameterIndex);
 
         if (parametri.descrizione != undefined) paramestro.descrizione = parametri.descrizione;
         else paramestro.descrizione = '';

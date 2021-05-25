@@ -247,7 +247,8 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
     async ChiamataGenerica(req: Request, res: Response) {
         let passato = false;
         try {
-            console.log('Risposta a chiamata : ' + this.percorsi.pathGlobal);
+            console.log('/****************************************************************/');
+            console.log('Inizio a rispondere a chiamata : ' + this.percorsi.pathGlobal);
             const logIn = InizializzaLogbaseIn(req, this.nome.toString());
             let tmp: IReturn = await this.Esegui(req);
             if (this.onParametriNonTrovati) this.onParametriNonTrovati(tmp.nonTrovati);
@@ -276,6 +277,8 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                 res.status(500).send(error);
             //return res;
         }
+        console.log('Fine a rispondere a chiamata : ' + this.percorsi.pathGlobal);
+        console.log('/****************************************************************/');
     }
     async ChiamaLaRotta(headerpath?: string) {
         try {
@@ -428,8 +431,8 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
             throw new Error("Errore :" + error);
         }
     }
-    CercaParametroSeNoAggiungi(nome: string, parameterIndex: number, tipoParametro: TipoParametro, posizione: TypePosizione) {
-        const tmp = new TerminaleParametro(nome, tipoParametro, posizione, parameterIndex);
+    CercaParametroSeNoAggiungi(parametri: IParametro, indexParameter: number) {
+        const tmp = new TerminaleParametro(parametri, indexParameter);
         this.listaParametri.push(tmp);//.lista.push({ propertyKey: propertyKey, Metodo: target });
         return tmp;
     }
@@ -665,8 +668,9 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
                     for (let index = 0; index < metodo.listaParametri.length; index++) {
                         const element = metodo.listaParametri[index];
                         /* configuro i parametri */
-                        const paramestro = metodoTmp.CercaParametroSeNoAggiungi(element.nomeParametro, element.indexParameter,
-                            element.tipoParametro, element.posizione);
+                        const paramestro = metodoTmp.CercaParametroSeNoAggiungi(
+                            <IParametro>{ nomeParametro: element.nomeParametro, tipoParametro: element.tipoParametro, posizione: element.posizione },
+                            element.indexParameter);
 
                         if (element.descrizione != undefined) paramestro.descrizione = element.descrizione;
                         else paramestro.descrizione = '';
