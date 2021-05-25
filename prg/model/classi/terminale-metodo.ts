@@ -801,6 +801,11 @@ export function mpAddHelmet(helmet: any): MethodDecorator {
         SalvaListaClasseMetaData(list);
     }
 }
+/**
+ * 
+ * @param item : string: - deve essere il nome di un metodo segnato come middleware o ombo, - se no deve essere una funzione che implementa la logia di express, {Request, Response, Next}
+ * @returns 
+ */
 export function mpAddMiddle(item: any): MethodDecorator {
     return function (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();

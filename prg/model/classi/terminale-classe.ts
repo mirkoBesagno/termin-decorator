@@ -183,7 +183,8 @@ export function SalvaListaClasseMetaData(tmp: ListaTerminaleClasse) {
  * @returns 
  */
 export function GetListaClasseMetaData() {
-    let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
+    let tmp: ListaTerminaleClasse = Reflect.getMetadata(
+        ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
     if (tmp == undefined) {
         tmp = new ListaTerminaleClasse();
     }
