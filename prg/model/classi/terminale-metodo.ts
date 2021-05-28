@@ -448,8 +448,7 @@ export class TerminaleMetodo implements IPrintabile, IDescrivibile {
                 };
                 try {
                     let parametriTmp = parametri.valoriParametri;
-                    if (this.onPrimaDiEseguireMetodo) parametriTmp = this.onPrimaDiEseguireMetodo(parametri,
-                        this.listaParametri);
+                    if (this.onPrimaDiEseguireMetodo) parametriTmp = this.onPrimaDiEseguireMetodo(parametri, this.listaParametri);
                     const tmpReturn = await this.metodoAvviabile.apply(this, parametriTmp);
                     if (IsJsonString(tmpReturn)) {
                         if ('body' in tmpReturn) { tmp.body = tmpReturn.body; }
@@ -637,7 +636,18 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
         /* inizio a lavorare sul metodo */
         if (metodo != undefined && list != undefined && classe != undefined) {
-            metodo.metodoAvviabile = descriptor.value;//la prendo come riferimento 
+
+           /*  const originalMethod = descriptor.value;
+            //wrapping the original method
+            descriptor.value = function (...args: any[]) {
+                console.log("wrapped function: before invoking " + propertyKey.toString());
+                const result = originalMethod.apply(this, args);
+                console.log("wrapped function: after invoking " + propertyKey.toString());
+                return result;
+            } */
+
+            if (metodo.metodoAvviabile == undefined)
+                metodo.metodoAvviabile = descriptor.value;//la prendo come riferimento 
 
             if (parametri.nomiClasseRiferimento != undefined)
                 metodo.nomiClassiDiRiferimento = parametri.nomiClasseRiferimento;
@@ -714,6 +724,7 @@ function decoratoreMetodo(parametri: IMetodo): MethodDecorator {
         else {
             console.log("Errore mio!");
         }
+        return descriptor;
     }
 }
 

@@ -1,10 +1,12 @@
+
+import "reflect-metadata";
+
 import { mpMain, Main } from "./model/classi/terminale-main";
 import { mpClas } from "./model/classi/terminale-classe";
 import { IReturn, IRitornoValidatore, mpAddMiddle, mpMet } from "./model/classi/terminale-metodo";
 import { mpPar, IParametro } from "./model/classi/terminale-parametro";
 import { TipoParametro, ErroreMio } from "./model/tools";
 
-import "reflect-metadata";
 
 export { Main as Main };
 export { mpMet as mpMet };
@@ -14,17 +16,45 @@ export { ErroreMio as ErroreMio };
 export { IRitornoValidatore as IRitornoValidatore };
 
 
-/* @mpClas()
-class ClassDue {
 
-}
+/* 
+
 
 @mpClas()
-class ClassUno {
+export class ClassDue {
+    constructor() {
+        console.log("Ciao");
+    }
+    static MetodoSaluta() {
+        return 'Ciao';
+    }
+
+    MetodoSalutaDue() {
+        return 'Ciao';
+    }
 
 
     @mpMet({})
-    MetodoPrimo(@mpPar({nomeParametro:'nome'}) nome: string) {
+    MetodoPrimo(nome: string) {
+        const t = ClassDue.MetodoSaluta();
+        try {
+            this.MetodoSalutaDue();
+        } catch (error) {
+            console.log(error);
+        }
+        if (nome && nome != '') {
+            nome = t;
+        }
+        return 'metodo primo ciao, sei : ' + t + ' : ' + nome;
+    }
+}
+
+@mpClas()
+export class ClassUno {
+
+
+    @mpMet({})
+    MetodoPrimo(@mpPar({ nomeParametro: 'nome' }) nome: string) {
         return 'metodo primo ciao, sei : ' + nome;
     }
 }
@@ -34,7 +64,7 @@ class ClassUno {
 const main = new Main('app');
 
 main.Inizializza("http://localhost", 3040, true, true);
-main.StartExpressConsole();
+main.StartExpress();//.StartExpressConsole();
 
-*/
+ */
 

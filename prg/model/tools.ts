@@ -96,8 +96,8 @@ export function IsJsonString(str: string): boolean {
     }
 }
 export class ErroreMio extends Error {
-    codiceErrore: number = 500;
-    percorsoErrore;
+    codiceErrore = 500;
+    percorsoErrore = '';
     constructor(messaggio: string, codiceErrore: number, nomeErrore: string, percorsoErrore:string) {
         super(messaggio);
         this.codiceErrore = codiceErrore;
