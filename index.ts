@@ -98,7 +98,7 @@ try {
     const classe: ClassUno = new ClassUno();
     const main = new Main('app');
 
-    main.Inizializza("http://localhost", 3030, true, true);
+    main.Inizializza("localhost", 3030, true, true);
     main.StartExpress();
     main.PrintMenu();
     console.log("Finito!!!");
