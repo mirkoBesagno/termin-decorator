@@ -1,17 +1,17 @@
-import { IPrintabile, targetTerminale } from "../tools";
+import { IPrintabile, IRaccoltaPercorsi, targetTerminale } from "../tools";
 
-import superagent from "superagent";
 import express, { Router } from "express";
-import chiedi from "prompts";
+
 import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
 import { ListaTerminaleMetodo } from "../liste/lista-terminale-metodo";
-import { TerminaleMetodo } from "./terminale-metodo";
-import { IRaccoltaPercorsi } from "./terminale-main";
 import fs from 'fs';
 
 import http from "http";
+import { TerminaleMetodo } from "./terminale-metodo";
 
-export class TerminaleClasse implements IPrintabile {
+import chiedi from "prompts";
+
+export class TerminaleClasse {
 
     static nomeMetadataKeyTarget = "ClasseTerminaleTarget";
 
@@ -51,18 +51,37 @@ export class TerminaleClasse implements IPrintabile {
         this.percorsi.pathGlobal = pathGlobal;
     }
 
-    async PrintMenu() {
-        const tab = '\t\t';
-        console.log(tab + 'TerminaleClasse' + '->' + 'PrintMenu');
-        console.log(tab + this.nome + ' | ' + this.id + ' | ' + '/' + this.percorsi.pathGlobal + '/' + this.path + ' ;');
+    SettaPathRoot_e_Global(item: string, percorsi: IRaccoltaPercorsi, app: any) {
 
+        if (percorsi.patheader == undefined) this.percorsi.patheader = "localhost";
+        else this.percorsi.patheader = percorsi.patheader;
+
+        if (percorsi.porta == undefined) this.percorsi.porta = 3000;
+        else this.percorsi.porta = percorsi.porta;
+
+        const pathGlobal = percorsi.pathGlobal + '/' + this.path;
+        this.percorsi.pathGlobal = pathGlobal;
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
-            element.PrintCredenziali(this.percorsi.pathGlobal + '/' + this.path);
+            if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
+                //element.ConfiguraRotta(this.rotte, this.percorsi);
+                element.ConfiguraRottaApplicazione(app, this.percorsi);
+            }
+            //element.listaRotteGeneraChiavi=this.listaMetodiGeneraKey;
         }
-        const scelta = await chiedi({ message: 'Premi invio per continuare', type: 'number', name: 'scelta' });
-
     }
+
+    CercaMetodoSeNoAggiungiMetodo(nome: string) {
+        let terminale = this.listaMetodi.CercaConNome(nome)
+
+        if (terminale == undefined)/* se non c'è */ {
+            terminale = new TerminaleMetodo(nome, nome, this.nome); // creo la funzione
+            this.listaMetodi.AggiungiElemento(terminale);
+        }
+        return terminale;
+    }
+
+    /******************************************************************* */
 
     async PrintMenuClasse() {
         console.log('Classe :' + this.nome);
@@ -88,51 +107,13 @@ export class TerminaleClasse implements IPrintabile {
                 } else {
                     console.log(risposta)
                 }
-                await this.PrintMenuClasse();
             } catch (error) {
-                await this.PrintMenuClasse();
+                console.log(error);
             }
+            await this.PrintMenuClasse();
         }
     }
 
-
-    PrintCredenziali() {
-        const tmp = "nome:" + this.nome + ":;:" +
-            "id:" + this.id + ":;:" +
-            "listaMetodi.length:" + this.listaMetodi.length + ":;:";
-        //console.log(tmp);
-    }
-
-    SettaPathRoot_e_Global(item: string, percorsi: IRaccoltaPercorsi, app: any) {
-
-        if (percorsi.patheader == undefined) this.percorsi.patheader = "http://localhost:";
-        else this.percorsi.patheader = percorsi.patheader;
-
-        if (percorsi.porta == undefined) this.percorsi.porta = 3000;
-        else this.percorsi.porta = percorsi.porta;
-
-        const pathGlobal = percorsi.pathGlobal + '/' + this.path;
-        this.percorsi.pathGlobal = pathGlobal;
-        for (let index = 0; index < this.listaMetodi.length; index++) {
-            const element = this.listaMetodi[index];
-            if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
-                //element.ConfiguraRotta(this.rotte, this.percorsi);
-                element.ConfiguraRottaApplicazione(app, this.percorsi);
-            }
-            //element.listaRotteGeneraChiavi=this.listaMetodiGeneraKey;
-        }
-    }
-
-
-    CercaMetodoSeNoAggiungiMetodo(nome: string) {
-        let terminale = this.listaMetodi.CercaConNome(nome)
-
-        if (terminale == undefined)/* se non c'è */ {
-            terminale = new TerminaleMetodo(nome, nome, this.nome); // creo la funzione
-            this.listaMetodi.AggiungiElemento(terminale);
-        }
-        return terminale;
-    }
 }
 
 /**
@@ -183,8 +164,7 @@ export function SalvaListaClasseMetaData(tmp: ListaTerminaleClasse) {
  * @returns 
  */
 export function GetListaClasseMetaData() {
-    let tmp: ListaTerminaleClasse = Reflect.getMetadata(
-        ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
+    let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
     if (tmp == undefined) {
         tmp = new ListaTerminaleClasse();
     }

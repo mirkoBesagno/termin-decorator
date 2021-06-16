@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
-    
-    "target": "es6",
+    "target": "ES6",
+    "lib": [
+      "es5",
+      "es6"
+    ],
     "module": "commonjs",
     "sourceMap": true,
     "outDir": "out",
@@ -9,8 +12,6 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
-    
   }
 }
