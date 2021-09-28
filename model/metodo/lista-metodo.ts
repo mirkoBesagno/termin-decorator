@@ -1,6 +1,5 @@
-import { Router } from "express";
-import { TerminaleMetodo } from "../classi/terminale-metodo";
-import { targetTerminale } from "../tools";
+import { IRaccoltaPercorsi, targetTerminale } from "../utility";
+import { TerminaleMetodo } from "./metadata-metodo";
 
 export class ListaTerminaleMetodo extends Array<TerminaleMetodo> {
     static nomeMetadataKeyTarget = "ListaTerminaleMetodo";
@@ -25,6 +24,16 @@ export class ListaTerminaleMetodo extends Array<TerminaleMetodo> {
         }
         this.push(item);
         return item;
+    }
+    ConfiguraListaRotteApplicazione(app: any,  percorsi: IRaccoltaPercorsi) {
+        for (let index = 0; index < this.length; index++) {
+            const element = this[index];
+            if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
+                //element.ConfiguraRotta(this.rotte, this.percorsi);
+                element.ConfiguraRottaApplicazione(app, percorsi);
+            }
+            //element.listaRotteGeneraChiavi=this.listaMetodiGeneraKey;
+        }
     }
 }
 
@@ -55,26 +64,4 @@ export class ListaTerminaleMiddleware extends Array<TerminaleMetodo> {
         this.push(item);
         return item;
     }
-}
-
-export function GetListaMiddlewareMetaData() {
-    /* let terminale = TerminaleMetodo.listaMiddleware.CercaConNomeRev(nome)
-
-    if (terminale == undefined) {
-        terminale = new TerminaleMetodo(nome, "", nome); 
-        TerminaleMetodo.listaMiddleware.AggiungiElemento(terminale);
-    }
-    return terminale; */
-
-
-    let tmp: ListaTerminaleMiddleware = Reflect.getMetadata(ListaTerminaleMiddleware.nomeMetadataKeyTarget, targetTerminale);
-    if (tmp == undefined) {
-        tmp = new ListaTerminaleMiddleware();
-    }
-    return tmp;
-}
-
-
-export function SalvaListaMiddlewareMetaData(tmp: ListaTerminaleMiddleware) {
-    Reflect.defineMetadata(ListaTerminaleMiddleware.nomeMetadataKeyTarget, tmp, targetTerminale);
 }

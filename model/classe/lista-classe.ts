@@ -1,6 +1,8 @@
-import { SalvaListaClasseMetaData, TerminaleClasse } from "../classi/terminale-classe";
+
 
 import chiedi from "prompts";
+import { TerminaleClasse } from "./metadata-classe";
+import { SalvaListaClasseMetaData } from "./utility-classe";
 
 export class ListaTerminaleClasse extends Array<TerminaleClasse> {
     static nomeMetadataKeyTarget = "ListaTerminaleClasse";
@@ -9,15 +11,20 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
         super();
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     CercaConNome(nome: string | Symbol): TerminaleClasse | undefined {
-        for (let index = 0; index < this.length; index++) {
-            const element = this[index];
-            if (element.nome == nome) return element;
+        try {
+            for (let index = 0; index < this.length; index++) {
+                const element = this[index];
+                if (element.nome == nome) return element;
+            }
+            return undefined;
+        } catch (error: any) {
+            console.log("Errore.");
+            throw error;
         }
-        return undefined;
-        //throw new Error("Errore mio !");
-
     }
+    // eslint-disable-next-line @typescript-eslint/ban-types
     CercaConPath(path: string | Symbol): TerminaleClasse | undefined {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
@@ -37,9 +44,10 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
         }
         return classe;
     }
-    CercaMetodo() {
+    /* CercaMetodo() {
 
-    }
+    } */
+
     AggiungiElemento(item: TerminaleClasse) {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
@@ -67,7 +75,7 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
 
     }
     async PrintListaClassi(): Promise<string[]> {
-        let ritorno: string[] = [];
+        const ritorno: string[] = [];
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
             const tmp = index + 1;

@@ -1,17 +1,15 @@
-import { IPrintabile, IRaccoltaPercorsi, targetTerminale } from "../tools";
-
-import express, { Router } from "express";
-
-import { ListaTerminaleClasse } from "../liste/lista-terminale-classe";
-import { ListaTerminaleMetodo } from "../liste/lista-terminale-metodo";
-import fs from 'fs';
-
-import http from "http";
-import { TerminaleMetodo } from "./terminale-metodo";
+import { Request, Response, Router } from "express";
+import { ListaTerminaleMetodo } from "../metodo/lista-metodo";
+import { TerminaleMetodo } from "../metodo/metadata-metodo";
+import { IGestorePercorsiPath, IHtml, IRaccoltaPercorsi } from "../utility";
 
 import chiedi from "prompts";
 
-export class TerminaleClasse {
+export class TerminaleClasse implements IGestorePercorsiPath {
+
+    listaKnex: any[] = [];
+
+    classeSwagger?= '';
 
     static nomeMetadataKeyTarget = "ClasseTerminaleTarget";
 
@@ -32,6 +30,8 @@ export class TerminaleClasse {
 
     percorsi: IRaccoltaPercorsi;
 
+    html: IHtml[] = [];
+
     constructor(nome: string, path?: string, headerPath?: string, port?: number) {
         this.id = Math.random().toString();
         this.rotte = Router();
@@ -49,10 +49,15 @@ export class TerminaleClasse {
 
         const pathGlobal = '/' + this.path;
         this.percorsi.pathGlobal = pathGlobal;
+        this.classeSwagger = '';
     }
 
     SettaPathRoot_e_Global(item: string, percorsi: IRaccoltaPercorsi, app: any) {
-
+        const pathGlobal = this.SettaPercorsi(percorsi);
+        this.ConfiguraListaRotteHTML(app, pathGlobal);
+        this.listaMetodi.ConfiguraListaRotteApplicazione(app, this.percorsi);
+    }
+    SettaPercorsi(percorsi: IRaccoltaPercorsi): string {
         if (percorsi.patheader == undefined) this.percorsi.patheader = "localhost";
         else this.percorsi.patheader = percorsi.patheader;
 
@@ -61,14 +66,7 @@ export class TerminaleClasse {
 
         const pathGlobal = percorsi.pathGlobal + '/' + this.path;
         this.percorsi.pathGlobal = pathGlobal;
-        for (let index = 0; index < this.listaMetodi.length; index++) {
-            const element = this.listaMetodi[index];
-            if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
-                //element.ConfiguraRotta(this.rotte, this.percorsi);
-                element.ConfiguraRottaApplicazione(app, this.percorsi);
-            }
-            //element.listaRotteGeneraChiavi=this.listaMetodiGeneraKey;
-        }
+        return pathGlobal;
     }
 
     CercaMetodoSeNoAggiungiMetodo(nome: string) {
@@ -85,7 +83,6 @@ export class TerminaleClasse {
 
     async PrintMenuClasse() {
         console.log('Classe :' + this.nome);
-        let index = 0;
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
             const tmp = index + 1;
@@ -114,61 +111,43 @@ export class TerminaleClasse {
         }
     }
 
-}
 
-/**
- * inizializza la classe, crea un rotta in express mediante il percorso specificato. 
- * @param percorso : di default il nome della classe
- */
-function decoratoreClasse(percorso?: string): any {
-    return (ctr: Function) => {
-        const tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-        const classe = CheckClasseMetaData(ctr.name);
-        if (percorso) classe.SetPath = percorso;
-        else classe.SetPath = ctr.name;
-        SalvaListaClasseMetaData(tmp);
+    SettaSwagger() {
+        /* 
+        "paths": {  } 
+        */
+        let ritorno = '';
+        for (let index = 0; index < this.listaMetodi.length; index++) {
+            const element = this.listaMetodi[index];
+            const tmp = element.SettaSwagger();
+            if (index > 0 && tmp != undefined)
+                ritorno = ritorno + ', ';
+            if (tmp != undefined)
+                ritorno = ritorno + tmp;
+        }
+        return ritorno;
     }
-}
 
-/**
- * 
- * @param nome 
- * @returns 
- */
-export function CheckClasseMetaData(nome: string) {
-    let listClasse: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale); // vado a prendere la struttura legata alle funzioni ovvero le classi
-    if (listClasse == undefined)/* se non c'è la creo*/ {
-        listClasse = new ListaTerminaleClasse();
-        Reflect.defineMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, listClasse, targetTerminale);
+    ConfiguraRotteHtml(app: any, percorsoTmp: string, contenuto: string) {
+        app.get(percorsoTmp,
+            //this.cors,
+            //this.helmet,
+            async (req: Request, res: Response) => {
+                if (this.html)
+                    res.send(contenuto);
+                else
+                    res.sendStatus(404);
+            });
     }
-    /* poi la cerco */
-    let classe = listClasse.CercaConNome(nome);
-    if (classe == undefined) {
-        classe = new TerminaleClasse(nome); //se il metodo non c'è lo creo
-        listClasse.AggiungiElemento(classe);
-        Reflect.defineMetadata(TerminaleClasse.nomeMetadataKeyTarget, classe, targetTerminale); //e lo vado a salvare nel meta data
+    ConfiguraListaRotteHTML(app: any, pathGlobal: string) {
+        for (let index = 0; index < this.html.length; index++) {
+            const element = this.html[index];
+            //element.ConfiguraRotteHtml(app, this.percorsi.pathGlobal,)
+            if (element.percorsoIndipendente)
+                this.ConfiguraRotteHtml(app, '/' + element.path, element.contenuto);
+            else
+                this.ConfiguraRotteHtml(app, pathGlobal + '/' + element.path, element.contenuto);
+        }
     }
-    return classe;
-}
 
-/**
- * 
- * @param tmp 
- */
-export function SalvaListaClasseMetaData(tmp: ListaTerminaleClasse) {
-    Reflect.defineMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, tmp, targetTerminale);
 }
-
-/**
- * 
- * @returns 
- */
-export function GetListaClasseMetaData() {
-    let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-    if (tmp == undefined) {
-        tmp = new ListaTerminaleClasse();
-    }
-    return tmp;
-}
-
-export { decoratoreClasse as mpClas };
