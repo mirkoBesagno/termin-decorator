@@ -1,5 +1,3 @@
-import { Request } from "express";
-import { TypeInterazone, TypePosizione } from "./metodo/utility-metodo";
 
 export type tipo = "number" | "text" | "date" | "array" | "object" | "boolean" | "any";
 
@@ -17,7 +15,11 @@ export interface IGestorePercorsiPath {
 export interface IRaccoltaPercorsi {
     pathGlobal: string, patheader: string, porta: number
 }
+export interface IContieneRaccoltaPercorsi {
+    percorsi: IRaccoltaPercorsi;
+}
 
+export type TypeInterazone = "rotta" | "middleware" | 'ambo';
 
 export interface IHtml {
     path: string,
@@ -92,8 +94,8 @@ export interface IRitornoValidatore {
 }
 
 export interface IDescrivibile {
-    descrizione: string;
-    sommario: string;
+    descrizione?: string;
+    sommario?: string;
 }
 
 export interface ILogbase {
@@ -110,3 +112,12 @@ export interface ILogbase {
     nomeMetodo?: string
 }
 
+export type TypePosizione = "body" | "query" | 'header';
+
+export interface IParametriEstratti {
+    valoriParametri: any[], nontrovato: INonTrovato[], errori: IRitornoValidatore[]
+}
+
+export interface IParametriEstratti {
+    valoriParametri: any[], nontrovato: INonTrovato[], errori: IRitornoValidatore[]
+}

@@ -1,5 +1,6 @@
 import { Request } from "express";
-import { ILogbase } from "./utility";
+import { ListaTerminaleClasse } from "./classe/lista-classe";
+import { ILogbase, targetTerminale } from "./utility";
 
 export function InizializzaLogbaseIn(req: Request, nomeMetodo?: string): ILogbase {
 
@@ -32,5 +33,24 @@ export function InizializzaLogbaseIn(req: Request, nomeMetodo?: string): ILogbas
         nomeMetodo: nomeMetodo
     };
 
+    return tmp;
+}
+
+/**
+ * 
+ * @param tmp 
+ */
+ export function SalvaListaClasseMetaData(tmp: ListaTerminaleClasse) {
+    Reflect.defineMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, tmp, targetTerminale);
+}
+/**
+ * 
+ * @returns 
+ */
+export function GetListaClasseMetaData() {
+    let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
+    if (tmp == undefined) {
+        tmp = new ListaTerminaleClasse();
+    }
     return tmp;
 }

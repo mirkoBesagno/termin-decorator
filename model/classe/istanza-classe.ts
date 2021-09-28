@@ -1,8 +1,9 @@
 import { ListaTerminaleClasse } from "./lista-classe";
-import { CheckClasseMetaData, GetListaClasseMetaData, IClasse, SalvaListaClasseMetaData } from "./utility-classe";
+import { CheckClasseMetaData, IClasse } from "./utility-classe";
 
 import fs from 'fs';
 import { IstanzaMetodo } from "../metodo/istanza-metodo";
+import { GetListaClasseMetaData, SalvaListaClasseMetaData } from "../utility-function";
 
 export class IstanzaClasse {
     constructor(parametri: IClasse, nomeClasse: string, listaMetodi?: IstanzaMetodo[]) {
@@ -28,10 +29,8 @@ export class IstanzaClasse {
                         path: element.path,
                         percorsoIndipendente: element.percorsoIndipendente
                     });
-                    // metodo.html?.contenuto = element.html;
                 } else if (element.html == undefined && element.htmlPath != undefined
                     && classe.html.find(x => { if (x.path == element.path) return true; else return false; }) == undefined) {
-
                     try {
                         classe.html.push({
                             contenuto: fs.readFileSync(element.htmlPath).toString(),
@@ -45,7 +44,6 @@ export class IstanzaClasse {
                             percorsoIndipendente: element.percorsoIndipendente
                         });
                     }
-                    // metodo.html?.contenuto = fs.readFileSync(element.htmlPath).toString();
                 }
             }
         }
@@ -70,9 +68,9 @@ export class IstanzaClasse {
         if (parametri.cacheOptionMemory) {
             classe.listaMetodi.forEach(element => {
                 if (element.cacheOptionMemory == undefined) {
-                    element.cacheOptionMemory = parametri.cacheOptionMemory;
+                    element.cacheOptionMemory = parametri.cacheOptionMemory ?? { durationSecondi: 1 };
                 }
-            });
+            })
         }
 
         if (parametri.classeSwagger && parametri.classeSwagger != '') {
@@ -86,7 +84,7 @@ export class IstanzaClasse {
                 }
             });
         }
-        /* classe. */
+
         SalvaListaClasseMetaData(tmp);
     }
 }

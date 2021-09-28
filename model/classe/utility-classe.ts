@@ -21,26 +21,6 @@ export interface IClasse {
     }[]; */
 }
 
-
-/**
- * 
- * @param tmp 
- */
-export function SalvaListaClasseMetaData(tmp: ListaTerminaleClasse) {
-    Reflect.defineMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, tmp, targetTerminale);
-}
-/**
- * 
- * @returns 
- */
-export function GetListaClasseMetaData() {
-    let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-    if (tmp == undefined) {
-        tmp = new ListaTerminaleClasse();
-    }
-    return tmp;
-}
-
 /**
  * 
  * @param nome 

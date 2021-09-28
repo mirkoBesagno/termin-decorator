@@ -1,18 +1,19 @@
-import { mpMain, Main } from "./model/classi/terminale-main";
-import { mpClas } from "./model/classi/terminale-classe";
-import { mpAddMiddle, mpMet } from "./model/classi/terminale-metodo";
-import { mpPar } from "./model/classi/terminale-parametro";
-/* import { mpLog } from "./model/classi/terminale-log"; */
-import { tipo, ErroreMio, IRitornoValidatore, GestioneErrore, IParametriEstratti, ILogbase } from "./model/tools";
-import { ListaTerminaleParametro } from './model/liste/lista-terminale-parametro';
 
 import "reflect-metadata";
+
+import { Main } from "./model/main/metadata-main";
+import { mpClas } from "./model/classe/decoratore-classe";
+import { mpMet } from "./model/metodo/decoratore-metodo";
+import { mpPar } from "./model/parametro/decoratore-parametro";
+import { IRitornoValidatore, ILogbase, IParametriEstratti } from "./model/utility";
+import { ListaTerminaleParametro } from './model/parametro/lista-parametro';
+import { ErroreMio, GestioneErrore } from "./model/errore";
+
 
 export { Main as Main };
 export { mpMet as mpMet };
 export { mpPar as mpPar };
 export { mpClas as mpClas };
-/* export { mpLog as mpLog } */
 
 export { ErroreMio as ErroreMio };
 export { IRitornoValidatore as IRitornoValidatore };

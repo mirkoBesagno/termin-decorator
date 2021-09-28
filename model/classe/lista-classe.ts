@@ -1,8 +1,8 @@
 
 
 import chiedi from "prompts";
+import { SalvaListaClasseMetaData } from "../utility-function";
 import { TerminaleClasse } from "./metadata-classe";
-import { SalvaListaClasseMetaData } from "./utility-classe";
 
 export class ListaTerminaleClasse extends Array<TerminaleClasse> {
     static nomeMetadataKeyTarget = "ListaTerminaleClasse";
@@ -25,7 +25,7 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
         }
     }
     // eslint-disable-next-line @typescript-eslint/ban-types
-    CercaConPath(path: string | Symbol): TerminaleClasse | undefined {
+    private CercaConPath(path: string | Symbol): TerminaleClasse | undefined {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
             if (element.GetPath == path) return element;

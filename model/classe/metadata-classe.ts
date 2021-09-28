@@ -7,18 +7,18 @@ import chiedi from "prompts";
 
 export class TerminaleClasse implements IGestorePercorsiPath {
 
-    listaKnex: any[] = [];
+     listaKnex: any[] = [];
 
     classeSwagger?= '';
 
     static nomeMetadataKeyTarget = "ClasseTerminaleTarget";
 
     listaMetodi: ListaTerminaleMetodo;
-    id: string;
+     id: string;
     nome: string;
-    rotte: Router;
+     rotte: Router;
 
-    private path: string;
+     path: string;
     public get GetPath(): string {
         return this.path;
     }
@@ -57,7 +57,7 @@ export class TerminaleClasse implements IGestorePercorsiPath {
         this.ConfiguraListaRotteHTML(app, pathGlobal);
         this.listaMetodi.ConfiguraListaRotteApplicazione(app, this.percorsi);
     }
-    SettaPercorsi(percorsi: IRaccoltaPercorsi): string {
+    private SettaPercorsi(percorsi: IRaccoltaPercorsi): string {
         if (percorsi.patheader == undefined) this.percorsi.patheader = "localhost";
         else this.percorsi.patheader = percorsi.patheader;
 
@@ -86,7 +86,7 @@ export class TerminaleClasse implements IGestorePercorsiPath {
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
             const tmp = index + 1;
-            if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
+            if (element.interazione == 'rotta' || element.interazione == 'ambo') {
                 console.log(tmp + ': ' + element.PrintStamp());
             }
         }
@@ -128,7 +128,7 @@ export class TerminaleClasse implements IGestorePercorsiPath {
         return ritorno;
     }
 
-    ConfiguraRotteHtml(app: any, percorsoTmp: string, contenuto: string) {
+    private ConfiguraRotteHtml(app: any, percorsoTmp: string, contenuto: string) {
         app.get(percorsoTmp,
             //this.cors,
             //this.helmet,
@@ -139,7 +139,7 @@ export class TerminaleClasse implements IGestorePercorsiPath {
                     res.sendStatus(404);
             });
     }
-    ConfiguraListaRotteHTML(app: any, pathGlobal: string) {
+    private ConfiguraListaRotteHTML(app: any, pathGlobal: string) {
         for (let index = 0; index < this.html.length; index++) {
             const element = this.html[index];
             //element.ConfiguraRotteHtml(app, this.percorsi.pathGlobal,)

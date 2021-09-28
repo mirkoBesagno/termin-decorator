@@ -1,17 +1,15 @@
-import { Response, Request } from "express";
-import { IHtml, ILogbase, IReturn, IRitornoValidatore, tipo } from "../utility";
+import { Request } from "express";
+import { IContieneRaccoltaPercorsi, IDescrivibile, IHtml, IReturn, IRitornoValidatore, tipo, TypeInterazone, TypePosizione } from "../utility";
 
 import { IParametriEstratti } from "../parametro/utility-parametro";
 import { ListaTerminaleParametro } from "../parametro/lista-parametro";
 
 export type TypeMetod = "get" | "put" | "post" | "patch" | "purge" | "delete";
 
-export type TypeInterazone = "rotta" | "middleware" | 'ambo';
 
-export type TypePosizione = "body" | "query" | 'header';
 
-import slowDown, { Options as OptSlowDows } from "express-slow-down";
-import rateLimit, { Options as OptRateLimit } from "express-rate-limit";
+import { Options as OptSlowDows } from "express-slow-down";
+import { Options as OptRateLimit } from "express-rate-limit";
 import { Options as OptionsCache } from "express-redis-cache";
 
 export class SanificatoreCampo {
@@ -50,10 +48,10 @@ export class RispostaControllo {
 
  * Validatore?: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => IRitornoValidatore;
  */
-export interface IMetodo extends IMetodoParametri, IMetodoEventi, IMetodoLimitazioni, IMetodoVettori {
+export interface IMetodo extends IMetodoParametri, IMetodoEventi, IMetodoLimitazioni, IMetodoVettori, IContieneRaccoltaPercorsi {
 
 }
-export interface IMetodoParametri {
+export interface IMetodoParametri extends IDescrivibile {
 
     //schemaSwagger?: any;
     /**Specifica se il percorso dato deve essere concatenato al percorso della classe o se è da prendere singolarmente di default è falso e quindi il percorso andra a sommarsi al percorso della classe */
@@ -120,6 +118,47 @@ export interface IMetodoLimitazioni {
     cacheOptionRedis?: OptionsCache;
     cacheOptionMemory?: { durationSecondi: number };
 }
+export function instanceOfIMetodoLimitazioni(object: any): object is IMetodoLimitazioni {
+
+    return ('slow_down' in object &&
+        'rate_limit' in object &&
+        'cors' in object &&
+        'helmet' in object &&
+        'middleware' in object &&
+        'cacheOptionRedis' in object &&
+        'cacheOptionMemory' in object);
+}
+export function instanceOfIMetodoEventi(object: any): object is IMetodoEventi {
+    return ('onChiamataInErrore' in object &&
+        'onPrimaDiEseguireMetodo' in object &&
+        'onChiamataCompletata' in object &&
+        'onLog' in object &&
+        'Validatore' in object &&
+        'Istanziatore' in object &&
+        'onRispostaControllatePradefinita' in object &&
+        'onPrimaDiTerminareLaChiamata' in object &&
+        'onDopoAverTerminatoLaFunzione' in object &&
+        'onPrimaDiEseguire' in object);
+}
+export function instanceOfIMetodoVettori(object: any): object is IMetodoVettori {
+    return ('ListaSanificatori' in object &&
+        'RisposteDiControllo' in object &&
+        'swaggerClassi' in object &&
+        'nomiClasseRiferimento' in object &&
+        'listaTest' in object &&
+        'listaHtml' in object);
+}
+export function instanceOfIMetodoParametri(object: any): object is IMetodoParametri {
+    return ('percorsoIndipendente' in object &&
+        'tipo' in object &&
+        'path' in object &&
+        'interazione' in object &&
+        'descrizione' in object &&
+        'sommario' in object);
+}
+export function instanceOfIMetodo(object: any): object is IMetodo {
+    return 'member' in object;
+}
 
 
 export class Risposta {
@@ -148,4 +187,3 @@ export interface IClasseRiferimento {
     nome: string,
     listaMiddleware?: any[]
 }
-

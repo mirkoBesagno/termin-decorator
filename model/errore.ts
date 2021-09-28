@@ -17,8 +17,8 @@ export interface IErroreMio {
 export class ErroreMio extends Error {
     codiceErrore: number;
     percorsoErrore?: string;
-    nomeClasse?: string;
-    nomeFunzione?: string;
+    private nomeClasse?: string;
+    private nomeFunzione?: string;
     constructor(item: IErroreMio) {
         super(item.messaggio);
         this.codiceErrore = item.codiceErrore;
@@ -34,4 +34,30 @@ export class ErroreMio extends Error {
             this.percorsoErrore = this.percorsoErrore + '_FUNZIONE_->' + this.nomeFunzione
         }
     }
+}
+
+
+export interface IGestioneErrore {
+    error: Error,
+    nomeClasse?: string,
+    nomeFunzione?: string
+}
+
+
+export function GestioneErrore(item: IGestioneErrore): ErroreMio {
+    let errore: ErroreMio;
+    const messaggio = '_CLASSE_->' + item.nomeClasse ?? '' + '_FUNZIONE_->' + item.nomeFunzione;
+    if (item.error instanceof ErroreMio) {
+        const tmp: ErroreMio = <ErroreMio>item.error;
+        tmp.percorsoErrore = messaggio + '->' + tmp.percorsoErrore;
+        errore = tmp;
+    }
+    else {
+        errore = new ErroreMio({
+            codiceErrore: 499,
+            messaggio: '' + item.error,
+            percorsoErrore: messaggio
+        });
+    }
+    return errore;
 }

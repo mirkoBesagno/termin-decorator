@@ -11,3 +11,5 @@ function decoratoreClasse(parametri: IClasse): any {
         new IstanzaClasse(parametri, ctr.name);
     }
 }
+
+export { decoratoreClasse as mpClas };

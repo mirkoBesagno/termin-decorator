@@ -1,6 +1,6 @@
 import { ListaTerminaleClasse } from "../classe/lista-classe";
-import { GetListaClasseMetaData, SalvaListaClasseMetaData } from "../classe/utility-classe";
 import { IParametro } from "../utility";
+import { GetListaClasseMetaData, SalvaListaClasseMetaData } from "../utility-function";
 import { TerminaleParametro } from "./metadata-parametro";
 
 export class IstanzaParametro {

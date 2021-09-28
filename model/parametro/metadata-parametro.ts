@@ -1,5 +1,4 @@
-import { TypePosizione } from "../metodo/utility-metodo";
-import { IDescrivibile, IParametro, IRitornoValidatore, tipo, TypeDovePossoTrovarlo } from "../utility";
+import { IDescrivibile, IParametro, IRitornoValidatore, tipo, TypeDovePossoTrovarlo, TypePosizione } from "../utility";
 
 export class TerminaleParametro implements IDescrivibile, IParametro {
     schemaSwagger?: {
@@ -37,9 +36,6 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
         this.obbligatorio = true;
     }
 
-    /******************************* */
-
-
     PrintParametro() {
         return "- " + this.tipo.toString() + " : " + this.nome + ' |';
     }
@@ -54,7 +50,7 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
     /*  */
 
 
-    SettaSwagger() {
+    private SettaSwagger() {
         const ritorno =
             `{
                 "name": "${this.nome}",

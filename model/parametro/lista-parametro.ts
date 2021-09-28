@@ -1,13 +1,12 @@
 
 
 import { Request } from "express";
-
-import chiedi from "prompts";
-import { ErroreMio } from "../errore-mio";
-import { TypeInterazone } from "../metodo/utility-metodo";
+import { ErroreMio } from "../errore";
+import { TypeInterazone } from "../utility";
 import { TerminaleParametro } from "./metadata-parametro";
 import { IParametri, IParametriEstratti } from "./utility-parametro";
 
+import chiedi from "prompts";
 
 export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
 
@@ -87,7 +86,7 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
         return ritorno;
     }
 
-    GetAutenticatore(): TerminaleParametro | undefined {
+    private GetAutenticatore(): TerminaleParametro | undefined {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
             if (element.autenticatore) {

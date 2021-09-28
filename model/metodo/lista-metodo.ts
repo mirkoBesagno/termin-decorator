@@ -1,4 +1,4 @@
-import { IRaccoltaPercorsi, targetTerminale } from "../utility";
+import { IRaccoltaPercorsi } from "../utility";
 import { TerminaleMetodo } from "./metadata-metodo";
 
 export class ListaTerminaleMetodo extends Array<TerminaleMetodo> {
@@ -28,7 +28,7 @@ export class ListaTerminaleMetodo extends Array<TerminaleMetodo> {
     ConfiguraListaRotteApplicazione(app: any,  percorsi: IRaccoltaPercorsi) {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
-            if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
+            if (element.interazione == 'rotta' || element.interazione == 'ambo') {
                 //element.ConfiguraRotta(this.rotte, this.percorsi);
                 element.ConfiguraRottaApplicazione(app, percorsi);
             }
@@ -53,7 +53,7 @@ export class ListaTerminaleMiddleware extends Array<TerminaleMetodo> {
         return this.AggiungiElemento(new TerminaleMetodo(nome, '', ''))
 
     }
-    AggiungiElemento(item: TerminaleMetodo) {
+    private AggiungiElemento(item: TerminaleMetodo) {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
             if (element.nome == item.nome && element.classePath == item.classePath) {

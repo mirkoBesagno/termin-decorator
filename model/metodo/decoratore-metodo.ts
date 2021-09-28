@@ -1,3 +1,12 @@
+
+
+import { IParametro } from "../utility";
+import { IMetodo, IMetodoEventi, IMetodoLimitazioni, IMetodoParametri, IMetodoVettori, instanceOfIMetodoEventi, instanceOfIMetodoLimitazioni, instanceOfIMetodoParametri, instanceOfIMetodoVettori, RispostaControllo } from "./utility-metodo";
+
+import { Options as OptSlowDows } from "express-slow-down";
+import { Options as OptRateLimit } from "express-rate-limit";
+import { IstanzaMetodo } from "./istanza-metodo";
+
 /**
  * crea una rotta con il nome della classe e la aggiunge alla classe di riferimento, il tipo del metodo dipende dal tipo di parametro.
  * @param parametri : 
@@ -11,25 +20,45 @@
  * Validatore?: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => IRitornoValidatore;
  * @returns 
  */
-
-import { IParametro } from "../utility";
-import { IMetodo, RispostaControllo } from "./utility-metodo";
-
-import slowDown, { Options as OptSlowDows } from "express-slow-down";
-import rateLimit, { Options as OptRateLimit } from "express-rate-limit";
-import { IstanzaMetodo } from "./istanza-metodo";
-
-/* function decoratoreMetodo(parametri:IMetodoParametri, eventi:IMetodoEventi, limitazioni:IMetodoLimitazioni, vettori:IMetodoVettori) */
 function decoratoreMetodo(parametri: IMetodo,
     listaParametri?: IParametro[], risposteDiControllo?: RispostaControllo[],
     slow_down?: OptSlowDows, rate_limit?: OptRateLimit): MethodDecorator {
     // eslint-disable-next-line @typescript-eslint/ban-types
     return function (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
-        new IstanzaMetodo(
-            parametri, propertyKey.toString(), descriptor, target.constructor.name,
-            listaParametri, risposteDiControllo,
-            slow_down, rate_limit
-        );
-        //return descriptor;
+        IstanzaMetodo.Complesso(parametri, propertyKey.toString(), descriptor, target.constructor.name,
+            listaParametri, risposteDiControllo, slow_down, rate_limit);
     }
 }
+function decoratoreMetodoGenerico(...parametri: Array<IMetodo | IMetodoEventi | IMetodoLimitazioni | IMetodoParametri | IMetodoVettori>) {
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    return function (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
+        for (let index = 0; index < parametri.length; index++) {
+            const element = parametri[index];
+            if (instanceOfIMetodoVettori(element)) {
+                IstanzaMetodo.Vettori(element, propertyKey.toString(), target.constructor.name);
+            }
+            if (instanceOfIMetodoEventi(element)) {
+                IstanzaMetodo.Eventi(element, propertyKey.toString(), target.constructor.name);
+            }
+            if (instanceOfIMetodoLimitazioni(element)) {
+                IstanzaMetodo.Limitazioni(element, propertyKey.toString(), target.constructor.name);
+            }
+            if (instanceOfIMetodoParametri(element)) {
+                IstanzaMetodo.Parametri(element, propertyKey.toString(), target.constructor.name, -1);
+            }
+        }
+    }
+}
+
+/* function decoratoreMetod(parametri: IMetodo,
+    listaParametri?: IParametro[], risposteDiControllo?: RispostaControllo[],
+    slow_down?: OptSlowDows, rate_limit?: OptRateLimit): MethodDecorator {
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    return function (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
+        IstanzaMetodo.Complesso(parametri, propertyKey.toString(), descriptor, target.constructor.name,
+            listaParametri, risposteDiControllo, slow_down, rate_limit);
+    }
+} */
+
+
+export { decoratoreMetodo as mpMet };
