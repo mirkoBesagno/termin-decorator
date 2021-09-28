@@ -11,8 +11,9 @@ import { ListaTerminaleTest } from "../test-funzionale/lista-test-funzionale";
 import { GetListaTestMetaData, IReturnTest, ITest, SalvaListaTerminaleMetaData } from "../test-funzionale/utility-test-funzionale";
 import { IstanzaClasse } from "../classe/istanza-classe";
 import { TerminaleTest } from "../test-funzionale/metadata-test-funzionale";
-import { SalvaListaClasseMetaData } from "../utility-function";
+import { GetListaClasseMetaData, SalvaListaClasseMetaData } from "../utility-function";
 import { StartMonitoring } from "./utility-main";
+
 
 
 export class Main implements IGestorePercorsiPath {
@@ -32,9 +33,12 @@ export class Main implements IGestorePercorsiPath {
         this.listaTerminaleTest = Reflect.getMetadata(ListaTerminaleTest.nomeMetadataKeyTarget, targetTerminale);
     }
 
-    private Inizializza(patheader: string, porta: number, rottaBase: boolean, creaFile?: boolean, pathDoveScrivereFile?: string) {
-        const tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
+    Inizializza(patheader: string, porta: number, rottaBase: boolean, creaFile?: boolean, pathDoveScrivereFile?: string) {
+        //const tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
+        
+        const tmp = GetListaClasseMetaData();
 
+        console.log('');
         if (tmp.length > 0) {
             this.percorsi.patheader = patheader;
             this.percorsi.porta = porta;
@@ -58,6 +62,9 @@ export class Main implements IGestorePercorsiPath {
         else {
             console.log("Attenzione non vi sono rotte e quantaltro.");
         }
+        
+        const list = GetListaClasseMetaData();
+        console.log('');
     }
     private InizializzaClassi(lista: IstanzaClasse[]) {
         return true;
@@ -94,7 +101,7 @@ export class Main implements IGestorePercorsiPath {
         StartMonitoring();
     }
 
-    private StartExpress() {
+    StartExpress() {
 
 
         /* this.serverExpressDecorato.use(function (req, res) {

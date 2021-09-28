@@ -3,7 +3,7 @@ export type tipo = "number" | "text" | "date" | "array" | "object" | "boolean" |
 
 export type TypeDovePossoTrovarlo = TypeInterazone | "qui" | 'non-qui';
 
-export const targetTerminale = { name: 'Terminale' };
+export const targetTerminale = { name: 'TerminaleDue' };
 
 export interface IGestorePercorsiPath {
     percorsi: IRaccoltaPercorsi;

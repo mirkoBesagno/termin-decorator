@@ -1,6 +1,4 @@
 
-import "reflect-metadata";
-
 import { Main } from "./model/main/metadata-main";
 import { mpClas } from "./model/classe/decoratore-classe";
 import { mpMet } from "./model/metodo/decoratore-metodo";
@@ -9,6 +7,7 @@ import { IRitornoValidatore, ILogbase, IParametriEstratti } from "./model/utilit
 import { ListaTerminaleParametro } from './model/parametro/lista-parametro';
 import { ErroreMio, GestioneErrore } from "./model/errore";
 
+import "reflect-metadata";
 
 export { Main as Main };
 export { mpMet as mpMet };

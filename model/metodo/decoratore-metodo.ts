@@ -6,6 +6,7 @@ import { IMetodo, IMetodoEventi, IMetodoLimitazioni, IMetodoParametri, IMetodoVe
 import { Options as OptSlowDows } from "express-slow-down";
 import { Options as OptRateLimit } from "express-rate-limit";
 import { IstanzaMetodo } from "./istanza-metodo";
+import { GetListaClasseMetaData } from "../utility-function";
 
 /**
  * crea una rotta con il nome della classe e la aggiunge alla classe di riferimento, il tipo del metodo dipende dal tipo di parametro.
@@ -46,7 +47,7 @@ function decoratoreMetodoGenerico(...parametri: Array<IMetodo | IMetodoEventi | 
             if (instanceOfIMetodoParametri(element)) {
                 IstanzaMetodo.Parametri(element, propertyKey.toString(), target.constructor.name, -1);
             }
-        }
+        } 
     }
 }
 
@@ -62,3 +63,4 @@ function decoratoreMetodoGenerico(...parametri: Array<IMetodo | IMetodoEventi | 
 
 
 export { decoratoreMetodo as mpMet };
+export { decoratoreMetodoGenerico as mpMetGen };
