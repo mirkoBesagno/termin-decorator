@@ -41,36 +41,28 @@ export function InizializzaLogbaseIn(req: Request, nomeMetodo?: string): ILogbas
  * @param tmp 
  */
 export function SalvaListaClasseMetaData(tmp: ListaTerminaleClasse) {
-    if (tmp == undefined || tmp == null || tmp.length == 0) {
-        console.log("hei che succede!!!");
+    try {
+        Reflect.defineMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, tmp, targetTerminale);
+        console.log( Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale));
+        
+    } catch (error) {
+        console.log(error);
     }
-    console.log("+++++++++++++++++++++++++++++++++ SalvaListaClasseMetaData");
-    console.log(ListaTerminaleClasse.nomeMetadataKeyTarget);
-    console.log(targetTerminale);
-    console.log('----------------------------------------------------');
-    Reflect.defineMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, tmp, targetTerminale);
-
-    const tmp2 = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-    console.log(tmp2);
-    console.log('222222222222----------------------------------------------------');
 }
 /**
  * 
  * @returns 
  */
-export function GetListaClasseMetaData(temp?:number) {
-    console.log("******************** GetListaClasseMetaData");
-    console.log(ListaTerminaleClasse.nomeMetadataKeyTarget);
-    console.log(targetTerminale);
-    console.log('----------------------------------------------------');
-    let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-    if (tmp == undefined) {
-        tmp = new ListaTerminaleClasse();
+export function GetListaClasseMetaData(temp?: number) {
+    try {
+        let tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
+        if (tmp == undefined) {
+            tmp = new ListaTerminaleClasse();
+        }
+        console.log( Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale));
+        return tmp;
+    } catch (err) {
+        console.log(err);
+        return new ListaTerminaleClasse();
     }
-    console.log(tmp);
-    console.log('111111111111----------------------------------------------------');
-    if (temp) {
-        console.log('holaaaaaaa');        
-    }
-    return tmp;
 }

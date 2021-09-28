@@ -3,6 +3,7 @@ import { IClasseRiferimento, IMetodo, IMetodoEventi, IMetodoLimitazioni, IMetodo
 
 import slowDown, { Options as OptSlowDows } from "express-slow-down";
 import rateLimit, { Options as OptRateLimit } from "express-rate-limit";
+import { Options as OptionsCache } from "express-redis-cache";
 import { NextFunction, Request, Response } from "express";
 
 import fs from "fs";
@@ -13,14 +14,12 @@ import superagent from "superagent";
 
 import { cacheMiddleware, CalcolaChiaveMemoryCache, redisClient } from "../express-cache";
 
-import { Options as OptionsCache } from "express-redis-cache";
 import { ListaTerminaleParametro } from "../parametro/lista-parametro";
 import { IParametriEstratti } from "../parametro/utility-parametro";
 import { InizializzaLogbaseIn, SalvaListaClasseMetaData } from "../utility-function";
 import { TerminaleParametro } from "../parametro/metadata-parametro";
 import { ErroreMio } from "../errore";
 import { ListaTerminaleClasse } from "../classe/lista-classe";
-import { Mixin } from 'ts-mixer';
 import { ConstruisciErrore, GetListaMiddlewareMetaData, InizializzaLogbaseOut, IsJsonString, Rispondi, SalvaListaMiddlewareMetaData, SostituisciRicorsivo } from "./utility-function-metodo";
 
 class MetodoEventi implements IMetodoEventi {
@@ -58,7 +57,7 @@ class MetodoEventi implements IMetodoEventi {
         if (init.Istanziatore != null && init.Istanziatore != undefined) this.Istanziatore = init.Istanziatore;
     }
 }
-class MetodoParametri implements IMetodoParametri {
+class MetodoParametri extends MetodoEventi implements IMetodoParametri {
     percorsoIndipendente: boolean;
     tipo: TypeMetod;
     path: string;
@@ -66,6 +65,7 @@ class MetodoParametri implements IMetodoParametri {
     descrizione: string;
     sommario: string;
     constructor() {
+        super();
         this.percorsoIndipendente = false;
         this.tipo = 'get';
         this.path = '';
@@ -94,11 +94,11 @@ class MetodoParametri implements IMetodoParametri {
         if (init.path == undefined) this.path = nomeMetodo;
         else this.path = init.path;
 
-        
+
     }
-    InitMiddleware(init: IMetodoParametri, descriptor: any, nomeMetodo: string, listaParametri:any){
-        
-        if (init.interazione == 'middleware' || init.interazione == 'ambo') { 
+    InitMiddleware(init: IMetodoParametri, descriptor: any, nomeMetodo: string, listaParametri: any) {
+
+        if (init.interazione == 'middleware' || init.interazione == 'ambo') {
             const listaMidd = GetListaMiddlewareMetaData();
             const midd = listaMidd.CercaConNomeSeNoAggiungi(nomeMetodo);
             midd.metodoAvviabile = descriptor.value;
@@ -107,7 +107,7 @@ class MetodoParametri implements IMetodoParametri {
         }
     }
 }
-class MetodoLimitazioni implements IMetodoLimitazioni {
+class MetodoLimitazioni extends MetodoParametri implements IMetodoLimitazioni {
     slow_down: OptSlowDows;
     rate_limit: OptRateLimit;
     cors: any;
@@ -117,6 +117,7 @@ class MetodoLimitazioni implements IMetodoLimitazioni {
     cacheOptionRedis: OptionsCache;
     cacheOptionMemory: { durationSecondi: number };
     constructor() {
+        super();
         this.slow_down = {
             windowMs: 3 * 60 * 1000, // 15 minutes
             delayAfter: 100, // allow 100 requests per 15 minutes, then...
@@ -147,7 +148,7 @@ class MetodoLimitazioni implements IMetodoLimitazioni {
         if (init.cacheOptionMemory) this.cacheOptionMemory = init.cacheOptionMemory ?? { durationSecondi: 1 };
     }
 }
-class MetodoVettori implements IMetodoVettori {
+class MetodoVettori extends MetodoLimitazioni implements IMetodoVettori {
     ListaSanificatori?: SanificatoreCampo[];
     RisposteDiControllo?: RispostaControllo[];
     swaggerClassi: string[];
@@ -160,6 +161,7 @@ class MetodoVettori implements IMetodoVettori {
     listaHtml: IHtml[];
 
     constructor() {
+        super();
         this.swaggerClassi = [];
         this.listaTest = [];
         this.RisposteDiControllo = [];
@@ -199,10 +201,11 @@ class MetodoVettori implements IMetodoVettori {
         }
     }
 }
-class MetodoRaccoltaPercorsi implements IContieneRaccoltaPercorsi {
+class MetodoRaccoltaPercorsi extends MetodoVettori implements IContieneRaccoltaPercorsi {
 
     percorsi: IRaccoltaPercorsi;
     constructor() {
+        super();
         this.percorsi = { pathGlobal: '', patheader: '', porta: 0 };
     }
     InitPercorsi(percorsi: IRaccoltaPercorsi, path: string, percorsoIndipendente: boolean) {
@@ -214,8 +217,7 @@ class MetodoRaccoltaPercorsi implements IContieneRaccoltaPercorsi {
             this.percorsi.pathGlobal = percorsi.pathGlobal + '/' + path;
     }
 }
-export class TerminaleMetodo
-    extends Mixin(MetodoEventi, MetodoParametri, MetodoLimitazioni, MetodoVettori, MetodoRaccoltaPercorsi)
+export class TerminaleMetodo extends MetodoRaccoltaPercorsi
     implements IMetodo/* , IGestorePercorsiPath, IMetodoParametri */ {
 
     private schemaSwagger?: any;
@@ -246,7 +248,7 @@ export class TerminaleMetodo
      * @param app 
      * @param percorsi 
      */
-    ConfiguraRottaApplicazione(app: any, percorsi: IRaccoltaPercorsi) {
+    async ConfiguraRottaApplicazione(app: any, percorsi: IRaccoltaPercorsi) {
         this.InitPercorsi(percorsi, this.path, this.percorsoIndipendente);
 
         const middlew: any[] = [];
@@ -259,7 +261,7 @@ export class TerminaleMetodo
         });
 
         if (this.metodoAvviabile != undefined) {
-            this.ConfiguraRotteSwitch(app, this.percorsi.pathGlobal, middlew);
+           await this.ConfiguraRotteSwitch(app, this.percorsi.pathGlobal, middlew);
         }
 
         if (this.listaHtml) {
@@ -270,7 +272,7 @@ export class TerminaleMetodo
                 else percorsoTmp = this.percorsi.pathGlobal + '/' + element.path;
 
                 if (this.metodoAvviabile != undefined) {
-                    this.ConfiguraRotteHtml(app, percorsoTmp, element.contenuto);
+                   await this.ConfiguraRotteHtml(app, percorsoTmp, element.contenuto);
                 }
             }
 
@@ -283,7 +285,7 @@ export class TerminaleMetodo
      * @param percorsoTmp : il percorso, questo dovra essere alimentato anche con il nome del metodo nel caso sia chiamato tramite ConfiguraRotteSwitch
      * @param middlew : la lista dei middleware
      */
-    private ConfiguraRotteSwitch(app: any, percorsoTmp: string, middlew: any[]) {
+    async ConfiguraRotteSwitch(app: any, percorsoTmp: string, middlew: any[]) {
         let corsOptions = {};
         const apiRateLimiter = rateLimit(this.rate_limit);
         const apiSpeedLimiter = slowDown(this.slow_down);
@@ -513,7 +515,7 @@ export class TerminaleMetodo
             }
             else {
                 const parametri = this.listaParametri.EstraiParametriDaRequest(req);
-                let valido: IRitornoValidatore | undefined = undefined;
+                let valido: IRitornoValidatore | undefined | void = undefined;
                 if (this.Validatore) {
                     valido = this.Validatore(parametri, this.listaParametri) ?? undefined;
                     if (valido && valido?.approvato == true && this.Istanziatore) {
@@ -592,7 +594,7 @@ export class TerminaleMetodo
             }
         }
     }
-    private VerificaPresenzaRispostaControllata(item: IReturn | undefined): boolean {
+    VerificaPresenzaRispostaControllata(item: IReturn | undefined): boolean {
         if (this.RisposteDiControllo != undefined) {
             for (let index = 0; index < this.RisposteDiControllo.length; index++) {
                 const element = this.RisposteDiControllo[index];
@@ -628,7 +630,7 @@ export class TerminaleMetodo
             return ConstruisciErrore('Attenzione errore!');
         }
     }
-    private VerificaTrigger(richiesta: Request): boolean {
+    VerificaTrigger(richiesta: Request): boolean {
 
         let tmp = undefined;
 
@@ -649,7 +651,7 @@ export class TerminaleMetodo
 
         return false;
     }
-    private CercaRispostaConTrigger(richiesta: Request): Risposta | undefined {
+    CercaRispostaConTrigger(richiesta: Request): Risposta | undefined {
 
         let tmp = undefined;
 
@@ -740,8 +742,12 @@ export class TerminaleMetodo
                             tmp.body = Object.assign({}, tmpReturn.body);
                             tmp.stato = tmpReturn.stato;
                         }
-                        else if (tmpReturn) {
+                        else if (typeof tmpReturn === 'object') {
                             tmp.body = tmpReturn;
+                            tmp.stato = 200//299;                            
+                        }
+                        else if (tmpReturn) {
+                            tmp.body = { 'messaggio':tmpReturn };
                             tmp.stato = 200//299;
                         }
                         else {
@@ -893,7 +899,7 @@ export class TerminaleMetodo
         if (this.onPrimaDiEseguire) parametri = parametri + '\tonLog :' + this.onPrimaDiEseguire.toString() + '\n';
 
         const tmp = this.nome + ' | ' + this.percorsi.pathGlobal + '\n' + parametri + '\n';
-        
+
         return tmp;
     }
     async ChiamaLaRotta(headerpath?: string) {
@@ -1279,3 +1285,14 @@ export class TerminaleMetodo
 
     }
 }
+
+
+/* 
+// Poi si crea un'interfaccia che unisce i mixin previsti con lo stesso nome della vostra base
+interface ITerminaleMetodo extends MetodoEventi, MetodoParametri, MetodoLimitazioni, MetodoVettori, MetodoRaccoltaPercorsi { }
+// Applicare i mixin nella classe base tramite il JS in fase di esecuzione
+applyMixins(TerminaleMetodo, [
+    MetodoEventi, MetodoParametri, MetodoLimitazioni,
+    MetodoVettori, MetodoRaccoltaPercorsi
+]) 
+*/

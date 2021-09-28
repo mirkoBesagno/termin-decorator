@@ -6,7 +6,6 @@ import { IMetodo, IMetodoEventi, IMetodoLimitazioni, IMetodoParametri, IMetodoVe
 import { Options as OptSlowDows } from "express-slow-down";
 import { Options as OptRateLimit } from "express-rate-limit";
 import { IstanzaMetodo } from "./istanza-metodo";
-import { GetListaClasseMetaData } from "../utility-function";
 
 /**
  * crea una rotta con il nome della classe e la aggiunge alla classe di riferimento, il tipo del metodo dipende dal tipo di parametro.
@@ -36,16 +35,16 @@ function decoratoreMetodoGenerico(...parametri: Array<IMetodo | IMetodoEventi | 
         for (let index = 0; index < parametri.length; index++) {
             const element = parametri[index];
             if (instanceOfIMetodoVettori(element)) {
-                IstanzaMetodo.Vettori(element, propertyKey.toString(), target.constructor.name);
+                IstanzaMetodo.Vettori(element, propertyKey.toString(), target.constructor.name, descriptor);
             }
             if (instanceOfIMetodoEventi(element)) {
-                IstanzaMetodo.Eventi(element, propertyKey.toString(), target.constructor.name);
+                IstanzaMetodo.Eventi(element, propertyKey.toString(), target.constructor.name, descriptor);
             }
             if (instanceOfIMetodoLimitazioni(element)) {
-                IstanzaMetodo.Limitazioni(element, propertyKey.toString(), target.constructor.name);
+                IstanzaMetodo.Limitazioni(element, propertyKey.toString(), target.constructor.name, descriptor);
             }
             if (instanceOfIMetodoParametri(element)) {
-                IstanzaMetodo.Parametri(element, propertyKey.toString(), target.constructor.name, -1);
+                IstanzaMetodo.Parametri(element, propertyKey.toString(), target.constructor.name, -1, descriptor);
             }
         } 
     }

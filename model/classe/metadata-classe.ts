@@ -52,10 +52,10 @@ export class TerminaleClasse implements IGestorePercorsiPath {
         this.classeSwagger = '';
     }
 
-    SettaPathRoot_e_Global(item: string, percorsi: IRaccoltaPercorsi, app: any) {
+    async SettaPathRoot_e_Global(item: string, percorsi: IRaccoltaPercorsi, app: any) {
         const pathGlobal = this.SettaPercorsi(percorsi);
         this.ConfiguraListaRotteHTML(app, pathGlobal);
-        this.listaMetodi.ConfiguraListaRotteApplicazione(app, this.percorsi);
+        await this.listaMetodi.ConfiguraListaRotteApplicazione(app, this.percorsi);
     }
     private SettaPercorsi(percorsi: IRaccoltaPercorsi): string {
         if (percorsi.patheader == undefined) this.percorsi.patheader = "localhost";

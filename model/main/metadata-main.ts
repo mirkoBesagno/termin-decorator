@@ -33,12 +33,9 @@ export class Main implements IGestorePercorsiPath {
         this.listaTerminaleTest = Reflect.getMetadata(ListaTerminaleTest.nomeMetadataKeyTarget, targetTerminale);
     }
 
-    Inizializza(patheader: string, porta: number, rottaBase: boolean, creaFile?: boolean, pathDoveScrivereFile?: string) {
+    async Inizializza(patheader: string, porta: number, rottaBase: boolean, creaFile?: boolean, pathDoveScrivereFile?: string) {
         //const tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-        
         const tmp = GetListaClasseMetaData();
-
-        console.log('');
         if (tmp.length > 0) {
             this.percorsi.patheader = patheader;
             this.percorsi.porta = porta;
@@ -46,11 +43,11 @@ export class Main implements IGestorePercorsiPath {
             this.percorsi.pathGlobal = pathGlobal;
 
             (<any>this.serverExpressDecorato).use(express.json());
-            (<any>this.serverExpressDecorato).use(cookieParser())
+            //(<any>this.serverExpressDecorato).use(cookieParser())
 
             for (let index = 0; index < tmp.length; index++) {
                 const element = tmp[index];
-                element.SettaPathRoot_e_Global(this.path, this.percorsi, this.serverExpressDecorato);
+                await element.SettaPathRoot_e_Global(this.path, this.percorsi, this.serverExpressDecorato);
             }
             this.httpServer = http.createServer(this.serverExpressDecorato);
 
@@ -62,9 +59,7 @@ export class Main implements IGestorePercorsiPath {
         else {
             console.log("Attenzione non vi sono rotte e quantaltro.");
         }
-        
         const list = GetListaClasseMetaData();
-        console.log('');
     }
     private InizializzaClassi(lista: IstanzaClasse[]) {
         return true;
@@ -96,23 +91,12 @@ export class Main implements IGestorePercorsiPath {
 
     }
 
-    private StartHttpServer() {
+    StartHttpServer() {
         this.httpServer.listen(this.percorsi.porta);
         StartMonitoring();
     }
 
     StartExpress() {
-
-
-        /* this.serverExpressDecorato.use(function (req, res) {
-            res.send(404);
-        });
-
-        this.serverExpressDecorato.all('*', function (req, res) {
-            res.redirect('/');
-        }); */
-
-        //
 
         this.serverExpressDecorato.listen(this.percorsi.porta)
 

@@ -6,6 +6,7 @@ import { Options as OptRateLimit } from "express-rate-limit";
 import { ListaTerminaleClasse } from "../classe/lista-classe";
 import { TerminaleParametro } from "../parametro/metadata-parametro";
 import { GetListaClasseMetaData, SalvaListaClasseMetaData } from "../utility-function";
+import { AssegnaMetodo } from "./utility-function-metodo";
 
 export class IstanzaMetodo {
     constructor() {
@@ -90,39 +91,51 @@ export class IstanzaMetodo {
         }
     }
 
-    static Eventi(init: IMetodoEventi, nomeMetodo: string, nomeClasse: string) {
+    static Eventi(init: IMetodoEventi, nomeMetodo: string, nomeClasse: string, descriptor?: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         /* inizializzo metodo */
         const classe = list.CercaConNomeSeNoAggiungi(nomeClasse);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(nomeMetodo.toString());
         metodo.InitMetodoEventi(init);
+        /* if (metodo.metodoAvviabile == undefined && descriptor != undefined)
+            metodo.metodoAvviabile = descriptor; */
+        // AssegnaMetodo(metodo, descriptor);
+        if (metodo && metodo.metodoAvviabile == undefined && descriptor != undefined && descriptor.value != undefined)
+            metodo.metodoAvviabile = descriptor.value;
         SalvaListaClasseMetaData(list);
     }
 
-    static Vettori(init: IMetodoVettori, nomeMetodo: string, nomeClasse: string) {
+    static Vettori(init: IMetodoVettori, nomeMetodo: string, nomeClasse: string, descriptor?: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         /* inizializzo metodo */
         const classe = list.CercaConNomeSeNoAggiungi(nomeClasse);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(nomeMetodo.toString());
         metodo.InitMetodoVettori(init);
+        AssegnaMetodo(metodo, descriptor);
         SalvaListaClasseMetaData(list);
     }
 
-    static Parametri(init: IMetodoParametri, nomeMetodo: string, nomeClasse: string, numeroParametri: number) {
+    static Parametri(init: IMetodoParametri, nomeMetodo: string, nomeClasse: string, numeroParametri: number, descriptor?: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         /* inizializzo metodo */
         const classe = list.CercaConNomeSeNoAggiungi(nomeClasse);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(nomeMetodo.toString());
         metodo.InitMetodoParametri(init, numeroParametri, nomeMetodo);
+        // AssegnaMetodo(metodo, descriptor);
+        if (metodo && metodo.metodoAvviabile == undefined && descriptor != undefined && descriptor.value != undefined)
+            metodo.metodoAvviabile = descriptor.value;
         SalvaListaClasseMetaData(list);
     }
 
-    static Limitazioni(init: IMetodoLimitazioni, nomeMetodo: string, nomeClasse: string) {
+    static Limitazioni(init: IMetodoLimitazioni, nomeMetodo: string, nomeClasse: string, descriptor?: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         /* inizializzo metodo */
         const classe = list.CercaConNomeSeNoAggiungi(nomeClasse);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(nomeMetodo.toString());
         metodo.InitMetodoLimitazioni(init);
+        // AssegnaMetodo(metodo, descriptor);
+        if (metodo && metodo.metodoAvviabile == undefined && descriptor != undefined && descriptor.value != undefined)
+            metodo.metodoAvviabile = descriptor.value;
         SalvaListaClasseMetaData(list);
     }
 }

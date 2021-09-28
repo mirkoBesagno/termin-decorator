@@ -49,7 +49,7 @@ export class RispostaControllo {
  * Validatore?: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => IRitornoValidatore;
  */
 export interface IMetodo extends IMetodoParametri, IMetodoEventi, IMetodoLimitazioni, IMetodoVettori, IContieneRaccoltaPercorsi {
-
+    metodoAvviabile: any;
 }
 export interface IMetodoParametri extends IDescrivibile {
 

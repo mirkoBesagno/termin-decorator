@@ -25,12 +25,12 @@ export class ListaTerminaleMetodo extends Array<TerminaleMetodo> {
         this.push(item);
         return item;
     }
-    ConfiguraListaRotteApplicazione(app: any,  percorsi: IRaccoltaPercorsi) {
+    async ConfiguraListaRotteApplicazione(app: any,  percorsi: IRaccoltaPercorsi) {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
             if (element.interazione == 'rotta' || element.interazione == 'ambo') {
                 //element.ConfiguraRotta(this.rotte, this.percorsi);
-                element.ConfiguraRottaApplicazione(app, percorsi);
+                await element.ConfiguraRottaApplicazione(app, percorsi);
             }
             //element.listaRotteGeneraChiavi=this.listaMetodiGeneraKey;
         }

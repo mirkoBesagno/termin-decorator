@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { ILogbase, IReturn, targetTerminale } from "../utility";
 import { ListaTerminaleMiddleware } from "./lista-metodo";
-import { SanificatoreCampo } from "./utility-metodo";
+import { IMetodo, SanificatoreCampo } from "./utility-metodo";
 
 import memorycache from "memory-cache";
 
@@ -121,4 +121,10 @@ export function GetListaMiddlewareMetaData() {
 
 export function SalvaListaMiddlewareMetaData(tmp: ListaTerminaleMiddleware) {
     Reflect.defineMetadata(ListaTerminaleMiddleware.nomeMetadataKeyTarget, tmp, targetTerminale);
+}
+
+export function AssegnaMetodo(metodo: IMetodo, descriptor?: PropertyDescriptor) {
+    if (metodo && metodo.metodoAvviabile == undefined && descriptor != undefined && descriptor.value != undefined)
+        metodo.metodoAvviabile = descriptor.value;
+    return metodo;
 }
