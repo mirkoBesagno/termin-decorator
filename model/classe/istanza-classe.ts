@@ -8,7 +8,7 @@ import { GetListaClasseMetaData, SalvaListaClasseMetaData } from "../utility-fun
 export class IstanzaClasse {
     constructor(parametri: IClasse, nomeClasse: string, listaMetodi?: IstanzaMetodo[]) {
 
-        const tmp: ListaTerminaleClasse = GetListaClasseMetaData(1);
+        const tmp: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = CheckClasseMetaData(nomeClasse);
         /* 
                 if (parametri.listaTest) classe.listaTest = parametri.listaTest; */

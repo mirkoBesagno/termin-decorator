@@ -118,50 +118,6 @@ export interface IMetodoLimitazioni {
     cacheOptionRedis?: OptionsCache;
     cacheOptionMemory?: { durationSecondi: number };
 }
-export function instanceOfIMetodoLimitazioni(object: any): object is IMetodoLimitazioni {
-    if ('slow_down' in object ||
-        'rate_limit' in object ||
-        'cors' in object ||
-        'helmet' in object ||
-        'middleware' in object ||
-        'cacheOptionRedis' in object ||
-        'cacheOptionMemory' in object) return true;
-    else return false;
-}
-export function instanceOfIMetodoEventi(object: any): object is IMetodoEventi {
-    if ('onChiamataInErrore' in object ||
-        'onPrimaDiEseguireMetodo' in object ||
-        'onChiamataCompletata' in object ||
-        'onLog' in object ||
-        'Validatore' in object ||
-        'Istanziatore' in object ||
-        'onRispostaControllatePradefinita' in object ||
-        'onPrimaDiTerminareLaChiamata' in object ||
-        'onDopoAverTerminatoLaFunzione' in object ||
-        'onPrimaDiEseguire' in object) return true;
-    else return false;
-}
-export function instanceOfIMetodoVettori(object: any): object is IMetodoVettori {
-    if ('ListaSanificatori' in object ||
-        'RisposteDiControllo' in object ||
-        'swaggerClassi' in object ||
-        'nomiClasseRiferimento' in object ||
-        'listaTest' in object ||
-        'listaHtml' in object) return true;
-    else return false;
-}
-export function instanceOfIMetodoParametri(object: any): object is IMetodoParametri {
-    if ('percorsoIndipendente' in object ||
-        'tipo' in object ||
-        'path' in object ||
-        'interazione' in object ||
-        'descrizione' in object ||
-        'sommario' in object) return true;
-    else return false;
-}
-export function instanceOfIMetodo(object: any): object is IMetodo {
-    return 'member' in object;
-}
 
 
 export class Risposta {

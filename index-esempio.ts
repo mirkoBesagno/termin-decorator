@@ -1,6 +1,7 @@
 import { Main, mpClas } from ".";
 import { mpMetGen } from "./model/metodo/decoratore-metodo";
 import { IMetodoParametri } from "./model/metodo/utility-metodo"; 
+import { GetListaClasseMetaData } from "./model/utility-function";
 
 
 @mpClas({ percorso: 'persona' })
@@ -19,4 +20,7 @@ const main = new Main('api');
 
 main.Inizializza("localhost", 8080, true, true); 
 
-main.StartExpress(); 
+const tmp = GetListaClasseMetaData();
+console.log(tmp);
+
+main.StartHttpServer(); 

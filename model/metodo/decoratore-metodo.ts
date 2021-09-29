@@ -1,11 +1,12 @@
 
 
 import { IParametro } from "../utility";
-import { IMetodo, IMetodoEventi, IMetodoLimitazioni, IMetodoParametri, IMetodoVettori, instanceOfIMetodoEventi, instanceOfIMetodoLimitazioni, instanceOfIMetodoParametri, instanceOfIMetodoVettori, RispostaControllo } from "./utility-metodo";
+import { IMetodo, IMetodoEventi, IMetodoLimitazioni, IMetodoParametri, IMetodoVettori, RispostaControllo } from "./utility-metodo";
 
 import { Options as OptSlowDows } from "express-slow-down";
 import { Options as OptRateLimit } from "express-rate-limit";
 import { IstanzaMetodo } from "./istanza-metodo";
+import { instanceOfIMetodoEventi, instanceOfIMetodoLimitazioni, instanceOfIMetodoParametri, instanceOfIMetodoVettori } from "./utility-function-metodo";
 import { GetListaClasseMetaData } from "../utility-function";
 
 /**
@@ -36,18 +37,20 @@ function decoratoreMetodoGenerico(...parametri: Array<IMetodo | IMetodoEventi | 
         for (let index = 0; index < parametri.length; index++) {
             const element = parametri[index];
             if (instanceOfIMetodoVettori(element)) {
-                IstanzaMetodo.Vettori(element, propertyKey.toString(), target.constructor.name);
+                IstanzaMetodo.Vettori(element, propertyKey.toString(), target.constructor.name, descriptor);
             }
             if (instanceOfIMetodoEventi(element)) {
-                IstanzaMetodo.Eventi(element, propertyKey.toString(), target.constructor.name);
+                IstanzaMetodo.Eventi(element, propertyKey.toString(), target.constructor.name, descriptor);
             }
             if (instanceOfIMetodoLimitazioni(element)) {
-                IstanzaMetodo.Limitazioni(element, propertyKey.toString(), target.constructor.name);
+                IstanzaMetodo.Limitazioni(element, propertyKey.toString(), target.constructor.name, descriptor);
             }
             if (instanceOfIMetodoParametri(element)) {
-                IstanzaMetodo.Parametri(element, propertyKey.toString(), target.constructor.name, -1);
+                IstanzaMetodo.Parametri(element, propertyKey.toString(), target.constructor.name, -1, descriptor);
             }
-        } 
+        }
+        const tmp = GetListaClasseMetaData();
+        console.log(tmp);
     }
 }
 

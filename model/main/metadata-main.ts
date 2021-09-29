@@ -96,7 +96,7 @@ export class Main implements IGestorePercorsiPath {
 
     }
 
-    private StartHttpServer() {
+    StartHttpServer() {
         this.httpServer.listen(this.percorsi.porta);
         StartMonitoring();
     }

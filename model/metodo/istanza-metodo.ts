@@ -67,6 +67,8 @@ export class IstanzaMetodo {
                 }
             }
             metodo.Setta(parametri, nomeMetodo, descriptor, list);
+            /* if (metodo && metodo.metodoAvviabile == undefined && descriptor != undefined && descriptor.value != undefined)
+                metodo.metodoAvviabile = descriptor.value; */
             SalvaListaClasseMetaData(list);
             return list;
         }
@@ -75,13 +77,15 @@ export class IstanzaMetodo {
         }
     }
 
-    static Semplice(nomeMetodo: string, nomeClasse: string) {
+    static Semplice(nomeMetodo: string, nomeClasse: string, descriptor?: PropertyDescriptor) {
 
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         /* inizializzo metodo */
         const classe = list.CercaConNomeSeNoAggiungi(nomeClasse);
-        const metodo = classe.CercaMetodoSeNoAggiungiMetodo(nomeMetodo.toString());
-        /* inizio a lavorare sul metodo */
+        const metodo = classe.CercaMetodoSeNoAggiungiMetodo(nomeMetodo.toString()); 
+        if (metodo && metodo.metodoAvviabile == undefined && descriptor != undefined && descriptor.value != undefined)
+            metodo.metodoAvviabile = descriptor.value;
+        SalvaListaClasseMetaData(list);
         if (metodo != undefined && list != undefined && classe != undefined) {
             return list;
         }
@@ -90,39 +94,47 @@ export class IstanzaMetodo {
         }
     }
 
-    static Eventi(init: IMetodoEventi, nomeMetodo: string, nomeClasse: string) {
+    static Eventi(init: IMetodoEventi, nomeMetodo: string, nomeClasse: string, descriptor?: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         /* inizializzo metodo */
         const classe = list.CercaConNomeSeNoAggiungi(nomeClasse);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(nomeMetodo.toString());
         metodo.InitMetodoEventi(init);
+        if (metodo && metodo.metodoAvviabile == undefined && descriptor != undefined && descriptor.value != undefined)
+            metodo.metodoAvviabile = descriptor.value;
         SalvaListaClasseMetaData(list);
     }
 
-    static Vettori(init: IMetodoVettori, nomeMetodo: string, nomeClasse: string) {
+    static Vettori(init: IMetodoVettori, nomeMetodo: string, nomeClasse: string, descriptor?: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         /* inizializzo metodo */
         const classe = list.CercaConNomeSeNoAggiungi(nomeClasse);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(nomeMetodo.toString());
         metodo.InitMetodoVettori(init);
+        if (metodo && metodo.metodoAvviabile == undefined && descriptor != undefined && descriptor.value != undefined)
+            metodo.metodoAvviabile = descriptor;
         SalvaListaClasseMetaData(list);
     }
 
-    static Parametri(init: IMetodoParametri, nomeMetodo: string, nomeClasse: string, numeroParametri: number) {
+    static Parametri(init: IMetodoParametri, nomeMetodo: string, nomeClasse: string, numeroParametri: number, descriptor?: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         /* inizializzo metodo */
         const classe = list.CercaConNomeSeNoAggiungi(nomeClasse);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(nomeMetodo.toString());
         metodo.InitMetodoParametri(init, numeroParametri, nomeMetodo);
+        if (metodo && metodo.metodoAvviabile == undefined && descriptor != undefined && descriptor.value != undefined)
+            metodo.metodoAvviabile = descriptor.value;
         SalvaListaClasseMetaData(list);
     }
 
-    static Limitazioni(init: IMetodoLimitazioni, nomeMetodo: string, nomeClasse: string) {
+    static Limitazioni(init: IMetodoLimitazioni, nomeMetodo: string, nomeClasse: string, descriptor?: PropertyDescriptor) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         /* inizializzo metodo */
         const classe = list.CercaConNomeSeNoAggiungi(nomeClasse);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(nomeMetodo.toString());
         metodo.InitMetodoLimitazioni(init);
+        if (metodo && metodo.metodoAvviabile == undefined && descriptor != undefined && descriptor.value != undefined)
+            metodo.metodoAvviabile = descriptor.value;
         SalvaListaClasseMetaData(list);
     }
 }

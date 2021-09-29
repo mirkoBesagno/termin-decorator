@@ -20,7 +20,6 @@ import { InizializzaLogbaseIn, SalvaListaClasseMetaData } from "../utility-funct
 import { TerminaleParametro } from "../parametro/metadata-parametro";
 import { ErroreMio } from "../errore";
 import { ListaTerminaleClasse } from "../classe/lista-classe";
-import { Mixin } from 'ts-mixer';
 import { ConstruisciErrore, GetListaMiddlewareMetaData, InizializzaLogbaseOut, IsJsonString, Rispondi, SalvaListaMiddlewareMetaData, SostituisciRicorsivo } from "./utility-function-metodo";
 
 class MetodoEventi implements IMetodoEventi {
@@ -58,7 +57,7 @@ class MetodoEventi implements IMetodoEventi {
         if (init.Istanziatore != null && init.Istanziatore != undefined) this.Istanziatore = init.Istanziatore;
     }
 }
-class MetodoParametri implements IMetodoParametri {
+class MetodoParametri extends MetodoEventi implements IMetodoParametri {
     percorsoIndipendente: boolean;
     tipo: TypeMetod;
     path: string;
@@ -66,6 +65,7 @@ class MetodoParametri implements IMetodoParametri {
     descrizione: string;
     sommario: string;
     constructor() {
+        super();
         this.percorsoIndipendente = false;
         this.tipo = 'get';
         this.path = '';
@@ -107,7 +107,7 @@ class MetodoParametri implements IMetodoParametri {
         }
     }
 }
-class MetodoLimitazioni implements IMetodoLimitazioni {
+class MetodoLimitazioni extends MetodoParametri implements IMetodoLimitazioni {
     slow_down: OptSlowDows;
     rate_limit: OptRateLimit;
     cors: any;
@@ -117,6 +117,7 @@ class MetodoLimitazioni implements IMetodoLimitazioni {
     cacheOptionRedis: OptionsCache;
     cacheOptionMemory: { durationSecondi: number };
     constructor() {
+        super();
         this.slow_down = {
             windowMs: 3 * 60 * 1000, // 15 minutes
             delayAfter: 100, // allow 100 requests per 15 minutes, then...
@@ -147,7 +148,7 @@ class MetodoLimitazioni implements IMetodoLimitazioni {
         if (init.cacheOptionMemory) this.cacheOptionMemory = init.cacheOptionMemory ?? { durationSecondi: 1 };
     }
 }
-class MetodoVettori implements IMetodoVettori {
+class MetodoVettori extends MetodoLimitazioni implements IMetodoVettori {
     ListaSanificatori?: SanificatoreCampo[];
     RisposteDiControllo?: RispostaControllo[];
     swaggerClassi: string[];
@@ -160,6 +161,7 @@ class MetodoVettori implements IMetodoVettori {
     listaHtml: IHtml[];
 
     constructor() {
+        super();
         this.swaggerClassi = [];
         this.listaTest = [];
         this.RisposteDiControllo = [];
@@ -199,10 +201,11 @@ class MetodoVettori implements IMetodoVettori {
         }
     }
 }
-class MetodoRaccoltaPercorsi implements IContieneRaccoltaPercorsi {
+class MetodoRaccoltaPercorsi extends MetodoVettori implements IContieneRaccoltaPercorsi {
 
     percorsi: IRaccoltaPercorsi;
     constructor() {
+        super();
         this.percorsi = { pathGlobal: '', patheader: '', porta: 0 };
     }
     InitPercorsi(percorsi: IRaccoltaPercorsi, path: string, percorsoIndipendente: boolean) {
@@ -215,7 +218,7 @@ class MetodoRaccoltaPercorsi implements IContieneRaccoltaPercorsi {
     }
 }
 export class TerminaleMetodo
-    extends Mixin(MetodoEventi, MetodoParametri, MetodoLimitazioni, MetodoVettori, MetodoRaccoltaPercorsi)
+    extends MetodoRaccoltaPercorsi
     implements IMetodo/* , IGestorePercorsiPath, IMetodoParametri */ {
 
     private schemaSwagger?: any;
@@ -1237,7 +1240,8 @@ export class TerminaleMetodo
                 const classeTmp = list.CercaConNomeSeNoAggiungi(element.nome);
                 const metodoTmp = classeTmp.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
                 /* configuro il metodo */
-                metodoTmp.metodoAvviabile = descriptor.value;
+                if (metodoTmp && metodoTmp.metodoAvviabile == undefined && descriptor != undefined && descriptor.value != undefined)
+                    metodoTmp.metodoAvviabile = descriptor.value;
                 metodoTmp.InitMetodoParametri(parametri, 0, propertyKey.toString());
 
                 for (let index = 0; index < this.listaParametri.length; index++) {
