@@ -57,7 +57,7 @@ export class TerminaleClasse implements IGestorePercorsiPath {
         this.ConfiguraListaRotteHTML(app, pathGlobal);
         this.listaMetodi.ConfiguraListaRotteApplicazione(app, this.percorsi);
     }
-    private SettaPercorsi(percorsi: IRaccoltaPercorsi): string {
+    SettaPercorsi(percorsi: IRaccoltaPercorsi): string {
         if (percorsi.patheader == undefined) this.percorsi.patheader = "localhost";
         else this.percorsi.patheader = percorsi.patheader;
 
@@ -86,7 +86,7 @@ export class TerminaleClasse implements IGestorePercorsiPath {
         for (let index = 0; index < this.listaMetodi.length; index++) {
             const element = this.listaMetodi[index];
             const tmp = index + 1;
-            if (element.interazione == 'rotta' || element.interazione == 'ambo') {
+            if (element.tipoInterazione == 'rotta' || element.tipoInterazione == 'ambo') {
                 console.log(tmp + ': ' + element.PrintStamp());
             }
         }
@@ -128,7 +128,7 @@ export class TerminaleClasse implements IGestorePercorsiPath {
         return ritorno;
     }
 
-    private ConfiguraRotteHtml(app: any, percorsoTmp: string, contenuto: string) {
+    ConfiguraRotteHtml(app: any, percorsoTmp: string, contenuto: string) {
         app.get(percorsoTmp,
             //this.cors,
             //this.helmet,
@@ -139,7 +139,7 @@ export class TerminaleClasse implements IGestorePercorsiPath {
                     res.sendStatus(404);
             });
     }
-    private ConfiguraListaRotteHTML(app: any, pathGlobal: string) {
+    ConfiguraListaRotteHTML(app: any, pathGlobal: string) {
         for (let index = 0; index < this.html.length; index++) {
             const element = this.html[index];
             //element.ConfiguraRotteHtml(app, this.percorsi.pathGlobal,)

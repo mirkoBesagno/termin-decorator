@@ -1,12 +1,8 @@
 
-
 import { Request } from "express";
-import { ErroreMio } from "../errore";
-import { TypeInterazone } from "../utility";
+import chiedi from "prompts"
+import { ErroreMio, IParametri, IParametriEstratti, TypeInterazone } from "../utility";
 import { TerminaleParametro } from "./metadata-parametro";
-import { IParametri, IParametriEstratti } from "./utility-parametro";
-
-import chiedi from "prompts";
 
 export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
 
@@ -86,7 +82,7 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
         return ritorno;
     }
 
-    private GetAutenticatore(): TerminaleParametro | undefined {
+    GetAutenticatore(): TerminaleParametro | undefined {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
             if (element.autenticatore) {
@@ -157,4 +153,24 @@ export class ListaTerminaleParametro extends Array<TerminaleParametro>  {
         header = header + '';
         return { body, query, header };
     }
+
+    
+    /* CercaConNome(nome: string): TerminaleParametro | undefined {
+        for (let index = 0; index < this.length; index++) {
+            const element = this[index];
+            if (element.nome == nome) return element;
+        }
+        return undefined;
+    }
+    AggiungiElemento(item: TerminaleParametro, ) {
+        for (let index = 0; index < this.length; index++) {
+            const element = this[index];
+            if (element.nome == item.nome && element.indexParameter == item.classePath) {
+                this[index] = item;
+                return item;
+            }
+        }
+        this.push(item);
+        return item;
+    } */
 }

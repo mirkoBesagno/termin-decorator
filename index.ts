@@ -4,8 +4,7 @@ import { mpClas } from "./model/classe/decoratore-classe";
 import { mpMet } from "./model/metodo/decoratore-metodo";
 import { mpPar } from "./model/parametro/decoratore-parametro";
 import { IRitornoValidatore, ILogbase, IParametriEstratti } from "./model/utility";
-import { ListaTerminaleParametro } from './model/parametro/lista-parametro';
-import { ErroreMio, GestioneErrore } from "./model/errore";
+import { ListaTerminaleParametro } from './model/parametro/lista-parametro'; 
 
 import "reflect-metadata";
 
@@ -13,10 +12,8 @@ export { Main as Main };
 export { mpMet as mpMet };
 export { mpPar as mpPar };
 export { mpClas as mpClas };
-
-export { ErroreMio as ErroreMio };
-export { IRitornoValidatore as IRitornoValidatore };
-export { GestioneErrore as GestioneErrore };
+ 
+export { IRitornoValidatore as IRitornoValidatore }; 
 
 export { IParametriEstratti as IParametriEstratti };
 export { ListaTerminaleParametro as ListaTerminaleParametro };

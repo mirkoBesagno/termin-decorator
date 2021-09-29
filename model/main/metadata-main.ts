@@ -1,4 +1,4 @@
-import { IGestorePercorsiPath, IRaccoltaPercorsi, targetTerminale } from "../utility";
+import { GetListaClasseMetaData, IGestorePercorsiPath, IRaccoltaPercorsi, SalvaListaClasseMetaData, targetTerminale } from "../utility";
 
 import { ListaTerminaleClasse } from "../classe/lista-classe";
 
@@ -10,19 +10,18 @@ import * as http from 'http';
 import { ListaTerminaleTest } from "../test-funzionale/lista-test-funzionale";
 import { GetListaTestMetaData, IReturnTest, ITest, SalvaListaTerminaleMetaData } from "../test-funzionale/utility-test-funzionale";
 import { IstanzaClasse } from "../classe/istanza-classe";
-import { TerminaleTest } from "../test-funzionale/metadata-test-funzionale";
-import { GetListaClasseMetaData, SalvaListaClasseMetaData } from "../utility-function";
+import { TerminaleTest } from "../test-funzionale/metadata-test-funzionale"; 
 import { StartMonitoring } from "./utility-main";
 
 
 
 export class Main implements IGestorePercorsiPath {
     percorsi: IRaccoltaPercorsi;
-    private path: string;
-    private serverExpressDecorato: express.Express;
-    private listaTerminaleClassi: ListaTerminaleClasse;
-    private listaTerminaleTest: ListaTerminaleTest;
-    private httpServer: any;
+    path: string;
+    serverExpressDecorato: express.Express;
+    listaTerminaleClassi: ListaTerminaleClasse;
+    listaTerminaleTest: ListaTerminaleTest;
+    httpServer: any;
 
     constructor(path: string, server?: express.Express) {
         this.path = path;
@@ -66,7 +65,7 @@ export class Main implements IGestorePercorsiPath {
         const list = GetListaClasseMetaData();
         console.log('');
     }
-    private InizializzaClassi(lista: IstanzaClasse[]) {
+    InizializzaClassi(lista: IstanzaClasse[]) {
         return true;
     }
 
@@ -79,7 +78,7 @@ export class Main implements IGestorePercorsiPath {
                 if (tmpMetodo.listaTest) {
                     for (let index = 0; index < tmpMetodo.listaTest.length; index++) {
                         const element = tmpMetodo.listaTest[index];
-                        if (tmpMetodo.interazione == 'rotta' || tmpMetodo.interazione == 'ambo') {
+                        if (tmpMetodo.tipoInterazione == 'rotta' || tmpMetodo.tipoInterazione == 'ambo') {
                             const risposta = await tmpMetodo.ChiamaLaRottaConParametri(
                                 element.body, element.query, element.header
                             );
@@ -96,7 +95,7 @@ export class Main implements IGestorePercorsiPath {
 
     }
 
-    private StartHttpServer() {
+    StartHttpServer() {
         this.httpServer.listen(this.percorsi.porta);
         StartMonitoring();
     }
@@ -183,7 +182,7 @@ export class Main implements IGestorePercorsiPath {
             console.log('********************************************************************************************************************')
         }
     }
-    private GetTest() {
+    GetTest() {
         const ritorno: number[] = [];
         if (this.listaTerminaleTest) {
             this.listaTerminaleTest.sort((x: TerminaleTest, y: TerminaleTest) => {
@@ -207,7 +206,7 @@ export class Main implements IGestorePercorsiPath {
     }
 
 
-    private AggiungiTest(parametri: ITest[]) {
+    AggiungiTest(parametri: ITest[]) {
         const tmp: ListaTerminaleTest = GetListaTestMetaData();
         for (let index = 0; index < parametri.length; index++) {
             const element = parametri[index];
@@ -238,7 +237,7 @@ export class Main implements IGestorePercorsiPath {
         });
     } */
 
-    private InizializzaSwagger(testo?: string) {
+    InizializzaSwagger(testo?: string) {
         let ritorno = '';
         try {
             let swaggerClassePath = '';
@@ -304,7 +303,7 @@ export class Main implements IGestorePercorsiPath {
 
     }
 
-    private ScriviFile(pathDoveScrivereFile: string) {
+    ScriviFile(pathDoveScrivereFile: string) {
 
         fs.mkdirSync(pathDoveScrivereFile + '/FileGenerati_MP', { recursive: true });
 

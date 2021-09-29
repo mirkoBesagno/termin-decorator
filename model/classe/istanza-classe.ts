@@ -3,12 +3,12 @@ import { CheckClasseMetaData, IClasse } from "./utility-classe";
 
 import fs from 'fs';
 import { IstanzaMetodo } from "../metodo/istanza-metodo";
-import { GetListaClasseMetaData, SalvaListaClasseMetaData } from "../utility-function";
+import { GetListaClasseMetaData, SalvaListaClasseMetaData } from "../utility";
 
 export class IstanzaClasse {
     constructor(parametri: IClasse, nomeClasse: string, listaMetodi?: IstanzaMetodo[]) {
 
-        const tmp: ListaTerminaleClasse = GetListaClasseMetaData(1);
+        const tmp: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = CheckClasseMetaData(nomeClasse);
         /* 
                 if (parametri.listaTest) classe.listaTest = parametri.listaTest; */
