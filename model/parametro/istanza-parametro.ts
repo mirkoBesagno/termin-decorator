@@ -1,12 +1,11 @@
 import { ListaTerminaleClasse } from "../classe/lista-classe";
-import { IParametro } from "../utility";
-import { GetListaClasseMetaData, SalvaListaClasseMetaData } from "../utility-function";
+import { GetListaClasseMetaData, IParametro, SalvaListaClasseMetaData } from "../utility";
 import { TerminaleParametro } from "./metadata-parametro";
+
 
 export class IstanzaParametro {
     constructor(parametri: IParametro, target: any, propertyKey: string | symbol, parameterIndex: number) {
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
-
         const classe = list.CercaConNomeSeNoAggiungi(target.constructor.name);
         const metodo = classe.CercaMetodoSeNoAggiungiMetodo(propertyKey.toString());
 

@@ -29,12 +29,6 @@ function Controllo<T>(item: {
             } else {
                 value = newVal;
             }
-            /* if (item.setCheck && item.setCheck(newVal) == true) {
-                value = newVal;                
-            }
-            else if (item.setCheck == undefined) {
-                value = newVal;
-            } */
         };
         Object.defineProperty(target, propertyKey, {
             get: getter,

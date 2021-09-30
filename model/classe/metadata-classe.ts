@@ -4,21 +4,26 @@ import { TerminaleMetodo } from "../metodo/metadata-metodo";
 import { IGestorePercorsiPath, IHtml, IRaccoltaPercorsi } from "../utility";
 
 import chiedi from "prompts";
+import { ListaTerminaleProprieta } from "../proprieta/lista-proprieta";
+import { TerminaleParametro } from "../parametro/metadata-parametro";
+import { TerminaleProprieta } from "../proprieta/metadata-proprieta";
 
 export class TerminaleClasse implements IGestorePercorsiPath {
 
-     listaKnex: any[] = [];
+    //listaProprieta:ListaTerminaleProprieta;
+
 
     classeSwagger?= '';
 
     static nomeMetadataKeyTarget = "ClasseTerminaleTarget";
 
+    listaProprieta: ListaTerminaleProprieta;
     listaMetodi: ListaTerminaleMetodo;
-     id: string;
+    id: string;
     nome: string;
-     rotte: Router;
+    rotte: Router;
 
-     path: string;
+    path: string;
     public get GetPath(): string {
         return this.path;
     }
@@ -36,6 +41,7 @@ export class TerminaleClasse implements IGestorePercorsiPath {
         this.id = Math.random().toString();
         this.rotte = Router();
         this.listaMetodi = new ListaTerminaleMetodo();
+        this.listaProprieta = new ListaTerminaleProprieta();
 
         this.nome = nome;
         if (path) this.path = path;
@@ -57,7 +63,7 @@ export class TerminaleClasse implements IGestorePercorsiPath {
         this.ConfiguraListaRotteHTML(app, pathGlobal);
         this.listaMetodi.ConfiguraListaRotteApplicazione(app, this.percorsi);
     }
-    private SettaPercorsi(percorsi: IRaccoltaPercorsi): string {
+    SettaPercorsi(percorsi: IRaccoltaPercorsi): string {
         if (percorsi.patheader == undefined) this.percorsi.patheader = "localhost";
         else this.percorsi.patheader = percorsi.patheader;
 
@@ -78,7 +84,15 @@ export class TerminaleClasse implements IGestorePercorsiPath {
         }
         return terminale;
     }
+    CercaProprietaSeNoAggiungiProprieta(nome: string) {
+        let terminale = this.listaProprieta.CercaConNome(nome)
 
+        if (terminale == undefined)/* se non c'è */ {
+            terminale = new TerminaleProprieta(nome, 'any'); // creo la funzione
+            this.listaProprieta.AggiungiElemento(terminale);
+        }
+        return terminale;
+    }
     /******************************************************************* */
 
     async PrintMenuClasse() {
@@ -128,7 +142,7 @@ export class TerminaleClasse implements IGestorePercorsiPath {
         return ritorno;
     }
 
-    private ConfiguraRotteHtml(app: any, percorsoTmp: string, contenuto: string) {
+    ConfiguraRotteHtml(app: any, percorsoTmp: string, contenuto: string) {
         app.get(percorsoTmp,
             //this.cors,
             //this.helmet,
@@ -139,7 +153,7 @@ export class TerminaleClasse implements IGestorePercorsiPath {
                     res.sendStatus(404);
             });
     }
-    private ConfiguraListaRotteHTML(app: any, pathGlobal: string) {
+    ConfiguraListaRotteHTML(app: any, pathGlobal: string) {
         for (let index = 0; index < this.html.length; index++) {
             const element = this.html[index];
             //element.ConfiguraRotteHtml(app, this.percorsi.pathGlobal,)

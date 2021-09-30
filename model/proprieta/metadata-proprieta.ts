@@ -1,39 +1,25 @@
-import { IDescrivibile, IParametro, IRitornoValidatore, tipo, TypeDovePossoTrovarlo, TypePosizione } from "../utility"; 
+import { TerminaleParametro } from "../parametro/metadata-parametro";
+import { IParametro, IRitornoValidatore, tipo } from "../utility";
 
-export class TerminaleParametro implements IDescrivibile, IParametro {
-    schemaSwagger?: {
-        nome: string,
-        valoreEsempio: string,
-        tipo: string
-    }[];
+
+
+export class TerminaleProprieta {
 
     valore: any;
-
-    dovePossoTrovarlo: TypeDovePossoTrovarlo = 'rotta';
     nome: string;
     tipo: tipo;
-    posizione: TypePosizione;
-    indexParameter: number;
 
     descrizione: string;
     sommario: string;
 
-    autenticatore: boolean;
-
-    obbligatorio: boolean;
-
 
     Validatore?: (parametro: any) => IRitornoValidatore;
-    constructor(nome: string, tipo: tipo, posizione: TypePosizione, indexParameter: number) {
+    constructor(nome: string, tipo: tipo) {
         this.nome = nome;
         this.tipo = tipo;
-        this.posizione = posizione;
-        this.indexParameter = indexParameter;
 
         this.descrizione = "";
         this.sommario = "";
-        this.autenticatore = false;
-        this.obbligatorio = true;
     }
 
     /******************************* */
@@ -48,27 +34,6 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
         //tmp = tmp + '' + this. + '';
         tmp = tmp + '' + JSON.stringify(this, null, 4) + '';
         return tmp;
-    }
-
-    /*  */
-
-
-    SettaSwagger() {
-        const ritorno =
-            `{
-                "name": "${this.nome}",
-                "in": "${this.posizione}",
-                "required": false,
-                "type": "${this.tipo}",
-                "description": "${this.descrizione}",
-                "summary":"${this.sommario}"
-            }`;
-        try {
-            JSON.parse(ritorno)
-        } catch (error) {
-            console.log(error);
-        }
-        return ritorno;
     }
 
     Verifica(): boolean {

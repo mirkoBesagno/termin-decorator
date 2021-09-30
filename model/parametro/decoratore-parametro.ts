@@ -1,6 +1,5 @@
 import { ListaTerminaleClasse } from "../classe/lista-classe";
-import { IParametro } from "../utility";
-import { GetListaClasseMetaData, SalvaListaClasseMetaData } from "../utility-function";
+import { GetListaClasseMetaData, IParametro, SalvaListaClasseMetaData } from "../utility";
 import { TerminaleParametro } from "./metadata-parametro";
 
 /**
@@ -32,4 +31,6 @@ import { TerminaleParametro } from "./metadata-parametro";
         SalvaListaClasseMetaData(list);
     }
 }
+
+
 export { decoratoreParametroGenerico as mpPar };

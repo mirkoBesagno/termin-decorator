@@ -1,12 +1,12 @@
 import { targetTerminale } from "../utility";
-import { ListaTerminaleTest } from "./lista-test-funzionale";
+import { ListaTerminaleTest, ListaTerminaleTestAPI } from "./lista-test-funzionale";
 
 
 
 export interface ITest {
     numeroRootTest: number,
     nome: string,
-    numero:number,
+    numero: number,
     /**Specifica se il percorso dato deve essere concatenato al percorso della classe o se è da prendere singolarmente di default è falso e quindi il percorso andra a sommarsi al percorso della classe */
     testUnita: {
         nome: string,
@@ -15,6 +15,7 @@ export interface ITest {
         FunzioniDiPulizia?: () => IReturnTest | Promise<IReturnTest> | undefined
     };
 }
+
 export interface IReturnTest {
     passato: boolean
 }
@@ -34,6 +35,26 @@ export function GetListaTestMetaData(): ListaTerminaleTest {
  * 
  * @param tmp 
  */
-export function SalvaListaTerminaleMetaData(tmp: ListaTerminaleTest) {
+export function SalvaListaTestMetaData(tmp: ListaTerminaleTest) {
     Reflect.defineMetadata(ListaTerminaleTest.nomeMetadataKeyTarget, tmp, targetTerminale);
+}
+
+/**
+ * 
+ * @returns 
+ */
+export function GetListaTestAPIMetaData(): ListaTerminaleTestAPI {
+    let tmp: ListaTerminaleTestAPI = Reflect.getMetadata(ListaTerminaleTestAPI.nomeMetadataKeyTarget, targetTerminale);
+    if (tmp == undefined) {
+        tmp = new ListaTerminaleTestAPI();
+    }
+    return tmp;
+}
+
+/**
+ * 
+ * @param tmp 
+ */
+export function SalvaListaTestAPIMetaData(tmp: ListaTerminaleTestAPI) {
+    Reflect.defineMetadata(ListaTerminaleTestAPI.nomeMetadataKeyTarget, tmp, targetTerminale);
 }

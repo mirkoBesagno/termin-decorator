@@ -3,7 +3,6 @@ import os from "os";
 
 export function StartMonitoring() {
     try {
-
         const used = process.memoryUsage();
         const partizionamentoMemoriaProcesso: {
             rss: string,
@@ -44,10 +43,10 @@ export function StartMonitoring() {
         partizionamentoMemoriaProcesso.cpuMedia = os.cpus();
         partizionamentoMemoriaProcesso.totalMemo = os.totalmem().toString();
         partizionamentoMemoriaProcesso.freeMemo = os.freemem().toString();
-
-        //console.log("Data" + Date.now(), partizionamentoMemoriaProcesso);
-
-
+        console.log(":-Data" + new Date().toISOString() + ' - ' + partizionamentoMemoriaProcesso.rss + ' - ' +
+            partizionamentoMemoriaProcesso.heapTotale + ' - ' +
+            partizionamentoMemoriaProcesso.heapUsed + ' - ' +
+            partizionamentoMemoriaProcesso.external + ' - ' + '\n');
         setTimeout(() => {
             StartMonitoring();
         }, (20) * 1000);

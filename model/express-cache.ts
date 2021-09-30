@@ -3,8 +3,7 @@ import { Request } from "express";
 //import redis from "redis";
 import expressRedisCache from "express-redis-cache";
 
-//import RedisServer from 'redis-server';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+
 const RedisServer = require('redis-server');
 export const redisClient = new RedisServer();
 //export const redisClient = redis.createClient(6379, '127.0.0.1');

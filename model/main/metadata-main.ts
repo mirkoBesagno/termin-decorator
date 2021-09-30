@@ -1,4 +1,4 @@
-import { IGestorePercorsiPath, IRaccoltaPercorsi, targetTerminale } from "../utility";
+import { GetListaClasseMetaData, IGestorePercorsiPath, IRaccoltaPercorsi, SalvaListaClasseMetaData, targetTerminale } from "../utility";
 
 import { ListaTerminaleClasse } from "../classe/lista-classe";
 
@@ -7,22 +7,22 @@ import cookieParser from "cookie-parser";
 import fs from "fs";
 import swaggerUI from "swagger-ui-express";
 import * as http from 'http';
-import { ListaTerminaleTest } from "../test-funzionale/lista-test-funzionale";
-import { GetListaTestMetaData, IReturnTest, ITest, SalvaListaTerminaleMetaData } from "../test-funzionale/utility-test-funzionale";
+import { ITestAPI, ListaTerminaleTest, ListaTerminaleTestAPI } from "../test-funzionale/lista-test-funzionale";
+import { GetListaTestAPIMetaData, GetListaTestMetaData, IReturnTest, ITest, SalvaListaTestAPIMetaData, SalvaListaTestMetaData } from "../test-funzionale/utility-test-funzionale";
 import { IstanzaClasse } from "../classe/istanza-classe";
-import { TerminaleTest } from "../test-funzionale/metadata-test-funzionale";
-import { GetListaClasseMetaData, SalvaListaClasseMetaData } from "../utility-function";
+import { TerminaleTest, TerminaleTestAPI } from "../test-funzionale/metadata-test-funzionale";
 import { StartMonitoring } from "./utility-main";
 
 
 
 export class Main implements IGestorePercorsiPath {
     percorsi: IRaccoltaPercorsi;
-    private path: string;
-    private serverExpressDecorato: express.Express;
-    private listaTerminaleClassi: ListaTerminaleClasse;
-    private listaTerminaleTest: ListaTerminaleTest;
-    private httpServer: any;
+    path: string;
+    serverExpressDecorato: express.Express;
+    listaTerminaleClassi: ListaTerminaleClasse;
+    listaTerminaleTest: ListaTerminaleTest;
+    httpServer: any;
+
 
     constructor(path: string, server?: express.Express) {
         this.path = path;
@@ -35,7 +35,7 @@ export class Main implements IGestorePercorsiPath {
 
     Inizializza(patheader: string, porta: number, rottaBase: boolean, creaFile?: boolean, pathDoveScrivereFile?: string) {
         //const tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-        
+
         const tmp = GetListaClasseMetaData();
 
         console.log('');
@@ -48,10 +48,8 @@ export class Main implements IGestorePercorsiPath {
             (<any>this.serverExpressDecorato).use(express.json());
             (<any>this.serverExpressDecorato).use(cookieParser())
 
-            for (let index = 0; index < tmp.length; index++) {
-                const element = tmp[index];
-                element.SettaPathRoot_e_Global(this.path, this.percorsi, this.serverExpressDecorato);
-            }
+            tmp.ConfiguraListaRotteApplicazione(this.path, this.percorsi, this.serverExpressDecorato);
+
             this.httpServer = http.createServer(this.serverExpressDecorato);
 
             SalvaListaClasseMetaData(tmp);
@@ -62,11 +60,11 @@ export class Main implements IGestorePercorsiPath {
         else {
             console.log("Attenzione non vi sono rotte e quantaltro.");
         }
-        
+
         const list = GetListaClasseMetaData();
         console.log('');
     }
-    private InizializzaClassi(lista: IstanzaClasse[]) {
+    InizializzaClassi(lista: IstanzaClasse[]) {
         return true;
     }
 
@@ -96,7 +94,7 @@ export class Main implements IGestorePercorsiPath {
 
     }
 
-    private StartHttpServer() {
+    StartHttpServer() {
         this.httpServer.listen(this.percorsi.porta);
         StartMonitoring();
     }
@@ -183,7 +181,8 @@ export class Main implements IGestorePercorsiPath {
             console.log('********************************************************************************************************************')
         }
     }
-    private GetTest() {
+    
+    GetTest() {
         const ritorno: number[] = [];
         if (this.listaTerminaleTest) {
             this.listaTerminaleTest.sort((x: TerminaleTest, y: TerminaleTest) => {
@@ -207,13 +206,23 @@ export class Main implements IGestorePercorsiPath {
     }
 
 
-    private AggiungiTest(parametri: ITest[]) {
+    AggiungiTest(parametri: ITest[]) {
         const tmp: ListaTerminaleTest = GetListaTestMetaData();
         for (let index = 0; index < parametri.length; index++) {
             const element = parametri[index];
             tmp.AggiungiElemento(new TerminaleTest(element));
         }
-        SalvaListaTerminaleMetaData(tmp);
+        SalvaListaTestMetaData(tmp);
+        this.listaTerminaleTest = Reflect.getMetadata(ListaTerminaleTest.nomeMetadataKeyTarget, targetTerminale);
+    }
+    AggiungiTestAPI(parametri: ITestAPI[]) {
+
+        const tmp: ListaTerminaleTestAPI = GetListaTestAPIMetaData();
+        for (let index = 0; index < parametri.length; index++) {
+            const element = parametri[index];
+            tmp.AggiungiElemento((element));
+        }
+        SalvaListaTestAPIMetaData(tmp);
         this.listaTerminaleTest = Reflect.getMetadata(ListaTerminaleTest.nomeMetadataKeyTarget, targetTerminale);
     }
 
@@ -238,7 +247,7 @@ export class Main implements IGestorePercorsiPath {
         });
     } */
 
-    private InizializzaSwagger(testo?: string) {
+    InizializzaSwagger(testo?: string) {
         let ritorno = '';
         try {
             let swaggerClassePath = '';
@@ -304,7 +313,7 @@ export class Main implements IGestorePercorsiPath {
 
     }
 
-    private ScriviFile(pathDoveScrivereFile: string) {
+    ScriviFile(pathDoveScrivereFile: string) {
 
         fs.mkdirSync(pathDoveScrivereFile + '/FileGenerati_MP', { recursive: true });
 
