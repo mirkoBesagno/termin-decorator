@@ -1,7 +1,6 @@
 import { TerminaleParametro } from "../parametro/metadata-parametro";
 import { IParametro, IRitornoValidatore, tipo } from "../utility";
-
-
+import { types } from "pg";
 
 export class TerminaleProprieta {
 
@@ -84,6 +83,16 @@ export class TerminaleProprieta {
         }
     }
     CostruisciCreazioneDB(): string {
-        return this.nome + '   text';
+        switch (this.tipo) {
+            case 'array': return this.nome + " varchar(255)";
+            case 'boolean': return this.nome + " varchar(255)";
+            case 'date': return this.nome + " varchar(255)";
+            case 'number': return this.nome + " varchar(255)";
+            case 'object': return this.nome + " varchar(255)";
+            case 'text': return this.nome + " varchar(255)";
+            case 'any': break;
+            default: return this.nome + " varchar(255)";
+        }
+        return this.nome + " varchar(255)";
     }
 }

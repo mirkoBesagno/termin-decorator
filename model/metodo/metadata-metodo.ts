@@ -2,8 +2,7 @@ import { ConstruisciErrore, ErroreMio, IClasseRiferimento, IContieneRaccoltaPerc
 
 import slowDown, { Options as OptSlowDows } from "express-slow-down";
 import rateLimit, { Options as OptRateLimit } from "express-rate-limit";
-import { Options as OptionsCache } from "express-redis-cache";
-import { cacheMiddleware, CalcolaChiaveMemoryCache, redisClient } from "../express-cache";
+import { CalcolaChiaveMemoryCache } from "../express-cache";
 import { NextFunction, Request, Response } from "express";
 import helmet from "helmet";
 import cors from 'cors';
@@ -108,7 +107,7 @@ class MetodoLimitazioni extends MetodoParametri implements IMetodoLimitazioni {
     helmet: any;
     middleware: any[];
 
-    cacheOptionRedis: OptionsCache;
+    //cacheOptionRedis: OptionsCache;
     cacheOptionMemory: { durationSecondi: number };
     constructor() {
         super();
@@ -133,7 +132,7 @@ class MetodoLimitazioni extends MetodoParametri implements IMetodoLimitazioni {
         this.helmet = helmet();
         this.middleware = [];
 
-        this.cacheOptionRedis = { expire: 1 /* secondi */, client: redisClient };
+        /* this.cacheOptionRedis = { expire: 1 , client: redisClient }; */
         this.cacheOptionMemory = { durationSecondi: 1 };
     }
     InitMetodoLimitazioni(init: IMetodoLimitazioni) {
@@ -432,7 +431,7 @@ export class TerminaleMetodo
                     .set(JSON.parse('{ ' + header + ' }'))
                     .set('accept', 'json')
                     ;
-            } catch (error) {
+            } catch (error: any) {
                 if ('response' in error) {
                     return (<any>error).response.body;
                 }
@@ -459,7 +458,7 @@ export class TerminaleMetodo
                     .set(header)
                     .set('accept', 'json')
                     ;
-            } catch (error) {
+            } catch (error:any) {
                 //console.log(error);
                 if ('response' in error) {
                     return (<any>error).response.body;
@@ -860,7 +859,7 @@ class ArtefattoExpress {
                     metodo.cors,
                     metodo.helmet,
                     middlew,
-                    cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
+                    //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 , client: redisClient }),
                     apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
                     async (req: Request, res: Response) => {
                         //console.log("GET");
@@ -882,7 +881,7 @@ class ArtefattoExpress {
                     metodo.cors,
                     metodo.helmet,
                     middlew,
-                    cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
+                    //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
                     apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
                     async (req: Request, res: Response) => {
                         //console.log("POST");
@@ -904,7 +903,7 @@ class ArtefattoExpress {
                     metodo.cors,
                     metodo.helmet,
                     middlew,
-                    cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
+                    //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
                     apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
                     async (req: Request, res: Response) => {
                         //console.log("DELETE");
@@ -926,7 +925,7 @@ class ArtefattoExpress {
                     metodo.cors,
                     metodo.helmet,
                     middlew,
-                    cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
+                    //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
                     apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
                     async (req: Request, res: Response) => {
                         //console.log("PATCH");
@@ -948,7 +947,7 @@ class ArtefattoExpress {
                     metodo.cors,
                     metodo.helmet,
                     middlew,
-                    cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
+                    //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
                     apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
                     async (req: Request, res: Response) => {
                         //console.log("PURGE");
@@ -970,7 +969,7 @@ class ArtefattoExpress {
                     metodo.cors,
                     metodo.helmet,
                     middlew,
-                    cacheMiddleware.route(metodo.cacheOptionRedis ?? {}),
+                    //cacheMiddleware.route(metodo.cacheOptionRedis ?? {}),
                     apiRateLimiter,
                     apiSpeedLimiter,/*csrfProtection,*/
                     async (req: Request, res: Response) => {

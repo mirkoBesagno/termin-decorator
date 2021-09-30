@@ -10,7 +10,6 @@ import { TerminaleProprieta } from "../proprieta/metadata-proprieta";
 import { Client } from "pg";
 
 
-
 export interface IClasseORM {
 
     nomeTriggerAutoCreateUpdated_Created_Deleted: string,
@@ -18,6 +17,7 @@ export interface IClasseORM {
     abilitaUpdatedAt: boolean;
     abilitaDeletedAt: boolean;
     nomeTabella: string;
+    creaId: boolean;
 }
 
 class ArtefattoClasseORM implements IClasseORM {
@@ -26,6 +26,7 @@ class ArtefattoClasseORM implements IClasseORM {
     abilitaCreatedAt: boolean;
     abilitaUpdatedAt: boolean;
     abilitaDeletedAt: boolean;
+    creaId: boolean;
     faxSimile_abilitaDeletedAt = `created_at timestamp with time zone  NOT NULL  DEFAULT current_timestamp`;
     faxSimile_abilitaCreatedAt = `updated_at timestamp with time zone  NOT NULL  DEFAULT current_timestamp`;
     faxSimile_abilitaUpdatedAt = `deleted_at timestamp with time zone`;
@@ -45,6 +46,7 @@ class ArtefattoClasseORM implements IClasseORM {
     listaProprieta: ListaTerminaleProprieta;
     nomeTabella: string;
     constructor(nomeTabella: string) {
+        this.creaId = false;
         this.nomeTabella = nomeTabella;
         this.listaProprieta = new ListaTerminaleProprieta();
         this.abilitaCreatedAt = false;
@@ -67,54 +69,36 @@ class ArtefattoClasseORM implements IClasseORM {
             const element = this.listaProprieta[index];
             ritornoTmp = ritornoTmp + element.CostruisciCreazioneDB();
             if (index + 1 < this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
-            else ritornoTmp = ritornoTmp + '\n';
+            else {
+                if (this.creaId) {
+                    ritornoTmp = ritornoTmp + ',\n';
+                    ritornoTmp = ritornoTmp + CreaID() + '\n';
+                } else {
+                    ritornoTmp = ritornoTmp + '\n';
+                }
+            }
         }
         ritornoTmp = ritornoTmp + ');' + '\n';
-
-        let result;
-        try {
-            result = await client.query(ritornoTmp);
-            console.log('ESEGUO : \n' + ritornoTmp);
-        } catch (error) {
-            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
-            console.log(error);
-            console.log('\n\nFINE Errroe : \n**********************\n\n');
-        }
+        await EseguiQueryControllata(client, ritornoTmp);
         ritorno = ritorno + ritornoTmp;
         ritornoTmp = '';
         if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
             ritornoTmp = ritornoTmp + this.TriggerUpdate(this.nomeTabella) + '\n';
         }
-
-        try {
-            result = await client.query(ritornoTmp);
-            console.log('ESEGUO : \n' + ritornoTmp);
-        } catch (error) {
-            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
-            console.log(error);
-            console.log('\n\nFINE Errroe : \n**********************\n\n');
-        }
+        await EseguiQueryControllata(client, ritornoTmp);
         ritorno = ritorno + ritornoTmp;
         ritornoTmp = '';
-
         if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
             ritornoTmp = ritornoTmp + this.TriggerDeleted_at(this.nomeTabella) + '\n';
         }
-
-        try {
-            result = await client.query(ritornoTmp);
-            console.log('ESEGUO : \n' + ritornoTmp);
-        } catch (error) {
-            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
-            console.log(error);
-            console.log('\n\nFINE Errroe : \n**********************\n\n');
-        }
+        await EseguiQueryControllata(client, ritornoTmp);
         ritorno = ritorno + ritornoTmp;
         ritornoTmp = '';
-
-
         return ritorno;
     }
+}
+export function CreaID(){
+    return "id SERIAL PRIMARY KEY";
 }
 export function TriggerUpdate_updated_at_column() {
     return `CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -138,14 +122,23 @@ export function DropAllTable() {
     GRANT ALL ON SCHEMA public TO public;
     COMMENT ON SCHEMA public IS 'standard public schema';`;
 }
+export async function EseguiQueryControllata(client: Client, query: string) {
+    try {
+        const result = await client.query(query);
+        console.log('ESEGUO : \n' + query);
+        return query;
+    } catch (error) {
+        console.log('\n\nINIZIO Errroe : \n**********************\n\n');
+        console.log(error);
+        console.log('\n\nFINE Errroe : \n**********************\n\n');
+    }
+}
 
 class ArtefattoClasseExpress extends ArtefattoClasseORM {
-
     listaMetodi: ListaTerminaleMetodo;
     id: string;
     nome: string;
     rotte: Router;
-
     path: string;
     public get GetPath(): string {
         return this.path;
@@ -155,13 +148,9 @@ class ArtefattoClasseExpress extends ArtefattoClasseORM {
         const pathGlobal = '/' + this.path;
         this.percorsi.pathGlobal = pathGlobal;
     }
-
     percorsi: IRaccoltaPercorsi;
-
     html: IHtml[] = [];
-
     classeSwagger?= '';
-
     constructor(nome: string, path?: string, headerPath?: string, port?: number) {
         super(nome);
 
@@ -183,11 +172,14 @@ class ArtefattoClasseExpress extends ArtefattoClasseORM {
         this.percorsi.pathGlobal = pathGlobal;
         this.classeSwagger = '';
     }
-
     SettaPathRoot_e_Global(item: string, percorsi: IRaccoltaPercorsi, app: any) {
         const pathGlobal = this.SettaPercorsi(percorsi);
         this.ConfiguraListaRotteHTML(app, pathGlobal);
         this.listaMetodi.ConfiguraListaRotteApplicazione(app, this.percorsi);
+
+    }
+    SettaORM() {
+        return true;
     }
     SettaPercorsi(percorsi: IRaccoltaPercorsi): string {
         if (percorsi.patheader == undefined) this.percorsi.patheader = "localhost";
@@ -220,7 +212,6 @@ class ArtefattoClasseExpress extends ArtefattoClasseORM {
         return terminale;
     }
     /******************************************************************* */
-
     async PrintMenuClasse() {
         console.log('Classe :' + this.nome);
         for (let index = 0; index < this.listaMetodi.length; index++) {
@@ -250,8 +241,6 @@ class ArtefattoClasseExpress extends ArtefattoClasseORM {
             await this.PrintMenuClasse();
         }
     }
-
-
     SettaSwagger() {
         /* 
         "paths": {  } 
@@ -267,7 +256,6 @@ class ArtefattoClasseExpress extends ArtefattoClasseORM {
         }
         return ritorno;
     }
-
     ConfiguraRotteHtml(app: any, percorsoTmp: string, contenuto: string) {
         app.get(percorsoTmp,
             //this.cors,

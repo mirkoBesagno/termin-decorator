@@ -97,10 +97,12 @@ export class IstanzaCLasseORM {
 
         const list: ListaTerminaleClasse = GetListaClasseMetaData();
         const classe = list.CercaConNomeSeNoAggiungi(nomeClasse);
-        classe.abilitaCreatedAt = parametri.abilitaCreatedAt;
-        classe.abilitaDeletedAt = parametri.abilitaDeletedAt;
-        classe.abilitaUpdatedAt = parametri.abilitaUpdatedAt;
-        classe.nomeTabella = parametri.nomeTabella;
+        classe.abilitaCreatedAt = parametri.abilitaCreatedAt ?? false;
+        classe.abilitaDeletedAt = parametri.abilitaDeletedAt ?? false;
+        classe.abilitaUpdatedAt = parametri.abilitaUpdatedAt ?? false;
+        classe.creaId = parametri.creaId ?? false;
+        classe.nomeTabella = parametri.nomeTabella ?? nomeClasse;
+        (<IClasseORM>classe).nomeTriggerAutoCreateUpdated_Created_Deleted = parametri.nomeTriggerAutoCreateUpdated_Created_Deleted ?? classe.nomeTriggerAutoCreateUpdated_Created_Deleted;
         SalvaListaClasseMetaData(list);
     }
 }

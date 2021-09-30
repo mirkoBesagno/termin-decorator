@@ -68,6 +68,9 @@ export class ListaTerminaleClasse extends Array<TerminaleClasse> {
             element.SettaPathRoot_e_Global(path, percorsi, serverExpressDecorato);
         }
     }
+    ConfiguraListaORM() {
+        return true;
+    }
 
     async PrintMenuClassi() {
         await this.PrintListaClassi();

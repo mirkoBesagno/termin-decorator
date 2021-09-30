@@ -3,8 +3,8 @@ import { Request } from "express";
 //import redis from "redis";
 import expressRedisCache from "express-redis-cache";
 
-
-const RedisServer = require('redis-server');
+/* 
+const RedisServer = require('redis-server'); 
 export const redisClient = new RedisServer();
 //export const redisClient = redis.createClient(6379, '127.0.0.1');
 
@@ -23,15 +23,16 @@ redisClient.on("end", function (item: any) {
 redisClient.on("warning", function (item: any) {
     console.log(item);
 });
+export const cacheMiddleware = expressRedisCache({ client: redisClient, expire: 10 });
 
-export const cacheMiddleware = expressRedisCache({ client: redisClient, expire: 10 /* secondi */ });
+*/
 
 import { sha1 } from "object-hash";
 
 export function CalcolaChiaveMemoryCache(req: Request) {
     const tmp = '-' + JSON.stringify(req.body) + '-' + JSON.stringify(req.header) + '-' + JSON.stringify(req.query) + '-';
     const tmpmd = sha1((tmp));
-    const key = '__express__' + req.url + '__MP__' + tmpmd+ '__';
+    const key = '__express__' + req.url + '__MP__' + tmpmd + '__';
     return key;
 }
 /* 

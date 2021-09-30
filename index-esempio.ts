@@ -2,12 +2,19 @@ import { ListaTerminaleParametro, Main, mpClas, mpMet, mpMetGen, mpPar, IParamet
 import { IReturnTest } from "./model/test-funzionale/utility-test-funzionale";
 import { IMetodoEventi, IMetodoParametri } from "./model/utility";
 import { Client } from "pg";
-import { randomUUID } from "crypto";
 
 /* 
 
 */
-@mpClas({ percorso: 'persona' }, { nomeTabella: 'Persona', abilitaCreatedAt: true, abilitaDeletedAt: true, abilitaUpdatedAt: true, nomeTriggerAutoCreateUpdated_Created_Deleted: 'TracciamentoOperazioni_I_liv' })
+@mpClas({ percorso: 'persona' },
+    {
+        nomeTabella: 'Persona',
+        abilitaCreatedAt: true,
+        abilitaDeletedAt: true,
+        abilitaUpdatedAt: true,
+        nomeTriggerAutoCreateUpdated_Created_Deleted: 'TracciamentoOperazioni_I_liv',
+        creaId: true
+    })
 export class Persona {
 
     @mpProp()
@@ -48,7 +55,7 @@ const client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'test',
-    password: 'password',
+    password: 'postgres',
     port: 5432,
 })
 client.connect().then(async (result) => {
@@ -62,7 +69,7 @@ client.connect().then(async (result) => {
     console.log('*******');
 
 
-    AggiungiRiga(0,100);
+    AggiungiRiga(0, 100);
 
 }).catch((err: any) => {
     console.log("ciao");
@@ -94,7 +101,7 @@ async function AggiungiRiga(count: number, limit: number) {
         try {
             const query = {
                 text: 'INSERT INTO persona(nome) VALUES($1)',
-                values: [randomUUID().toString()],
+                values: [makeid(Number.parseInt(String(Math.random() * 100))).toString()],
             }
             // callback
             await client.query(query);
@@ -110,4 +117,15 @@ async function AggiungiRiga(count: number, limit: number) {
         }
     }, 3000)
 
+}
+
+function makeid(length: number) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() *
+            charactersLength));
+    }
+    return result;
 }
