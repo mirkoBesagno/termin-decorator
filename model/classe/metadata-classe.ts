@@ -7,17 +7,140 @@ import chiedi from "prompts";
 import { ListaTerminaleProprieta } from "../proprieta/lista-proprieta";
 import { TerminaleParametro } from "../parametro/metadata-parametro";
 import { TerminaleProprieta } from "../proprieta/metadata-proprieta";
-
-export class TerminaleClasse implements IGestorePercorsiPath {
-
-    //listaProprieta:ListaTerminaleProprieta;
+import { Client } from "pg";
 
 
-    classeSwagger?= '';
 
-    static nomeMetadataKeyTarget = "ClasseTerminaleTarget";
+export interface IClasseORM {
+
+    nomeTriggerAutoCreateUpdated_Created_Deleted: string,
+    abilitaCreatedAt: boolean;
+    abilitaUpdatedAt: boolean;
+    abilitaDeletedAt: boolean;
+    nomeTabella: string;
+}
+
+class ArtefattoClasseORM implements IClasseORM {
+    nomeTriggerAutoCreateUpdated_Created_Deleted = 'update_updated_at_column';
+
+    abilitaCreatedAt: boolean;
+    abilitaUpdatedAt: boolean;
+    abilitaDeletedAt: boolean;
+    faxSimile_abilitaDeletedAt = `created_at timestamp with time zone  NOT NULL  DEFAULT current_timestamp`;
+    faxSimile_abilitaCreatedAt = `updated_at timestamp with time zone  NOT NULL  DEFAULT current_timestamp`;
+    faxSimile_abilitaUpdatedAt = `deleted_at timestamp with time zone`;
+
+    TriggerDeleted_at(nomeTabella: string) {
+        return `CREATE INDEX IF NOT EXISTS idx_somethings_deleted_at ON ${nomeTabella} (deleted_at ASC);`;
+    }
+    TriggerUpdate(nomeTabella: string) {
+        return `DROP TRIGGER IF EXISTS tg_somethings_updated_at ON ${nomeTabella};
+        CREATE TRIGGER tg_somethings_updated_at
+        BEFORE UPDATE
+        ON ${nomeTabella}
+        FOR EACH ROW
+        EXECUTE PROCEDURE update_updated_at_column();`
+    }
 
     listaProprieta: ListaTerminaleProprieta;
+    nomeTabella: string;
+    constructor(nomeTabella: string) {
+        this.nomeTabella = nomeTabella;
+        this.listaProprieta = new ListaTerminaleProprieta();
+        this.abilitaCreatedAt = false;
+        this.abilitaDeletedAt = false;
+        this.abilitaUpdatedAt = false;
+    }
+
+    faxsSimileIntestazione = 'CREATE TABLE  IF NOT EXISTS  ';
+
+    async CostruisciCreazioneDB(client: Client) {
+        let ritorno = '';
+        let ritornoTmp = '';
+        ritornoTmp = ritornoTmp + this.faxsSimileIntestazione + this.nomeTabella + '(' + '\n';
+        if (this.abilitaCreatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaCreatedAt + ',' + '\n'; }
+        if (this.abilitaDeletedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaDeletedAt + ',' + '\n'; }
+        if (this.abilitaUpdatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaUpdatedAt; }
+        if (this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
+        else ritornoTmp = ritornoTmp + '\n';
+        for (let index = 0; index < this.listaProprieta.length; index++) {
+            const element = this.listaProprieta[index];
+            ritornoTmp = ritornoTmp + element.CostruisciCreazioneDB();
+            if (index + 1 < this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
+            else ritornoTmp = ritornoTmp + '\n';
+        }
+        ritornoTmp = ritornoTmp + ');' + '\n';
+
+        let result;
+        try {
+            result = await client.query(ritornoTmp);
+            console.log('ESEGUO : \n' + ritornoTmp);
+        } catch (error) {
+            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
+            console.log(error);
+            console.log('\n\nFINE Errroe : \n**********************\n\n');
+        }
+        ritorno = ritorno + ritornoTmp;
+        ritornoTmp = '';
+        if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
+            ritornoTmp = ritornoTmp + this.TriggerUpdate(this.nomeTabella) + '\n';
+        }
+
+        try {
+            result = await client.query(ritornoTmp);
+            console.log('ESEGUO : \n' + ritornoTmp);
+        } catch (error) {
+            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
+            console.log(error);
+            console.log('\n\nFINE Errroe : \n**********************\n\n');
+        }
+        ritorno = ritorno + ritornoTmp;
+        ritornoTmp = '';
+
+        if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
+            ritornoTmp = ritornoTmp + this.TriggerDeleted_at(this.nomeTabella) + '\n';
+        }
+
+        try {
+            result = await client.query(ritornoTmp);
+            console.log('ESEGUO : \n' + ritornoTmp);
+        } catch (error) {
+            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
+            console.log(error);
+            console.log('\n\nFINE Errroe : \n**********************\n\n');
+        }
+        ritorno = ritorno + ritornoTmp;
+        ritornoTmp = '';
+
+
+        return ritorno;
+    }
+}
+export function TriggerUpdate_updated_at_column() {
+    return `CREATE OR REPLACE FUNCTION update_updated_at_column()
+    RETURNS TRIGGER AS $$
+    BEGIN
+        NEW.updated_at = now();
+        RETURN NEW;
+    END;
+    $$ language 'plpgsql';`;
+}
+export function CreateDataBase(nomeDB: string) {
+    return `CREATE DATABASE ${nomeDB};`;
+}
+export function DropDataBase(nomeDB: string) {
+    return `DROP DATABASE IF EXISTS ${nomeDB};`;
+}
+export function DropAllTable() {
+    return `DROP SCHEMA public CASCADE;
+    CREATE SCHEMA public;
+    GRANT ALL ON SCHEMA public TO postgres;
+    GRANT ALL ON SCHEMA public TO public;
+    COMMENT ON SCHEMA public IS 'standard public schema';`;
+}
+
+class ArtefattoClasseExpress extends ArtefattoClasseORM {
+
     listaMetodi: ListaTerminaleMetodo;
     id: string;
     nome: string;
@@ -37,11 +160,14 @@ export class TerminaleClasse implements IGestorePercorsiPath {
 
     html: IHtml[] = [];
 
+    classeSwagger?= '';
+
     constructor(nome: string, path?: string, headerPath?: string, port?: number) {
+        super(nome);
+
         this.id = Math.random().toString();
         this.rotte = Router();
         this.listaMetodi = new ListaTerminaleMetodo();
-        this.listaProprieta = new ListaTerminaleProprieta();
 
         this.nome = nome;
         if (path) this.path = path;
@@ -163,5 +289,39 @@ export class TerminaleClasse implements IGestorePercorsiPath {
                 this.ConfiguraRotteHtml(app, pathGlobal + '/' + element.path, element.contenuto);
         }
     }
+}
 
+
+export class TerminaleClasse extends ArtefattoClasseExpress implements IGestorePercorsiPath {
+    //listaProprieta:ListaTerminaleProprieta;
+
+
+    static nomeMetadataKeyTarget = "ClasseTerminaleTarget";
+
+    constructor(nome: string, path?: string, headerPath?: string, port?: number) {
+        super(nome, path, headerPath, port);
+    }
+
+
+
+    /* SettaPathRoot_e_Global(item: string, percorsi: IRaccoltaPercorsi, app: any) {
+    }
+    SettaPercorsi(percorsi: IRaccoltaPercorsi): string {
+    }
+
+    CercaMetodoSeNoAggiungiMetodo(nome: string) {
+    }
+    CercaProprietaSeNoAggiungiProprieta(nome: string) { 
+
+    async PrintMenuClasse() {
+    }
+
+
+    SettaSwagger() {
+    }
+
+    ConfiguraRotteHtml(app: any, percorsoTmp: string, contenuto: string) {
+    }
+    ConfiguraListaRotteHTML(app: any, pathGlobal: string) {
+    } */
 }

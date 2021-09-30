@@ -3,6 +3,7 @@ import { ListaTerminaleClasse } from "./lista-classe";
 import fs from 'fs';
 import { IstanzaMetodo } from "../metodo/istanza-metodo";
 import { CheckClasseMetaData, GetListaClasseMetaData, IClasse, SalvaListaClasseMetaData } from "../utility";
+import { IClasseORM } from "./metadata-classe";
 
 export class IstanzaClasse {
     constructor(parametri: IClasse, nomeClasse: string, listaMetodi?: IstanzaMetodo[]) {
@@ -11,8 +12,8 @@ export class IstanzaClasse {
         /* inizializzo metodo */
         const classe = list.CercaConNomeSeNoAggiungi(nomeClasse);
 
-      /*   const tmp: ListaTerminaleClasse = GetListaClasseMetaData();
-        const classe = CheckClasseMetaData(nomeClasse); */
+        /*   const tmp: ListaTerminaleClasse = GetListaClasseMetaData();
+          const classe = CheckClasseMetaData(nomeClasse); */
         /* if (parametri.listaTest) classe.listaTest = parametri.listaTest; */
 
         if (parametri.percorso) classe.SetPath = parametri.percorso;
@@ -87,6 +88,19 @@ export class IstanzaClasse {
             });
         }
 
+        SalvaListaClasseMetaData(list);
+    }
+}
+
+export class IstanzaCLasseORM {
+    constructor(nomeClasse: string, parametri: IClasseORM) {
+
+        const list: ListaTerminaleClasse = GetListaClasseMetaData();
+        const classe = list.CercaConNomeSeNoAggiungi(nomeClasse);
+        classe.abilitaCreatedAt = parametri.abilitaCreatedAt;
+        classe.abilitaDeletedAt = parametri.abilitaDeletedAt;
+        classe.abilitaUpdatedAt = parametri.abilitaUpdatedAt;
+        classe.nomeTabella = parametri.nomeTabella;
         SalvaListaClasseMetaData(list);
     }
 }

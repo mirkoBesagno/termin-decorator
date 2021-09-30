@@ -377,6 +377,8 @@ export interface IMetodoLimitazioni {
     cacheOptionMemory?: { durationSecondi: number };
 }
 export interface IClasse {
+
+
     cacheOptionRedis?: OptionsCache,
     cacheOptionMemory?: { durationSecondi: number },
 
@@ -668,4 +670,17 @@ export function AssegnaMetodo(metodo: IMetodo, descriptor?: PropertyDescriptor) 
     if (metodo && metodo.metodoAvviabile == undefined && descriptor != undefined && descriptor.value != undefined)
         metodo.metodoAvviabile = descriptor.value;
     return metodo;
+}
+
+export function applyMixins(derivedCtor: any, constructors: any[]) {
+    constructors.forEach((baseCtor) => {
+        Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
+            Object.defineProperty(
+                derivedCtor.prototype,
+                name,
+                Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
+                Object.create(null)
+            );
+        });
+    });
 }

@@ -1,0 +1,9 @@
+
+
+https://blog.sqreen.com/nodejs-security-best-practices/
+
+https://blog.sqreen.com/sql-injection-explained/
+
+https://ichi.pro/it/i-10-migliori-corsi-node-js-per-principianti-e-sviluppatori-web-esperti-157165253599545
+
+npm i appmetrics-dash

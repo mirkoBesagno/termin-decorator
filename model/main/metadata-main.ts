@@ -12,6 +12,8 @@ import { GetListaTestAPIMetaData, GetListaTestMetaData, IReturnTest, ITest, Salv
 import { IstanzaClasse } from "../classe/istanza-classe";
 import { TerminaleTest, TerminaleTestAPI } from "../test-funzionale/metadata-test-funzionale";
 import { StartMonitoring } from "./utility-main";
+import { CreateDataBase, DropAllTable, DropDataBase, TriggerUpdate_updated_at_column } from "../classe/metadata-classe";
+import { Client } from "pg";
 
 
 
@@ -67,7 +69,70 @@ export class Main implements IGestorePercorsiPath {
     InizializzaClassi(lista: IstanzaClasse[]) {
         return true;
     }
+    async InizializzaORM(client: Client, nomeDatabase?: string) {
+        let ritorno = '';
+        let ritornoTmp = '';
 
+        /* if (nomeDatabase)
+            ritornoTmp = ritornoTmp + DropDataBase(nomeDatabase) + '\n';
+
+        try {
+            await client.query(ritornoTmp);
+            console.log('ESEGUO : \n' + ritornoTmp);
+        } catch (error) {
+            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
+            console.log(error);
+            console.log('\n\nFINE Errroe : \n**********************\n\n');
+        }
+        ritorno = ritornoTmp;
+        ritornoTmp = '';
+
+        if (nomeDatabase)
+            ritornoTmp = ritornoTmp + CreateDataBase(nomeDatabase) + '\n';
+        try {
+            await client.query(ritornoTmp);
+            console.log('ESEGUO : \n' + ritornoTmp);
+        } catch (error) {
+            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
+            console.log(error);
+            console.log('\n\nFINE Errroe : \n**********************\n\n');
+        } */
+        ritorno = ritornoTmp;
+        ritornoTmp = '';
+
+        if (nomeDatabase)
+            ritornoTmp = ritornoTmp + DropAllTable() + '\n';
+        try {
+            await client.query(ritornoTmp);
+            console.log('ESEGUO : \n' + ritornoTmp);
+        } catch (error) {
+            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
+            console.log(error);
+            console.log('\n\nFINE Errroe : \n**********************\n\n');
+        }
+        ritorno = ritornoTmp;
+        ritornoTmp = '';
+
+        ritornoTmp = ritornoTmp + TriggerUpdate_updated_at_column() + '\n';
+        try {
+            await client.query(ritornoTmp);
+            console.log('ESEGUO : \n' + ritornoTmp);
+        } catch (error) {
+            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
+            console.log(error);
+            console.log('\n\nFINE Errroe : \n**********************\n\n');
+        }
+        ritorno = ritornoTmp;
+        ritornoTmp = '';
+        for await (const element of this.listaTerminaleClassi) {
+            ritorno = ritorno + await element.CostruisciCreazioneDB(client);
+        }
+        /* for (let index = 0; index < this.listaTerminaleClassi.length; index++) {
+            const element = this.listaTerminaleClassi[index];
+            ritorno = await ritorno + element.CostruisciCreazioneDB(client);
+        } */
+        return ritorno;
+    }
     async StartTestAPI() {
         for (let index2 = 0; index2 < this.listaTerminaleClassi.length; index2++) {
             const tmpClasse = this.listaTerminaleClassi[index2];
@@ -93,12 +158,10 @@ export class Main implements IGestorePercorsiPath {
         }
 
     }
-
     StartHttpServer() {
         this.httpServer.listen(this.percorsi.porta);
         StartMonitoring();
     }
-
     StartExpress() {
 
 
@@ -116,7 +179,6 @@ export class Main implements IGestorePercorsiPath {
 
         StartMonitoring();
     }
-
     async StartTest(numeroRootTest?: number) {
 
         if (this.listaTerminaleTest) {
@@ -181,7 +243,6 @@ export class Main implements IGestorePercorsiPath {
             console.log('********************************************************************************************************************')
         }
     }
-    
     GetTest() {
         const ritorno: number[] = [];
         if (this.listaTerminaleTest) {
@@ -204,8 +265,6 @@ export class Main implements IGestorePercorsiPath {
         }
         return ritorno;
     }
-
-
     AggiungiTest(parametri: ITest[]) {
         const tmp: ListaTerminaleTest = GetListaTestMetaData();
         for (let index = 0; index < parametri.length; index++) {
@@ -225,7 +284,6 @@ export class Main implements IGestorePercorsiPath {
         SalvaListaTestAPIMetaData(tmp);
         this.listaTerminaleTest = Reflect.getMetadata(ListaTerminaleTest.nomeMetadataKeyTarget, targetTerminale);
     }
-
     /* InizializzaHandlebars() {
         //  this.serverExpressDecorato.engine('handlebars', exphbs());
         // this.serverExpressDecorato.set('view engine', 'handlebars'); 
@@ -246,7 +304,6 @@ export class Main implements IGestorePercorsiPath {
             res.render('about-us');
         });
     } */
-
     InizializzaSwagger(testo?: string) {
         let ritorno = '';
         try {
@@ -302,17 +359,13 @@ export class Main implements IGestorePercorsiPath {
             return ritorno;
         }
     }
-
     /************************************** */
-
-
     async PrintMenu() {
         const tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         //console.log("Menu main, digita il numero della la tua scelta: ");
         await tmp.PrintMenuClassi();
 
     }
-
     ScriviFile(pathDoveScrivereFile: string) {
 
         fs.mkdirSync(pathDoveScrivereFile + '/FileGenerati_MP', { recursive: true });

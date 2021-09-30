@@ -22,20 +22,6 @@ export class TerminaleProprieta {
         this.sommario = "";
     }
 
-    /******************************* */
-
-
-    PrintParametro() {
-        return "- " + this.tipo.toString() + " : " + this.nome + ' |';
-    }
-    PrintStruttura() {
-        let tmp = '';
-        tmp = tmp + "- " + this.tipo.toString() + " : " + this.nome + ' |\n';
-        //tmp = tmp + '' + this. + '';
-        tmp = tmp + '' + JSON.stringify(this, null, 4) + '';
-        return tmp;
-    }
-
     Verifica(): boolean {
         try {
             switch (this.tipo) {
@@ -97,36 +83,7 @@ export class TerminaleProprieta {
             return false;
         }
     }
-
-    static CostruisciTerminaleParametro(parametri: IParametro, terminale: TerminaleParametro) {
-
-        if (terminale && parametri) {
-            if (parametri.descrizione != undefined) terminale.descrizione = parametri.descrizione;
-            else terminale.descrizione = '';
-
-            if (parametri.sommario != undefined) terminale.sommario = parametri.sommario;
-            else terminale.sommario = '';
-
-            if (parametri.dovePossoTrovarlo != undefined) terminale.dovePossoTrovarlo = parametri.dovePossoTrovarlo;
-            else terminale.dovePossoTrovarlo = 'rotta';
-
-            if (parametri.schemaSwagger != undefined) terminale.schemaSwagger = parametri.schemaSwagger;
-
-            if (parametri.Validatore != undefined) terminale.Validatore = parametri.Validatore;
-
-            terminale.autenticatore = parametri.autenticatore ?? false;
-            terminale.obbligatorio = parametri.obbligatorio ?? true;
-        }
-        return terminale;
-    }
-    static NormalizzaValori(parametri: IParametro, nomeDafault: string) {
-        if (parametri.obbligatorio == undefined) parametri.obbligatorio = true;
-        if (parametri.tipo == undefined) parametri.tipo = 'any';
-        if (parametri.descrizione == undefined) parametri.descrizione = '';
-        if (parametri.sommario == undefined) parametri.sommario = '';
-        if (parametri.nome == undefined) parametri.nome = nomeDafault;
-        if (parametri.posizione == undefined) parametri.posizione = 'query';
-        if (parametri.autenticatore == undefined) parametri.autenticatore = false;
-        return parametri;
+    CostruisciCreazioneDB(): string {
+        return this.nome + '   text';
     }
 }
