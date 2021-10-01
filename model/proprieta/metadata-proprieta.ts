@@ -1,8 +1,12 @@
 import { TerminaleParametro } from "../parametro/metadata-parametro";
-import { IParametro, IRitornoValidatore, tipo } from "../utility";
-import { types } from "pg";
+import { IParametro, IProprieta, IRitornoValidatore, tipo } from "../utility";
+import { Client, types } from "pg";
 
-export class TerminaleProprieta {
+export type TypeIstantevent='BEFORE' | 'AFTER' | 'INSTEAD OF';
+
+export type TypeSurgevent= 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE';
+
+export class TerminaleProprieta implements IProprieta {
 
     valore: any;
     nome: string;
@@ -11,8 +15,16 @@ export class TerminaleProprieta {
     descrizione: string;
     sommario: string;
 
+    trigger?: [
+        {
+            instantevent: TypeIstantevent[],
+            surgevent: TypeSurgevent[],
+            nomeTrigger: string,
+            nomeFunzione: string,
+            Validatore: (nuovo: any, vecchio: any, argomenti: any[], instantevent: any, surgevent: any) => void | Error;
+        }
+    ]
 
-    Validatore?: (parametro: any) => IRitornoValidatore;
     constructor(nome: string, tipo: tipo) {
         this.nome = nome;
         this.tipo = tipo;
@@ -93,6 +105,43 @@ export class TerminaleProprieta {
             case 'any': break;
             default: return this.nome + " varchar(255)";
         }
+
+
+
         return this.nome + " varchar(255)";
+    }
+    async CostruisceTrigger(nomeTabella: string, client: Client,) {
+        for (let index = 0; this.trigger && index < this.trigger.length; index++) {
+            const element = this.trigger[index];
+            try {
+                await client.query(`
+                CREATE OR REPLACE FUNCTION FN_${element.nomeFunzione}() RETURNS trigger AS
+                $$
+                    if (NEW.nome != 'mirko'){   
+                        plv8.elog(INFO, 'HELLO', 'Messaggio di saluto sei passato!') 
+                        return NEW;
+                    }
+                    else{
+                    throw new Error('Attenzione nome Mirko, illegale'); 
+                    }
+                $$
+                LANGUAGE "plv8";
+        
+                COMMENT ON FUNCTION FN_${element.nomeFunzione}() IS 'Hei tanto roba questa è scritta usando plv8!!';
+        
+                DROP TRIGGER IF EXISTS TR_${element.nomeTrigger} ON persona;
+        
+                CREATE TRIGGER TR_${element.nomeTrigger}
+                    BEFORE 
+                    INSERT OR UPDATE 
+                    ON ${nomeTabella} 
+                    FOR EACH ROW
+                    EXECUTE PROCEDURE FN_${element.nomeFunzione}();
+                `);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
     }
 }

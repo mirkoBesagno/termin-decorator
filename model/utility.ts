@@ -403,7 +403,13 @@ export interface IProprieta {
 
     descrizione: string;
     sommario: string;
-    Validatore?: (parametro: any) => IRitornoValidatore;
+    trigger?: [
+        {
+            nome: string,
+            Validatore: (nuovo: any, vecchio: any, argomenti: any[], instantevent: any, surgevent: any) => void | Error;
+        }
+    ]
+
 }
 /* 
 export class Html implements IHtml {

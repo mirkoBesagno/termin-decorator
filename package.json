@@ -52,6 +52,7 @@
     "handlebars": "^4.7.7",
     "helmet": "^4.4.1",
     "http-server": "^0.12.3",
+    "knex": "^0.95.11",
     "memory-cache": "^0.2.0",
     "node-cache": "^5.1.2",
     "object-hash": "^2.2.0",

@@ -12,7 +12,7 @@ import { GetListaTestAPIMetaData, GetListaTestMetaData, IReturnTest, ITest, Salv
 import { IstanzaClasse } from "../classe/istanza-classe";
 import { TerminaleTest, TerminaleTestAPI } from "../test-funzionale/metadata-test-funzionale";
 import { StartMonitoring } from "./utility-main";
-import { CreateDataBase, DropAllTable, DropDataBase, TriggerUpdate_updated_at_column } from "../classe/metadata-classe";
+import { CreateDataBase, DropAllTable, DropDataBase, EseguiQueryControllata, TriggerUpdate_updated_at_column } from "../classe/metadata-classe";
 import { Client } from "pg";
 
 
@@ -72,65 +72,20 @@ export class Main implements IGestorePercorsiPath {
     async InizializzaORM(client: Client, nomeDatabase?: string) {
         let ritorno = '';
         let ritornoTmp = '';
-
-        /* if (nomeDatabase)
-            ritornoTmp = ritornoTmp + DropDataBase(nomeDatabase) + '\n';
-
-        try {
-            await client.query(ritornoTmp);
-            console.log('ESEGUO : \n' + ritornoTmp);
-        } catch (error) {
-            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
-            console.log(error);
-            console.log('\n\nFINE Errroe : \n**********************\n\n');
-        }
-        ritorno = ritornoTmp;
-        ritornoTmp = '';
-
-        if (nomeDatabase)
-            ritornoTmp = ritornoTmp + CreateDataBase(nomeDatabase) + '\n';
-        try {
-            await client.query(ritornoTmp);
-            console.log('ESEGUO : \n' + ritornoTmp);
-        } catch (error) {
-            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
-            console.log(error);
-            console.log('\n\nFINE Errroe : \n**********************\n\n');
-        } */
-        ritorno = ritornoTmp;
-        ritornoTmp = '';
-
         if (nomeDatabase)
             ritornoTmp = ritornoTmp + DropAllTable() + '\n';
-        try {
-            await client.query(ritornoTmp);
-            console.log('ESEGUO : \n' + ritornoTmp);
-        } catch (error) {
-            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
-            console.log(error);
-            console.log('\n\nFINE Errroe : \n**********************\n\n');
-        }
+        EseguiQueryControllata(client, ritornoTmp);
         ritorno = ritornoTmp;
         ritornoTmp = '';
-
+        
         ritornoTmp = ritornoTmp + TriggerUpdate_updated_at_column() + '\n';
-        try {
-            await client.query(ritornoTmp);
-            console.log('ESEGUO : \n' + ritornoTmp);
-        } catch (error) {
-            console.log('\n\nINIZIO Errroe : \n**********************\n\n');
-            console.log(error);
-            console.log('\n\nFINE Errroe : \n**********************\n\n');
-        }
+        EseguiQueryControllata(client, ritornoTmp);
+
         ritorno = ritornoTmp;
         ritornoTmp = '';
         for await (const element of this.listaTerminaleClassi) {
             ritorno = ritorno + await element.CostruisciCreazioneDB(client);
         }
-        /* for (let index = 0; index < this.listaTerminaleClassi.length; index++) {
-            const element = this.listaTerminaleClassi[index];
-            ritorno = await ritorno + element.CostruisciCreazioneDB(client);
-        } */
         return ritorno;
     }
     async StartTestAPI() {
