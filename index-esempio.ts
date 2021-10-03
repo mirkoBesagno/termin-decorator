@@ -21,6 +21,9 @@ interface IPersona {
 export class Persona implements IPersona {
 
     @mpProp({
+        Constraints: {
+            check: { nome: 'checkProprireta,ecc' }
+        },
         descrizione: 'descrizProp',
         tipo: 'text',
         sommario: 'sommarioProp',
@@ -42,8 +45,33 @@ export class Persona implements IPersona {
     })
     nome: string;
 
-    constructor(nome: string) {
+    @mpProp({
+        Constraints: {
+            check: { nome: 'checkProprireta,ecc' }
+        },
+        descrizione: 'descrizProp',
+        tipo: 'text',
+        sommario: 'sommarioProp',
+        valore: 'valoreProp',
+        trigger: [
+            {
+                instantevent: 'BEFORE',
+                nomeFunzione: 'controlloCognome',
+                nomeTrigger: 'controlloCognome',
+                surgevent: ['INSERT'],
+                Validatore: (NEW: Persona, HOLD: Persona, TG_ARGV: any[], /* instantevent */TG_OP: any, /* surgevent */TG_WHEN: any) => {
+
+                    if (NEW.cognome == 'Pizzini') {
+                        throw new Error("Attenzione valore illegale.");
+                    }
+                }
+            }
+        ]
+    })
+    cognome: string;
+    constructor(nome: string, cognome: string) {
         this.nome = nome;
+        this.cognome = cognome;
     }
 
     @mpMetGen()
@@ -57,18 +85,18 @@ export class Persona implements IPersona {
     @mpMetGen(undefined, <IMetodoEventi>{
         Istanziatore: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => {
 
-            return new Persona('fjilbsgbjlk dfhjle jhbiasdlgkd');
+            return new Persona('fjilbsgbjlk dfhjle jhbiasdlgkd', 'dsgsdfgs324567346356');
         }
     })
     SalutaColTuoNome() {
         return "Ciao " + this.nome;
     }
 }
-
+/* 
 @mpClas({ percorso: 'maggiordomo' },
     {
         nomeTabella: 'maggiordomo',
-        estende: 'persona',
+        //estende: 'persona',
         abilitaCreatedAt: true,
         abilitaDeletedAt: true,
         abilitaUpdatedAt: true,
@@ -86,7 +114,7 @@ export class Maggiordomo extends Persona {
         this.personaRiferimento = new Persona('nome default');
     }
 
-}
+} */
 
 
 const main = new Main('api');
@@ -119,8 +147,8 @@ client.connect().then(async (result) => {
     console.log('*******');
 
     let query = {
-        text: 'INSERT INTO persona(nome) VALUES($1)',
-        values: ['Michele'],
+        text: 'INSERT INTO persona(nome, cognome) VALUES($1, $2)',
+        values: ['Michele', 'Carotta'],
     }
     // callback
 
@@ -130,8 +158,8 @@ client.connect().then(async (result) => {
         console.log('\n*****\n' + error + '\n********\n\n');
     }
     query = {
-        text: 'INSERT INTO persona(nome) VALUES($1)',
-        values: ['Mirko'],
+        text: 'INSERT INTO persona(nome, cognome) VALUES($1, $2)',
+        values: ['Mirko', 'Pizzini'],
     }
     // callback
 
@@ -142,8 +170,8 @@ client.connect().then(async (result) => {
     }
 
     query = {
-        text: 'INSERT INTO persona(nome) VALUES($1)',
-        values: ['mirko'],
+        text: 'INSERT INTO persona(nome, cognome) VALUES($1, $2)',
+        values: ['mirko', 'pizzini'],
     }
     // callback
     try {
@@ -187,7 +215,7 @@ main.AggiungiTest([
         testUnita: {
             nome: '',
             FunzioniDaTestare: () => {
-                const persone = new Persona('mirko io persona');
+                const persone = new Persona('mirko io persona', '3543543534');
                 persone.SalutaChiunque();
                 return <IReturnTest>{};
             },
@@ -203,8 +231,8 @@ async function AggiungiRiga(count: number, limit: number) {
     setTimeout(async () => {
         try {
             const query = {
-                text: 'INSERT INTO persona(nome) VALUES($1)',
-                values: [makeid(Number.parseInt(String(Math.random() * 100))).toString()],
+                text: 'INSERT INTO persona(nome, cognome) VALUES($1, $2)',
+                values: [makeid(Number.parseInt(String(Math.random() * 100))).toString(), makeid(Number.parseInt(String(Math.random() * 100))).toString()],
             }
             // callback
             await client.query(query);

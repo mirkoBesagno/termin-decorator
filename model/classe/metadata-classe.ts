@@ -88,6 +88,22 @@ class ArtefattoClasseORM implements IClasseORM {
             const element = this.listaProprieta[index];
             element.CostruisceTrigger(this.nomeTabella, client);
         }
+        /* Ora creo un indice di prova */
+        ritornoTmp = `CREATE INDEX index_name ON ${this.nomeTabella} 
+        (
+            nome ASC NULLS LAST
+        );`;
+        await EseguiQueryControllata(client, ritornoTmp);
+        ritorno = ritorno + ritornoTmp;
+        ritornoTmp = '';
+
+        ritornoTmp = `CREATE INDEX index_cognome ON ${this.nomeTabella} 
+        (
+            cognome ASC NULLS LAST
+        );`;
+        await EseguiQueryControllata(client, ritornoTmp);
+        ritorno = ritorno + ritornoTmp;
+        ritornoTmp = '';
         /*  */
         if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
             ritornoTmp = ritornoTmp + this.TriggerUpdate(this.nomeTabella) + '\n';
@@ -243,7 +259,7 @@ class ArtefattoClasseExpress extends ArtefattoClasseORM {
                     console.log(risposta)
                 }
             } catch (error) {
-                console.log('\n*****\n'+error+'\n********\n\n');
+                console.log('\n*****\n' + error + '\n********\n\n');
             }
             await this.PrintMenuClasse();
         }

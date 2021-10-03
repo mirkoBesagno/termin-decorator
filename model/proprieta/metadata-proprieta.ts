@@ -1,9 +1,15 @@
 import { TerminaleParametro } from "../parametro/metadata-parametro";
-import { IParametro, IProprieta, IRitornoValidatore, tipo, TypeIstantevent, TypeSurgevent } from "../utility";
+import { IConstraints, IParametro, IProprieta, IRitornoValidatore, tipo, TypeIstantevent, TypeSurgevent } from "../utility";
 import { Client, types } from "pg";
 
 
 export class TerminaleProprieta implements IProprieta {
+
+    //funzione 
+    Constraints?: IConstraints;
+
+    /*  */
+
 
     valore: any;
     nome: string;
@@ -93,18 +99,15 @@ export class TerminaleProprieta implements IProprieta {
     }
     CostruisciCreazioneDB(): string {
         switch (this.tipo) {
-            case 'array': return this.nome + " varchar(255)";
-            case 'boolean': return this.nome + " varchar(255)";
-            case 'date': return this.nome + " varchar(255)";
-            case 'number': return this.nome + " varchar(255)";
-            case 'object': return this.nome + " varchar(255)";
+            case 'array': return this.nome + " int";
+            case 'boolean': return this.nome + " bool";
+            case 'date': return this.nome + " timestamptz";
+            case 'number': return this.nome + " int"; // float8, int, int4, int8, decimal
+            case 'object': return this.nome + " int";
             case 'text': return this.nome + " varchar(255)";
-            case 'any': break;
+            case 'any': return this.nome + " varchar(255)";
             default: return this.nome + " varchar(255)";
         }
-
-
-
         return this.nome + " varchar(255)";
     }
     async CostruisceTrigger(nomeTabella: string, client: Client,) {

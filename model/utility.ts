@@ -396,7 +396,25 @@ export interface IClasse {
     }[]; */
 }
 
+export interface ICheck {
+    check?: any,
+    nome?: string,
+}
+
+export interface IUnique {
+    unique?: any,
+    nome?: string,
+}
+export interface IConstraints {
+    check?: ICheck;
+    notNull?: boolean;
+    unique?: IUnique;
+
+}
+
 export interface IProprieta {
+    Constraints?: IConstraints;
+
     valore: any;
     nome?: string;
     tipo: tipo;
