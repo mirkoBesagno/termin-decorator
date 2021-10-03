@@ -66,7 +66,7 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
         try {
             JSON.parse(ritorno)
         } catch (error) {
-            console.log(error);
+            console.log('\n*****\n'+error+'\n********\n\n');
         }
         return ritorno;
     }

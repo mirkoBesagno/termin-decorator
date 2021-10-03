@@ -19,7 +19,8 @@ export class IstanzaProprieta {
             if (item.valore) proprieta.valore = item.valore;
             if (item.descrizione) proprieta.descrizione = item.descrizione;
             if (item.nome) proprieta.nome = item.nome;
-            if (item.Validatore) proprieta.Validatore = item.Validatore;
+            else if (proprieta.nome == '' || proprieta.nome == undefined) proprieta.nome = nomeProprieta;
+            if (item.trigger) proprieta.trigger = item.trigger;
         }
         SalvaListaClasseMetaData(list);
     }

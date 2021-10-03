@@ -77,11 +77,18 @@ class ArtefattoClasseORM implements IClasseORM {
                     ritornoTmp = ritornoTmp + '\n';
                 }
             }
+
         }
         ritornoTmp = ritornoTmp + ');' + '\n';
         await EseguiQueryControllata(client, ritornoTmp);
         ritorno = ritorno + ritornoTmp;
         ritornoTmp = '';
+        /* Ora che la tabella esiste vado ad eseguire i trigger */
+        for (let index = 0; index < this.listaProprieta.length; index++) {
+            const element = this.listaProprieta[index];
+            element.CostruisceTrigger(this.nomeTabella, client);
+        }
+        /*  */
         if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
             ritornoTmp = ritornoTmp + this.TriggerUpdate(this.nomeTabella) + '\n';
         }
@@ -97,7 +104,7 @@ class ArtefattoClasseORM implements IClasseORM {
         return ritorno;
     }
 }
-export function CreaID(){
+export function CreaID() {
     return "id SERIAL PRIMARY KEY";
 }
 export function TriggerUpdate_updated_at_column() {
@@ -236,7 +243,7 @@ class ArtefattoClasseExpress extends ArtefattoClasseORM {
                     console.log(risposta)
                 }
             } catch (error) {
-                console.log(error);
+                console.log('\n*****\n'+error+'\n********\n\n');
             }
             await this.PrintMenuClasse();
         }

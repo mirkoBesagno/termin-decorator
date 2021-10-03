@@ -398,19 +398,26 @@ export interface IClasse {
 
 export interface IProprieta {
     valore: any;
-    nome: string;
+    nome?: string;
     tipo: tipo;
 
     descrizione: string;
     sommario: string;
     trigger?: [
         {
-            nome: string,
+            instantevent: TypeIstantevent,
+            surgevent: TypeSurgevent[],
+            nomeTrigger: string,
+            nomeFunzione: string,
             Validatore: (nuovo: any, vecchio: any, argomenti: any[], instantevent: any, surgevent: any) => void | Error;
         }
     ]
 
 }
+
+export type TypeIstantevent='BEFORE' | 'AFTER' | 'INSTEAD OF';
+
+export type TypeSurgevent= 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE';
 /* 
 export class Html implements IHtml {
 

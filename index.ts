@@ -87,7 +87,7 @@ class ClassUno {
         try {
             Ciao(nome);
         } catch (error) {
-            console.log(error);
+            console.log('\n*****\n'+error+'\n********\n\n');
         }
 
         return 'metodo primo ciao, sei : ' + nome;
@@ -104,7 +104,7 @@ try {
     console.log("Finito!!!");
 
 } catch (error) {
-    console.log(error);
+    console.log('\n*****\n'+error+'\n********\n\n');
     console.log("Finito!!!");
 }
 */

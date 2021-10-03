@@ -11,7 +11,7 @@ interface IPersona {
 */
 @mpClas({ percorso: 'persona' },
     {
-        nomeTabella: 'Persona',
+        nomeTabella: 'persona',
         abilitaCreatedAt: true,
         abilitaDeletedAt: true,
         abilitaUpdatedAt: true,
@@ -21,12 +21,22 @@ interface IPersona {
 export class Persona implements IPersona {
 
     @mpProp({
-        Trigger:[
+        descrizione: 'descrizProp',
+        tipo: 'text',
+        sommario: 'sommarioProp',
+        valore: 'valoreProp',
+        trigger: [
             {
-                nome:'',
-                tempistica: 'Before',
-                princevent: 'INSERT',
-                funzione:()=>{}
+                instantevent: 'BEFORE',
+                nomeFunzione: 'controlloNome',
+                nomeTrigger: 'controlloNome',
+                surgevent: ['INSERT'],
+                Validatore: (NEW: Persona, HOLD: Persona, TG_ARGV: any[], /* instantevent */TG_OP: any, /* surgevent */TG_WHEN: any) => {
+
+                    if (NEW.nome == 'Mirko') {
+                        throw new Error("Attenzione valore illegale.");
+                    }
+                }
             }
         ]
     })
@@ -47,12 +57,35 @@ export class Persona implements IPersona {
     @mpMetGen(undefined, <IMetodoEventi>{
         Istanziatore: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => {
 
-            return undefined;
+            return new Persona('fjilbsgbjlk dfhjle jhbiasdlgkd');
         }
     })
     SalutaColTuoNome() {
         return "Ciao " + this.nome;
     }
+}
+
+@mpClas({ percorso: 'maggiordomo' },
+    {
+        nomeTabella: 'maggiordomo',
+        estende: 'persona',
+        abilitaCreatedAt: true,
+        abilitaDeletedAt: true,
+        abilitaUpdatedAt: true,
+        nomeTriggerAutoCreateUpdated_Created_Deleted: 'TracciamentoOperazioni_I_liv',
+        creaId: true
+    })
+export class Maggiordomo extends Persona {
+
+    personaRiferimento: Persona;
+
+    gradoDiLavoro?: number;
+
+    constructor() {
+        super('ciao');
+        this.personaRiferimento = new Persona('nome default');
+    }
+
 }
 
 
@@ -61,84 +94,23 @@ const main = new Main('api');
 
 main.Inizializza("localhost", 8080, true, true);
 
-
-
 const client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'test',
-    password: 'password',//'postgres',
+    password: 'postgres',
     port: 5432,
 })
 client.connect().then(async (result) => {
 
-    const orm = await main.InizializzaORM(client, 'test');
-    console.log('\n\n\n\n'+orm+'\n\n\n\n\n\n');
-    
     try {
         await client.query(`CREATE EXTENSION plv8;`);
     } catch (error) {
-        console.log(error);
+        console.log('\n\n****\n' + error + '\n****\n\n');
     }
-    try {
-        await client.query(`
-        CREATE OR REPLACE FUNCTION FN_MP_prova_funzione() RETURNS trigger AS
-        $$
-            if (NEW.nome != 'mirko'){   
-                plv8.elog(INFO, 'HELLO', 'Messaggio di saluto sei passato!') 
-                return NEW;
-            }
-            else{
-            throw new Error('Attenzione nome Mirko, illegale'); 
-            }
-        $$
-        LANGUAGE "plv8";
 
-        COMMENT ON FUNCTION FN_MP_prova_funzione() IS 'Hei tanto roba questa è scritta usando plv8!!';
-
-        DROP TRIGGER IF EXISTS TR_MP_prova_trigger ON persona;
-
-        CREATE TRIGGER TR_MP_prova_trigger
-            BEFORE 
-            INSERT OR UPDATE 
-            ON persona 
-            FOR EACH ROW
-            EXECUTE PROCEDURE FN_MP_prova_funzione();
-            `);
-    } catch (error) {
-        console.log(error);
-    }
-    /* try {
-
-        await client.query(`            
-        CREATE OR REPLACE FUNCTION MP_test_trigger_MP_due() RETURNS trigger AS
-        $$
-            begin
-                if new.nome = (
-                select p.nome
-                from persona p
-                where p.nome = new.nome
-                ) then
-                return null;
-                end if;
-                return new;
-            end;
-        $$
-        LANGUAGE "plpgsql";
-
-        COMMENT ON FUNCTION MP_test_trigger_MP_due() IS 'Hei tanto roba questa è scritta usando psql!!';
-
-
-        DROP TRIGGER IF EXISTS MP_test_trigger_MP_due ON persona;
-
-        CREATE TRIGGER MP_test_trigger_MP_due
-            BEFORE INSERT OR UPDATE 
-            ON persona FOR EACH ROW
-            EXECUTE PROCEDURE MP_test_trigger_MP_due();
-        `);
-    } catch (error) {
-        console.log(error);
-    } */
+    const orm = await main.InizializzaORM(client, 'test');
+    console.log('\n\n\n\n' + orm + '\n\n\n\n\n\n');
 
     console.log('*******');
     console.log('\n\n\n');
@@ -155,7 +127,7 @@ client.connect().then(async (result) => {
     try {
         await client.query(query);
     } catch (error) {
-        console.log(error);
+        console.log('\n*****\n' + error + '\n********\n\n');
     }
     query = {
         text: 'INSERT INTO persona(nome) VALUES($1)',
@@ -166,14 +138,9 @@ client.connect().then(async (result) => {
     try {
         await client.query(query);
     } catch (error) {
-        console.log(error);
+        console.log('\n*****\n' + error + '\n********\n\n');
     }
 
-    try {
-        await client.query(query);
-    } catch (error) {
-        console.log(error);
-    }
     query = {
         text: 'INSERT INTO persona(nome) VALUES($1)',
         values: ['mirko'],
@@ -182,10 +149,10 @@ client.connect().then(async (result) => {
     try {
         await client.query(query);
     } catch (error) {
-        console.log(error);
+        console.log('\n*****\n' + error + '\n********\n\n');
     }
 
-    const knexClient = knex({
+    /* const knexClient = knex({
         client: 'postgres',
         connection: {
             user: 'postgres',
@@ -194,14 +161,14 @@ client.connect().then(async (result) => {
             password: 'password',//'postgres',
             port: 5432,
         }
-    });
+    }); */
 
-    knexClient.select().from('persona').then(res => {
+    /* knexClient.select().from('persona').then(res => {
         console.log(res);
         console.log('');
-    }).catch(er => {
+    }).catch((er: any) => {
         console.log(er);
-    });
+    }); */
 
 
     //AggiungiRiga(0, 100);
@@ -210,8 +177,6 @@ client.connect().then(async (result) => {
     .catch((err: any) => {
         console.log("ciao");
     });
-
-import { knex } from "knex";
 
 
 main.AggiungiTest([
@@ -250,7 +215,7 @@ async function AggiungiRiga(count: number, limit: number) {
             }
         } catch (error) {
             console.log('\n\nINIZIO Errroe : \n**********************\n\n');
-            console.log(error);
+            console.log('\n*****\n' + error + '\n********\n\n');
             console.log('\n\nFINE Errroe : \n**********************\n\n');
         }
     }, 3000)

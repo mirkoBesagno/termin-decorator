@@ -1,10 +1,7 @@
 import { TerminaleParametro } from "../parametro/metadata-parametro";
-import { IParametro, IProprieta, IRitornoValidatore, tipo } from "../utility";
+import { IParametro, IProprieta, IRitornoValidatore, tipo, TypeIstantevent, TypeSurgevent } from "../utility";
 import { Client, types } from "pg";
 
-export type TypeIstantevent='BEFORE' | 'AFTER' | 'INSTEAD OF';
-
-export type TypeSurgevent= 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE';
 
 export class TerminaleProprieta implements IProprieta {
 
@@ -17,7 +14,7 @@ export class TerminaleProprieta implements IProprieta {
 
     trigger?: [
         {
-            instantevent: TypeIstantevent[],
+            instantevent: TypeIstantevent,
             surgevent: TypeSurgevent[],
             nomeTrigger: string,
             nomeFunzione: string,
@@ -113,17 +110,34 @@ export class TerminaleProprieta implements IProprieta {
     async CostruisceTrigger(nomeTabella: string, client: Client,) {
         for (let index = 0; this.trigger && index < this.trigger.length; index++) {
             const element = this.trigger[index];
+            let tmp = '';
+            for (let index = 0; index < element.surgevent.length; index++) {
+                const el = element.surgevent[index];
+                tmp = tmp + el;
+                if (index + 1 < element.surgevent.length) {
+                    tmp = tmp + ' OR ';
+                }
+            }
+            let corpoFunzione = '';
             try {
-                await client.query(`
+                const strg = String(element.Validatore);
+
+                const tt = strg.indexOf('{');
+                const t1 = strg.substring(tt + 1, strg.length);
+                const t2 = t1.lastIndexOf('}');
+                const t3 = t1.substring(0, t2 - 1);
+                corpoFunzione = t3;
+                console.log(strg);
+
+            } catch (error) {
+                console.log('\n*****\n' + error + '\n********\n\n');
+                corpoFunzione = '';
+            }
+            try {
+                const queri1 = `
                 CREATE OR REPLACE FUNCTION FN_${element.nomeFunzione}() RETURNS trigger AS
                 $$
-                    if (NEW.nome != 'mirko'){   
-                        plv8.elog(INFO, 'HELLO', 'Messaggio di saluto sei passato!') 
-                        return NEW;
-                    }
-                    else{
-                    throw new Error('Attenzione nome Mirko, illegale'); 
-                    }
+                    ${corpoFunzione}
                 $$
                 LANGUAGE "plv8";
         
@@ -132,14 +146,15 @@ export class TerminaleProprieta implements IProprieta {
                 DROP TRIGGER IF EXISTS TR_${element.nomeTrigger} ON persona;
         
                 CREATE TRIGGER TR_${element.nomeTrigger}
-                    BEFORE 
-                    INSERT OR UPDATE 
+                    ${element.instantevent} 
+                    ${tmp} 
                     ON ${nomeTabella} 
                     FOR EACH ROW
                     EXECUTE PROCEDURE FN_${element.nomeFunzione}();
-                `);
+                `;
+                await client.query(queri1);
             } catch (error) {
-                console.log(error);
+                console.log('\n*****\n' + error + '\n********\n\n');
             }
         }
 

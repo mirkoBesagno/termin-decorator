@@ -49,10 +49,10 @@ export function StartMonitoring() {
             partizionamentoMemoriaProcesso.external + ' - ' + '\n');
         setTimeout(() => {
             StartMonitoring();
-        }, (20) * 1000);
+        }, (5) * 1000);
     } catch (error) {
         setTimeout(() => {
             StartMonitoring();
-        }, (20) * 1000);
+        }, (5) * 1000);
     }
 }

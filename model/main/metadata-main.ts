@@ -177,7 +177,7 @@ export class Main implements IGestorePercorsiPath {
                             risultati.push("Test con nome : " + test.test.nome + ',| numero :' + test.test.numero + ',| passato :NESSUN RISULTATO' + ' :!:');
                         }
                     } catch (error) {
-                        console.log(error);
+                        console.log('\n*****\n'+error+'\n********\n\n');
                         console.log("TEST IN ERRORE.");
                         risultati.push("Test con nome : " + test.test.nome + ',| numero :' + test.test.numero + ',| passato :TEST IN ERRORE' + ' :!:');
                     }
