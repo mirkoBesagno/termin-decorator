@@ -1,5 +1,5 @@
 import { ListaTerminaleClasse } from "../classe/lista-classe";
-import { CheckClasseMetaData, GetListaClasseMetaData, IClasse, IProprieta, SalvaListaClasseMetaData } from "../utility";
+import { CheckClasseMetaData, GetListaClasseMetaData, IClasse, IProprieta, ORMObject, SalvaListaClasseMetaData, tipo } from "../utility";
 
 
 
@@ -16,7 +16,17 @@ export class IstanzaProprieta {
         if (item) {
             if (item.Constraints) proprieta.Constraints = item.Constraints;
             if (item.sommario) proprieta.sommario = item.sommario;
-            if (item.tipo) proprieta.tipo = item.tipo;
+            if ((<ORMObject>(<tipo>item.tipo)).tipo &&
+                (<ORMObject>(<tipo>item.tipo)).colonnaRiferimento &&
+                (<ORMObject>(<tipo>item.tipo)).tabellaRiferimento) {
+                proprieta.tipo = new ORMObject(
+                    (<ORMObject>item.tipo).colonnaRiferimento,
+                    (<ORMObject>item.tipo).tabellaRiferimento
+                );
+            }
+            else {
+                if (item.tipo) proprieta.tipo = item.tipo;
+            }
             if (item.valore) proprieta.valore = item.valore;
             if (item.descrizione) proprieta.descrizione = item.descrizione;
             if (item.nome) proprieta.nome = item.nome;

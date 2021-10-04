@@ -101,6 +101,8 @@ export class IstanzaCLasseORM {
         classe.abilitaDeletedAt = parametri.abilitaDeletedAt ?? false;
         classe.abilitaUpdatedAt = parametri.abilitaUpdatedAt ?? false;
         classe.creaId = parametri.creaId ?? false;
+        classe.estende = parametri.estende;
+        classe.like = parametri.like;
         classe.nomeTabella = parametri.nomeTabella ?? nomeClasse;
         (<IClasseORM>classe).nomeTriggerAutoCreateUpdated_Created_Deleted = parametri.nomeTriggerAutoCreateUpdated_Created_Deleted ?? classe.nomeTriggerAutoCreateUpdated_Created_Deleted;
         SalvaListaClasseMetaData(list);

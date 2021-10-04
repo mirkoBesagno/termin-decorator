@@ -94,29 +94,99 @@ export class Persona implements IPersona {
         return "Ciao " + this.nome;
     }
 }
-/* 
+
 @mpClas({ percorso: 'maggiordomo' },
     {
         nomeTabella: 'maggiordomo',
-        //estende: 'persona',
+        /* estende: 'persona', like:'persona', */
         abilitaCreatedAt: true,
         abilitaDeletedAt: true,
         abilitaUpdatedAt: true,
         nomeTriggerAutoCreateUpdated_Created_Deleted: 'TracciamentoOperazioni_I_liv',
         creaId: true
     })
-export class Maggiordomo extends Persona {
+export class Maggiordomo {
 
+
+    @mpProp({
+        Constraints: {
+            unique: { nome: 'uniqueOnNome', unique: true },
+            notNull: true,
+            check: { nome: 'checkOnNome', check: "nome != 'Ernesto'" }
+        },
+        descrizione: 'descrizProp',
+        tipo: 'text',
+        sommario: 'sommarioProp',
+        trigger: [
+            {
+                instantevent: 'BEFORE',
+                nomeFunzione: 'controlloNome',
+                nomeTrigger: 'controlloNome',
+                surgevent: ['INSERT'],
+                Validatore: (NEW: Persona, HOLD: Persona, TG_ARGV: any[], /* instantevent */TG_OP: any, /* surgevent */TG_WHEN: any) => {
+
+                    if (NEW.nome == 'Mirko') {
+                        throw new Error("Attenzione valore illegale.");
+                    }
+                }
+            }
+        ]
+    })
+    nome: string;
+
+    @mpProp({
+        Constraints: {
+            unique: { nome: 'uniqueOnCognome', unique: true },
+            notNull: true,
+            check: { nome: 'checkOnCognome', check: "cognome != 'Lupino'" }
+        },
+        descrizione: 'descrizProp',
+        tipo: 'text',
+        sommario: 'sommarioProp',
+        trigger: [
+            {
+                instantevent: 'BEFORE',
+                nomeFunzione: 'controlloCognome',
+                nomeTrigger: 'controlloCognome',
+                surgevent: ['INSERT'],
+                Validatore: (NEW: Persona, HOLD: Persona, TG_ARGV: any[], /* instantevent */TG_OP: any, /* surgevent */TG_WHEN: any) => {
+
+                    if (NEW.cognome == 'Pizzini') {
+                        throw new Error("Attenzione valore illegale.");
+                    }
+                }
+            }
+        ]
+    })
+    cognome: string;
+
+
+    @mpProp({
+        descrizione: 'descrizProp',
+        tipo: {
+            tipo: 'object',
+            colonnaRiferimento: 'serial',
+            tabellaRiferimento: 'persona'
+        },
+        sommario: 'sommarioProp',
+    })
     personaRiferimento: Persona;
 
+    @mpProp({
+        descrizione: 'descrizProp',
+        tipo: 'text',
+        sommario: 'sommarioProp',
+    })
     gradoDiLavoro?: number;
 
-    constructor() {
-        super('ciao');
-        this.personaRiferimento = new Persona('nome default');
+    constructor(nome: string, cognome: string) {
+        //super('nome construct', 'congome construct');
+        this.personaRiferimento = new Persona('nome default', 'cognome default');
+        this.nome = nome;
+        this.cognome = cognome;
     }
 
-} */
+}
 
 
 const main = new Main('api');
@@ -128,16 +198,12 @@ const client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'test',
-    password: 'password',//'postgres',
+    password: 'postgres',
     port: 5432,
 })
 client.connect().then(async (result) => {
 
-    try {
-        await client.query(`CREATE EXTENSION plv8;`);
-    } catch (error) {
-        console.log('\n\n****\n' + error + '\n****\n\n');
-    }
+
 
     const orm = await main.InizializzaORM(client, 'test');
     console.log('\n\n\n\n' + orm + '\n\n\n\n\n\n');
@@ -149,6 +215,18 @@ client.connect().then(async (result) => {
     console.log('*******');
 
     let query = {
+        text: 'INSERT INTO maggiordomo(nome, cognome) VALUES($1, $2)',
+        values: ['Mag Michele', 'Mag Carotta'],
+    }
+    // callback
+
+    try {
+        await client.query(query);
+    } catch (error) {
+        console.log('\n*****\n' + error + '\n********\n\n');
+    }
+
+    query = {
         text: 'INSERT INTO persona(nome, cognome) VALUES($1, $2)',
         values: ['Michele', 'Carotta'],
     }

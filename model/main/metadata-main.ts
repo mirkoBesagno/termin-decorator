@@ -70,21 +70,32 @@ export class Main implements IGestorePercorsiPath {
         return true;
     }
     async InizializzaORM(client: Client, nomeDatabase?: string) {
+        try {
+            await client.query(`CREATE EXTENSION plv8;`);
+        } catch (error) {
+            console.log('\n\n****\n' + error + '\n****\n\n');
+        }
         let ritorno = '';
         let ritornoTmp = '';
         if (nomeDatabase)
             ritornoTmp = ritornoTmp + DropAllTable() + '\n';
         EseguiQueryControllata(client, ritornoTmp);
-        ritorno = ritornoTmp;
+        ritorno = ritorno + ritornoTmp;
         ritornoTmp = '';
-        
+
         ritornoTmp = ritornoTmp + TriggerUpdate_updated_at_column() + '\n';
         EseguiQueryControllata(client, ritornoTmp);
 
-        ritorno = ritornoTmp;
+        ritorno = ritorno + ritornoTmp;
         ritornoTmp = '';
         for await (const element of this.listaTerminaleClassi) {
-            ritorno = ritorno + await element.CostruisciCreazioneDB(client);
+            ritorno = ritorno + await element.CostruisciCreazioneDB(client, true);
+        }
+        for await (const element of this.listaTerminaleClassi) {
+            ritorno = ritorno + await element.CostruisciCreazioneDB(client, false);
+        }
+        for await (const element of this.listaTerminaleClassi) {
+            ritorno = ritorno + await element.CostruisciRelazioniDB(client);
         }
         return ritorno;
     }
@@ -177,7 +188,7 @@ export class Main implements IGestorePercorsiPath {
                             risultati.push("Test con nome : " + test.test.nome + ',| numero :' + test.test.numero + ',| passato :NESSUN RISULTATO' + ' :!:');
                         }
                     } catch (error) {
-                        console.log('\n*****\n'+error+'\n********\n\n');
+                        console.log('\n*****\n' + error + '\n********\n\n');
                         console.log("TEST IN ERRORE.");
                         risultati.push("Test con nome : " + test.test.nome + ',| numero :' + test.test.numero + ',| passato :TEST IN ERRORE' + ' :!:');
                     }

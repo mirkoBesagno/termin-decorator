@@ -35,10 +35,22 @@ export type tipo = /* "number" | */
     "date" | "timestamptz" |
     "array" |
     "json" |
-    "object" |
     "boolean" |
-    "any";
+    "any" |
+    //"object" 
+    ORMObject
+    ;
+export class ORMObject {
+    tipo: 'object';
+    colonnaRiferimento:  tipo;
+    tabellaRiferimento: string;
+    constructor(colonnaRiferimento: tipo, tabellaRiferimento: string) {
+        this.tipo = 'object';
+        this.colonnaRiferimento = colonnaRiferimento;
+        this.tabellaRiferimento = tabellaRiferimento;
 
+    }
+}
 export interface ILogbase {
     data: Date;
     body: object;
@@ -446,7 +458,7 @@ export interface IProprieta {
         {
             ruoli: string[],
             events: 'SELECT' | 'UPDATE' | 'DELET' | 'INSERT',
-            where: (NEW:any, OLD:any)=>void|true|Error
+            where: (NEW: any, OLD: any) => void | true | Error
         }
     ]
 

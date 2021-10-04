@@ -1,5 +1,5 @@
 import { TerminaleParametro } from "../parametro/metadata-parametro";
-import { IConstraints, IParametro, IProprieta, IRitornoValidatore, tipo, TypeIstantevent, TypeSurgevent } from "../utility";
+import { IConstraints, IParametro, IProprieta, IRitornoValidatore, ORMObject, tipo, TypeIstantevent, TypeSurgevent } from "../utility";
 import { Client, types } from "pg";
 
 
@@ -115,9 +115,9 @@ export class TerminaleProprieta implements IProprieta {
             return false;
         }
     }
-    CostruisciCreazioneDB(): string {
+    AppoggioCostruzioneStringa(item: tipo) {
         let tmpRitorno = '';
-        switch (this.tipo) {
+        switch (item) {
             //ARRAY
             case 'array': tmpRitorno = '"' + this.nome + '"' + " int"; break;
             //BOOLEAN
@@ -140,17 +140,36 @@ export class TerminaleProprieta implements IProprieta {
             case 'varchar(n)': tmpRitorno = '"' + this.nome + '"' + " varchar(255)"; break;
             case 'character(n)': tmpRitorno = '"' + this.nome + '"' + " character(255)"; break;
             //
-            //OBJECT
-            case 'object': tmpRitorno = '"' + this.nome + '"' + " int"; break;
-            //
             //ANY
             case 'any': tmpRitorno = '"' + this.nome + '"' + " varchar(255)"; break;
             default: tmpRitorno = '"' + this.nome + '"' + " varchar(255)"; break;
         }
+        return tmpRitorno;
+    }
+    CostruisciCreazioneDB(nomeClasse: string): string {
+        let tmpRitorno = '';
+        if (this.tipo instanceof ORMObject) {
+            /* Qui creo alter table ecc.. */
+            tmpRitorno = this.AppoggioCostruzioneStringa(this.tipo.colonnaRiferimento);
+        }
+        else {
+            tmpRitorno = this.AppoggioCostruzioneStringa(this.tipo);
+        }
         if (this.Constraints) {
-            if (this.Constraints.unique) tmpRitorno = tmpRitorno + ' CONSTRAINT ' + '"' + this.Constraints.unique.nome + '"' + ' UNIQUE';
+            if (this.Constraints.unique) tmpRitorno = tmpRitorno + ' CONSTRAINT ' + '"' + 'cn_' +nomeClasse + '_' + this.Constraints.unique.nome + '"' + ' UNIQUE';
             if (this.Constraints.notNull) tmpRitorno = tmpRitorno + ' NOT NULL';
-            if (this.Constraints.check) tmpRitorno = tmpRitorno + ' CONSTRAINT ' + '"' + this.Constraints.check.nome + '"' + ' CHECK(' + this.Constraints.check.check + ')';
+            if (this.Constraints.check) tmpRitorno = tmpRitorno + ' CONSTRAINT ' + '"' + 'cn_ck_'+ nomeClasse + '_' + this.Constraints.check.nome + '"' + ' CHECK(' + this.Constraints.check.check + ')';
+        }
+        return tmpRitorno;
+    }
+    CostruisciRelazioniDB(nomeTabella: string) {
+        let tmpRitorno = '';
+        if (this.tipo instanceof ORMObject) {
+            /* Qui creo alter table ecc.. */
+            tmpRitorno = `ALTER TABLE ${nomeTabella}
+            ADD CONSTRAINT "CO_${nomeTabella}_${this.tipo.tabellaRiferimento}" 
+            FOREIGN KEY (${this.nome}) 
+            REFERENCES ${this.tipo.tabellaRiferimento} (id); `;//${parent_key_columns}
         }
         return tmpRitorno;
     }

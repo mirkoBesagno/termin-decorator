@@ -12,17 +12,20 @@ import { Client } from "pg";
 
 export interface IClasseORM {
 
+    like?: string;
     nomeTriggerAutoCreateUpdated_Created_Deleted: string,
     abilitaCreatedAt: boolean;
     abilitaUpdatedAt: boolean;
     abilitaDeletedAt: boolean;
     nomeTabella: string;
+    estende?: string;
     creaId: boolean;
 }
 
 class ArtefattoClasseORM implements IClasseORM {
     nomeTriggerAutoCreateUpdated_Created_Deleted = 'update_updated_at_column';
-
+    like?: string;
+    estende?: string;
     abilitaCreatedAt: boolean;
     abilitaUpdatedAt: boolean;
     abilitaDeletedAt: boolean;
@@ -56,68 +59,205 @@ class ArtefattoClasseORM implements IClasseORM {
 
     faxsSimileIntestazione = 'CREATE TABLE  IF NOT EXISTS  ';
 
-    async CostruisciCreazioneDB(client: Client) {
+    async CostruisciCreazioneDB(client: Client, padreEreditario: boolean) {
         let ritorno = '';
         let ritornoTmp = '';
-        ritornoTmp = ritornoTmp + this.faxsSimileIntestazione + '"'+this.nomeTabella+'"' + ' (' + '\n';
-        if (this.abilitaCreatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaCreatedAt + ',' + '\n'; }
-        if (this.abilitaDeletedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaDeletedAt + ',' + '\n'; }
-        if (this.abilitaUpdatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaUpdatedAt; }
-        if (this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
-        else ritornoTmp = ritornoTmp + '\n';
-        for (let index = 0; index < this.listaProprieta.length; index++) {
-            const element = this.listaProprieta[index];
-            ritornoTmp = ritornoTmp + element.CostruisciCreazioneDB();
-            if (index + 1 < this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
-            else {
-                if (this.creaId) {
+        if (this.estende == undefined && this.like == undefined && padreEreditario == true) {
+
+            ritornoTmp = ritornoTmp + this.faxsSimileIntestazione + '"' + this.nomeTabella + '"' + ' (' + '\n';
+            if (this.abilitaCreatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaCreatedAt + ',' + '\n'; }
+            if (this.abilitaDeletedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaDeletedAt + ',' + '\n'; }
+            if (this.abilitaUpdatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaUpdatedAt; }
+            if (this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
+            else ritornoTmp = ritornoTmp + '\n';
+            let checkTmp = false;
+            for (let index = 0; index < this.listaProprieta.length; index++) {
+                const element = this.listaProprieta[index];
+                ritornoTmp = ritornoTmp + element.CostruisciCreazioneDB(this.nomeTabella);
+                if (index + 1 < this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
+                else {
+                    if (this.creaId) {
+                        ritornoTmp = ritornoTmp + ',\n';
+                        ritornoTmp = ritornoTmp + CreaID() + '\n';
+                        checkTmp = true;
+                    } else {
+                        ritornoTmp = ritornoTmp + '\n';
+                    }
+                }
+
+            }
+            if (this.creaId == true && checkTmp == false) {
+                if (this.listaProprieta.length > 0) {
                     ritornoTmp = ritornoTmp + ',\n';
                     ritornoTmp = ritornoTmp + CreaID() + '\n';
-                } else {
-                    ritornoTmp = ritornoTmp + '\n';
+                }
+                else if (this.abilitaUpdatedAt || this.abilitaCreatedAt || this.abilitaDeletedAt) {
+                    ritornoTmp = ritornoTmp + ',\n' + CreaID() + '\n';
+                }
+                else {
+                    ritornoTmp = ritornoTmp + CreaID() + '\n';
                 }
             }
-
+            ritornoTmp = ritornoTmp + ');' + '\n';
+            await EseguiQueryControllata(client, ritornoTmp);
+            ritorno = ritorno + ritornoTmp;
+            ritornoTmp = '';
+            /* Ora che la tabella esiste vado ad eseguire i trigger */
+            for (let index = 0; index < this.listaProprieta.length; index++) {
+                const element = this.listaProprieta[index];
+                element.CostruisceTrigger(this.nomeTabella, client);
+            }
+            if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
+                ritornoTmp = ritornoTmp + this.TriggerUpdate(this.nomeTabella) + '\n';
+            }
+            await EseguiQueryControllata(client, ritornoTmp);
+            ritorno = ritorno + ritornoTmp;
+            ritornoTmp = '';
+            if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
+                ritornoTmp = ritornoTmp + this.TriggerDeleted_at(this.nomeTabella) + '\n';
+            }
+            await EseguiQueryControllata(client, ritornoTmp);
+            ritorno = ritorno + ritornoTmp;
+            ritornoTmp = '';
         }
-        ritornoTmp = ritornoTmp + ');' + '\n';
-        await EseguiQueryControllata(client, ritornoTmp);
-        ritorno = ritorno + ritornoTmp;
-        ritornoTmp = '';
-        /* Ora che la tabella esiste vado ad eseguire i trigger */
+        else if (this.estende && padreEreditario == false) {
+            let ritorno = '';
+            let ritornoTmp = '';
+            ritornoTmp = ritornoTmp + this.faxsSimileIntestazione + '"' + this.nomeTabella + '"' + ' (' + '\n';
+            if (this.abilitaCreatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaCreatedAt + ',' + '\n'; }
+            if (this.abilitaDeletedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaDeletedAt + ',' + '\n'; }
+            if (this.abilitaUpdatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaUpdatedAt; }
+            if (this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
+            else ritornoTmp = ritornoTmp + '\n';
+            let checkTmp = false;
+            for (let index = 0; index < this.listaProprieta.length; index++) {
+                const element = this.listaProprieta[index];
+                ritornoTmp = ritornoTmp + element.CostruisciCreazioneDB(this.nomeTabella);
+                if (index + 1 < this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
+                else {
+                    if (this.creaId) {
+                        ritornoTmp = ritornoTmp + ',\n';
+                        ritornoTmp = ritornoTmp + CreaID() + '\n';
+                        checkTmp = true;
+                    } else {
+                        ritornoTmp = ritornoTmp + '\n';
+                    }
+                }
+
+            }
+            if (this.creaId == true && checkTmp == false) {
+                if (this.listaProprieta.length > 0) {
+                    ritornoTmp = ritornoTmp + ',\n';
+                    ritornoTmp = ritornoTmp + CreaID() + '\n';
+                }
+                else if (this.abilitaUpdatedAt || this.abilitaCreatedAt || this.abilitaDeletedAt) {
+                    ritornoTmp = ritornoTmp + ',\n' + CreaID() + '\n';
+                }
+                else {
+                    ritornoTmp = ritornoTmp + CreaID() + '\n';
+                }
+            }
+            ritornoTmp = ritornoTmp + ') INHERITS("' + this.estende + '");' + '\n';
+            await EseguiQueryControllata(client, ritornoTmp);
+            ritorno = ritorno + ritornoTmp;
+            ritornoTmp = '';
+            /* Ora che la tabella esiste vado ad eseguire i trigger */
+            for (let index = 0; index < this.listaProprieta.length; index++) {
+                const element = this.listaProprieta[index];
+                element.CostruisceTrigger(this.nomeTabella, client);
+            }
+            if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
+                ritornoTmp = ritornoTmp + this.TriggerUpdate(this.nomeTabella) + '\n';
+            }
+            await EseguiQueryControllata(client, ritornoTmp);
+            ritorno = ritorno + ritornoTmp;
+            ritornoTmp = '';
+            if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
+                ritornoTmp = ritornoTmp + this.TriggerDeleted_at(this.nomeTabella) + '\n';
+            }
+            await EseguiQueryControllata(client, ritornoTmp);
+            ritorno = ritorno + ritornoTmp;
+            ritornoTmp = '';
+        }
+        else if (this.like && padreEreditario == false) {
+            let ritorno = '';
+            let ritornoTmp = '';
+            ritornoTmp = ritornoTmp + this.faxsSimileIntestazione + '"' + this.nomeTabella + '"' + ' (' + '\n';
+            if (this.abilitaCreatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaCreatedAt + ',' + '\n'; }
+            if (this.abilitaDeletedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaDeletedAt + ',' + '\n'; }
+            if (this.abilitaUpdatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaUpdatedAt; }
+            if (this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
+            else ritornoTmp = ritornoTmp + '\n';
+            let checkTmp = false;
+            for (let index = 0; index < this.listaProprieta.length; index++) {
+                const element = this.listaProprieta[index];
+                ritornoTmp = ritornoTmp + element.CostruisciCreazioneDB(this.nomeTabella);
+                if (index + 1 < this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
+                else {
+                    if (this.creaId) {
+                        ritornoTmp = ritornoTmp + ',\n';
+                        ritornoTmp = ritornoTmp + CreaID() + '\n';
+                        checkTmp = true;
+                    } else {
+                        ritornoTmp = ritornoTmp + '\n';
+                    }
+                }
+
+            }
+            if (this.creaId == true && checkTmp == false) {
+                if (this.listaProprieta.length > 0) {
+                    ritornoTmp = ritornoTmp + ',\n';
+                    ritornoTmp = ritornoTmp + CreaID() + '\n';
+                }
+                else if (this.abilitaUpdatedAt || this.abilitaCreatedAt || this.abilitaDeletedAt) {
+                    ritornoTmp = ritornoTmp + ',\n' + CreaID() + '\n';
+                }
+                else {
+                    ritornoTmp = ritornoTmp + CreaID() + '\n';
+                }
+            }
+            if (this.listaProprieta.length > 0) {
+                ritornoTmp = ritornoTmp + ',\n';
+                ritornoTmp = ritornoTmp + 'LIKE "'+ this.like+'"' + '\n';
+            }else{
+                ritornoTmp = ritornoTmp + 'LIKE "'+ this.like+'"' + '\n';                
+            }
+            ritornoTmp = ritornoTmp + ');' + '\n';
+            await EseguiQueryControllata(client, ritornoTmp);
+            ritorno = ritorno + ritornoTmp;
+            ritornoTmp = '';
+            /* Ora che la tabella esiste vado ad eseguire i trigger */
+            for (let index = 0; index < this.listaProprieta.length; index++) {
+                const element = this.listaProprieta[index];
+                element.CostruisceTrigger(this.nomeTabella, client);
+            }
+            if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
+                ritornoTmp = ritornoTmp + this.TriggerUpdate(this.nomeTabella) + '\n';
+            }
+            await EseguiQueryControllata(client, ritornoTmp);
+            ritorno = ritorno + ritornoTmp;
+            ritornoTmp = '';
+            if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
+                ritornoTmp = ritornoTmp + this.TriggerDeleted_at(this.nomeTabella) + '\n';
+            }
+            await EseguiQueryControllata(client, ritornoTmp);
+            ritorno = ritorno + ritornoTmp;
+            ritornoTmp = '';
+        }
+        return ritorno;
+    }
+
+    async CostruisciRelazioniDB(client: Client) {
+        /* if (this.estende) {
+            const query = `ALTER TABLE ${this.nomeTabella} INHERIT ${this.estende};`
+            EseguiQueryControllata(client, query);
+        } */
         for (let index = 0; index < this.listaProprieta.length; index++) {
             const element = this.listaProprieta[index];
-            element.CostruisceTrigger(this.nomeTabella, client);
+            const tmp = element.CostruisciRelazioniDB(this.nomeTabella);
+            EseguiQueryControllata(client, tmp);
         }
-        /* Ora creo un indice di prova */
-        /* ritornoTmp = `CREATE INDEX index_name ON ${this.nomeTabella} 
-        (
-            nome ASC NULLS LAST
-        );`;
-        await EseguiQueryControllata(client, ritornoTmp);
-        ritorno = ritorno + ritornoTmp;
-        ritornoTmp = '';
 
-        ritornoTmp = `CREATE INDEX index_cognome ON ${this.nomeTabella} 
-        (
-            cognome ASC NULLS LAST
-        );`;
-        await EseguiQueryControllata(client, ritornoTmp);
-        ritorno = ritorno + ritornoTmp;
-        ritornoTmp = ''; */
-        /*  */
-        if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
-            ritornoTmp = ritornoTmp + this.TriggerUpdate(this.nomeTabella) + '\n';
-        }
-        await EseguiQueryControllata(client, ritornoTmp);
-        ritorno = ritorno + ritornoTmp;
-        ritornoTmp = '';
-        if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
-            ritornoTmp = ritornoTmp + this.TriggerDeleted_at(this.nomeTabella) + '\n';
-        }
-        await EseguiQueryControllata(client, ritornoTmp);
-        ritorno = ritorno + ritornoTmp;
-        ritornoTmp = '';
-        return ritorno;
     }
 }
 export function CreaID() {
@@ -147,8 +287,11 @@ export function DropAllTable() {
 }
 export async function EseguiQueryControllata(client: Client, query: string) {
     try {
-        const result = await client.query(query);
-        console.log('ESEGUO : \n' + query);
+        if (query != "") {
+            const result = await client.query(query);
+            console.log('ESEGUO : \n' + query);
+            return query;
+        }
         return query;
     } catch (error) {
         console.log('\n\nINIZIO Errroe : \n**********************\n\n');
