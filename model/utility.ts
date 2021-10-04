@@ -25,7 +25,19 @@ export interface IDescrivibile {
     sommario: string;
 }
 
-export type tipo = "number" | "text" | "date" | "array" | "object" | "boolean" | "any";
+//export type tipo = "number" | "text" | "date" | "array" | "object" | "boolean" | "any";
+export type tipo = /* "number" | */
+    //number
+    'decimal' | 'smallint' | 'integer' | 'numeric' | 'real' | 'smallserial' | 'serial' |
+    //text
+    "text" | "varchar(n)" | "character(n)" |
+    //date
+    "date" | "timestamptz" |
+    "array" |
+    "json" |
+    "object" |
+    "boolean" |
+    "any";
 
 export interface ILogbase {
     data: Date;
@@ -415,7 +427,7 @@ export interface IConstraints {
 export interface IProprieta {
     Constraints?: IConstraints;
 
-    valore: any;
+    valore?: any;
     nome?: string;
     tipo: tipo;
 
@@ -429,13 +441,20 @@ export interface IProprieta {
             nomeFunzione: string,
             Validatore: (nuovo: any, vecchio: any, argomenti: any[], instantevent: any, surgevent: any) => void | Error;
         }
+    ],
+    permessi?: [
+        {
+            ruoli: string[],
+            events: 'SELECT' | 'UPDATE' | 'DELET' | 'INSERT',
+            where: (NEW:any, OLD:any)=>void|true|Error
+        }
     ]
 
 }
 
-export type TypeIstantevent='BEFORE' | 'AFTER' | 'INSTEAD OF';
+export type TypeIstantevent = 'BEFORE' | 'AFTER' | 'INSTEAD OF';
 
-export type TypeSurgevent= 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE';
+export type TypeSurgevent = 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE';
 /* 
 export class Html implements IHtml {
 

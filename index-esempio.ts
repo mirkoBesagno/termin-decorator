@@ -22,12 +22,13 @@ export class Persona implements IPersona {
 
     @mpProp({
         Constraints: {
-            check: { nome: 'checkProprireta,ecc' }
+            unique: { nome: 'uniqueOnNome', unique: true },
+            notNull: true,
+            check: { nome: 'checkOnNome', check: "nome != 'Ernesto'" }
         },
         descrizione: 'descrizProp',
         tipo: 'text',
         sommario: 'sommarioProp',
-        valore: 'valoreProp',
         trigger: [
             {
                 instantevent: 'BEFORE',
@@ -47,12 +48,13 @@ export class Persona implements IPersona {
 
     @mpProp({
         Constraints: {
-            check: { nome: 'checkProprireta,ecc' }
+            unique: { nome: 'uniqueOnCognome', unique: true },
+            notNull: true,
+            check: { nome: 'checkOnCognome', check: "cognome != 'Lupino'" }
         },
         descrizione: 'descrizProp',
         tipo: 'text',
         sommario: 'sommarioProp',
-        valore: 'valoreProp',
         trigger: [
             {
                 instantevent: 'BEFORE',
@@ -126,7 +128,7 @@ const client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'test',
-    password: 'postgres',
+    password: 'password',//'postgres',
     port: 5432,
 })
 client.connect().then(async (result) => {
@@ -180,6 +182,16 @@ client.connect().then(async (result) => {
         console.log('\n*****\n' + error + '\n********\n\n');
     }
 
+    query = {
+        text: 'INSERT INTO persona(nome, cognome) VALUES($1, $2)',
+        values: ['Ernesto', 'Lupino'],
+    }
+    // callback
+    try {
+        await client.query(query);
+    } catch (error) {
+        console.log('\n*****\n' + error + '\n********\n\n');
+    }
     /* const knexClient = knex({
         client: 'postgres',
         connection: {
@@ -260,3 +272,4 @@ function makeid(length: number) {
     }
     return result;
 }
+

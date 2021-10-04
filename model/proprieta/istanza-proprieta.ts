@@ -14,6 +14,7 @@ export class IstanzaProprieta {
         const proprieta = classe.CercaProprietaSeNoAggiungiProprieta(nomeProprieta.toString());
 
         if (item) {
+            if (item.Constraints) proprieta.Constraints = item.Constraints;
             if (item.sommario) proprieta.sommario = item.sommario;
             if (item.tipo) proprieta.tipo = item.tipo;
             if (item.valore) proprieta.valore = item.valore;

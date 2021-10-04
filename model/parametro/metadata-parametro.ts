@@ -1,4 +1,4 @@
-import { IDescrivibile, IParametro, IRitornoValidatore, tipo, TypeDovePossoTrovarlo, TypePosizione } from "../utility"; 
+import { IDescrivibile, IParametro, IRitornoValidatore, tipo, TypeDovePossoTrovarlo, TypePosizione } from "../utility";
 
 export class TerminaleParametro implements IDescrivibile, IParametro {
     schemaSwagger?: {
@@ -66,7 +66,7 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
         try {
             JSON.parse(ritorno)
         } catch (error) {
-            console.log('\n*****\n'+error+'\n********\n\n');
+            console.log('\n*****\n' + error + '\n********\n\n');
         }
         return ritorno;
     }
@@ -81,15 +81,24 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
                     this.valore = Boolean(this.valore);
                     break;
                 case 'date':
+                case 'timestamptz':
                     this.valore = new Date(this.valore);
                     break;
-                case 'number':
+                case 'decimal':
+                case 'smallint':
+                case 'integer':
+                case 'numeric':
+                case 'real':
+                case 'smallserial':
+                case 'serial':
                     this.valore = Number(this.valore);
                     break;
                 case 'object':
                     this.valore = Object(this.valore);
                     break;
                 case 'text':
+                case 'varchar(n)':
+                case 'character(n)':
                     this.valore = String(this.valore);
                     break;
                 case 'any': break;
@@ -112,15 +121,24 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
                     valore = Boolean(valore);
                     break;
                 case 'date':
+                case 'timestamptz':
                     valore = new Date(valore);
                     break;
-                case 'number':
+                case 'decimal':
+                case 'smallint':
+                case 'integer':
+                case 'numeric':
+                case 'real':
+                case 'smallserial':
+                case 'serial':
                     valore = Number(valore);
                     break;
                 case 'object':
                     valore = Object(valore);
                     break;
                 case 'text':
+                case 'varchar(n)':
+                case 'character(n)':
                     valore = String(valore);
                     break;
                 case 'any': break;

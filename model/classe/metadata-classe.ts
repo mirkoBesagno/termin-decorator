@@ -35,8 +35,8 @@ class ArtefattoClasseORM implements IClasseORM {
         return `CREATE INDEX IF NOT EXISTS idx_somethings_deleted_at ON ${nomeTabella} (deleted_at ASC);`;
     }
     TriggerUpdate(nomeTabella: string) {
-        return `DROP TRIGGER IF EXISTS tg_somethings_updated_at ON ${nomeTabella};
-        CREATE TRIGGER tg_somethings_updated_at
+        return `DROP TRIGGER IF EXISTS tr_somethings_updated_at ON ${nomeTabella};
+        CREATE TRIGGER tr_somethings_updated_at
         BEFORE UPDATE
         ON ${nomeTabella}
         FOR EACH ROW
@@ -59,7 +59,7 @@ class ArtefattoClasseORM implements IClasseORM {
     async CostruisciCreazioneDB(client: Client) {
         let ritorno = '';
         let ritornoTmp = '';
-        ritornoTmp = ritornoTmp + this.faxsSimileIntestazione + this.nomeTabella + '(' + '\n';
+        ritornoTmp = ritornoTmp + this.faxsSimileIntestazione + '"'+this.nomeTabella+'"' + ' (' + '\n';
         if (this.abilitaCreatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaCreatedAt + ',' + '\n'; }
         if (this.abilitaDeletedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaDeletedAt + ',' + '\n'; }
         if (this.abilitaUpdatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaUpdatedAt; }
@@ -89,7 +89,7 @@ class ArtefattoClasseORM implements IClasseORM {
             element.CostruisceTrigger(this.nomeTabella, client);
         }
         /* Ora creo un indice di prova */
-        ritornoTmp = `CREATE INDEX index_name ON ${this.nomeTabella} 
+        /* ritornoTmp = `CREATE INDEX index_name ON ${this.nomeTabella} 
         (
             nome ASC NULLS LAST
         );`;
@@ -103,7 +103,7 @@ class ArtefattoClasseORM implements IClasseORM {
         );`;
         await EseguiQueryControllata(client, ritornoTmp);
         ritorno = ritorno + ritornoTmp;
-        ritornoTmp = '';
+        ritornoTmp = ''; */
         /*  */
         if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
             ritornoTmp = ritornoTmp + this.TriggerUpdate(this.nomeTabella) + '\n';

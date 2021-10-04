@@ -5,3 +5,12 @@ pg_stat_statements
  spi
 
  plv8
+
+ https://www.enterprisedb.com/postgres-tutorials/postgresql-query-introduction-explanation-and-50-examples
+
+
+ https://www.enterprisedb.com/blog/how-to-secure-postgresql-security-hardening-best-practices-checklist-tips-encryption-authentication-vulnerabilities
+
+ https://wiki.postgresql.org/wiki/Introduction_to_VACUUM,_ANALYZE,_EXPLAIN,_and_COUNT
+
+ https://carto.com/help/working-with-data/sql-stored-procedures/
