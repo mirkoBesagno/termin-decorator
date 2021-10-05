@@ -15,6 +15,47 @@ import { StartMonitoring } from "./utility-main";
 import { CreateDataBase, DropAllTable, DropDataBase, EseguiQueryControllata, TriggerUpdate_updated_at_column } from "../classe/metadata-classe";
 import { Client } from "pg";
 
+import superagent from "superagent";
+
+/* export class User {
+    nome: string;
+    option: {
+        creaTabelle: boolean,
+        creaUser: boolean
+    };
+    inGroup: string[];
+    constructor() {
+        this.nome = '';
+        this.option = { creaTabelle: false, creaUser: false };
+        this.inGroup = [];
+    }
+} */
+export class Role {
+    nome: string;
+    option: {
+        isSuperUser: boolean,
+        creaTabelle: boolean,
+        creaDB: boolean,
+        creaUser: boolean,
+        login: boolean,
+        connectionLimit?: number,
+        passwordCriptografia?: string,
+        validUntil?: Date
+    };
+    inGroup: string[];
+    inRole: string[];
+    connectionLimit: number;
+    password: string;
+
+    constructor() {
+        this.nome = '';
+        this.option = { creaTabelle: false, creaUser: false, login: false, isSuperUser: false, creaDB: false };
+        this.inGroup = [];
+        this.inRole = [];
+        this.connectionLimit = 1;
+        this.password = 'password';
+    }
+}
 
 
 export class Main implements IGestorePercorsiPath {
@@ -69,7 +110,7 @@ export class Main implements IGestorePercorsiPath {
     InizializzaClassi(lista: IstanzaClasse[]) {
         return true;
     }
-    async InizializzaORM(client: Client, nomeDatabase?: string) {
+    async InizializzaORM(client: Client, nomeDatabase?: string, listaRuoli?: Role[]) {
         try {
             await client.query(`CREATE EXTENSION plv8;`);
         } catch (error) {
@@ -86,7 +127,8 @@ export class Main implements IGestorePercorsiPath {
         ritornoTmp = ritornoTmp + TriggerUpdate_updated_at_column() + '\n';
         EseguiQueryControllata(client, ritornoTmp);
 
-        ritorno = ritorno + ritornoTmp;
+        ritorno = ritorno + this.InizializzaRuoli(client, listaRuoli);
+
         ritornoTmp = '';
         for await (const element of this.listaTerminaleClassi) {
             ritorno = ritorno + await element.CostruisciCreazioneDB(client, true);
@@ -99,28 +141,82 @@ export class Main implements IGestorePercorsiPath {
         }
         return ritorno;
     }
-    async StartTestAPI() {
-        for (let index2 = 0; index2 < this.listaTerminaleClassi.length; index2++) {
-            const tmpClasse = this.listaTerminaleClassi[index2];
-            console.log('Classe :' + tmpClasse);
-            for (let index = 0; index < tmpClasse.listaMetodi.length; index++) {
-                const tmpMetodo = tmpClasse.listaMetodi[index];
-                if (tmpMetodo.listaTest) {
-                    for (let index = 0; index < tmpMetodo.listaTest.length; index++) {
-                        const element = tmpMetodo.listaTest[index];
-                        if (tmpMetodo.interazione == 'rotta' || tmpMetodo.interazione == 'ambo') {
-                            const risposta = await tmpMetodo.ChiamaLaRottaConParametri(
-                                element.body, element.query, element.header
-                            );
-                            if (risposta == undefined) {
-                                console.log("Risposta undefined!");
-                            } else {
-                                console.log(risposta)
-                            }
-                        }
-                    }
-                }
+
+    InizializzaRuoli(client: Client, listaRuoli?: Role[]) {
+        let ritornoTmp = '';
+        if (listaRuoli) {
+            for (let index = 0; index < listaRuoli.length; index++) {
+                const element = listaRuoli[index];
+                const faxs = `CREATE ROLE ${element.nome} WITH 
+                ${element.option.isSuperUser != undefined && element.option.isSuperUser == true ? 'SUPERUSER' : 'NOSUPERUSER'} 
+                ${element.option.creaDB != undefined && element.option.creaDB == true ? 'CREATEDB' : 'NOCREATEDB'}
+                ${element.option.creaUser != undefined && element.option.creaUser == true ? 'CREATEROLE' : 'NOCREATEROLE'} 
+                INHERIT 
+                ${element.option.login != undefined && element.option.login == true ? 'LOGIN' : 'NOLOGIN'} 
+                NOREPLICATION  
+                NOBYPASSRLS 
+                PASSWORD '${element.password}' 
+                ${element.option.connectionLimit != undefined ? 'CONNECTION LIMIT ' + element.option.connectionLimit : 'CONNECTION LIMIT UNLIMITED'} 
+                ;`;
+                EseguiQueryControllata(client, faxs);
+                ritornoTmp = ritornoTmp + faxs;
             }
+        }
+        return ritornoTmp;
+    }
+
+    async StartTestAPI() {
+        const tmp: ListaTerminaleTestAPI = GetListaTestAPIMetaData();
+        tmp.sort((x: ITestAPI, y: ITestAPI) => {
+            if (x.numeroSequenza < y.numeroSequenza) return -1;
+            else if (x.numeroSequenza > y.numeroSequenza) return 1;
+            else {
+                if (x.numeroSequenza < y.numeroSequenza) return -1;
+                else if (x.numeroSequenza > y.numeroSequenza) return 1;
+                else return 0;
+            }
+        });
+        for (let index2 = 0; index2 < tmp.length; index2++) {
+            const tmpTest = tmp[index2];
+            console.log('Classe :' + tmpTest);
+            console.log("Inizio lista test con nome : " + tmpTest.nomeTest + ',| numero :' + tmpTest.numeroSequenza + ' :!:');
+            let risposta: any;
+            try {
+                try {
+                    try {
+                        risposta = await superagent(tmpTest.verbo, tmpTest.path)
+                            .query(tmpTest.query)
+                            .send(tmpTest.body)
+                            .set(tmpTest.header)
+                            .set('accept', 'json')
+                            ;
+                    } catch (error: any) {
+                        //console.log(error);
+                        if ('response' in error) {
+                            risposta = (<any>error).response.body;
+                        }
+                        throw new Error("Errore:" + error);
+                    }
+                    if (risposta) {
+                        risposta.body;
+                    } else {
+                        risposta = '';
+                    }
+                    /*  */
+                } catch (error) {
+                    throw new Error("Errore :" + error);
+                }
+                if (tmpTest.Controllo)
+                    tmpTest.Controllo(risposta ?? '');
+            } catch (error) {
+                risposta = '' + error;
+            }
+            if (risposta == undefined) {
+                console.log("Risposta undefined!");
+            } else {
+                console.log(risposta)
+            }
+            console.log("Fine test con nome : " + tmpTest.nomeTest + ',| numero :' + tmpTest.numeroSequenza + ' :!:');
         }
 
     }

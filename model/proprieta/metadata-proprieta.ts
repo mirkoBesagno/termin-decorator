@@ -1,5 +1,5 @@
 import { TerminaleParametro } from "../parametro/metadata-parametro";
-import { IConstraints, IParametro, IProprieta, IRitornoValidatore, ORMObject, tipo, TypeIstantevent, TypeSurgevent } from "../utility";
+import { IConstraints, IGrant, IParametro, IProprieta, IRitornoValidatore, ITrigger, ORMObject, tipo, TypeIstantevent, TypeSurgevent } from "../utility";
 import { Client, types } from "pg";
 
 
@@ -7,7 +7,7 @@ export class TerminaleProprieta implements IProprieta {
 
     //funzione 
     Constraints?: IConstraints;
-
+    grant?: IGrant[];
     /*  */
 
 
@@ -18,15 +18,7 @@ export class TerminaleProprieta implements IProprieta {
     descrizione: string;
     sommario: string;
 
-    trigger?: [
-        {
-            instantevent: TypeIstantevent,
-            surgevent: TypeSurgevent[],
-            nomeTrigger: string,
-            nomeFunzione: string,
-            Validatore: (nuovo: any, vecchio: any, argomenti: any[], instantevent: any, surgevent: any) => void | Error;
-        }
-    ]
+    trigger?: ITrigger[];
 
     constructor(nome: string, tipo: tipo) {
         this.nome = nome;
@@ -156,9 +148,9 @@ export class TerminaleProprieta implements IProprieta {
             tmpRitorno = this.AppoggioCostruzioneStringa(this.tipo);
         }
         if (this.Constraints) {
-            if (this.Constraints.unique) tmpRitorno = tmpRitorno + ' CONSTRAINT ' + '"' + 'cn_' +nomeClasse + '_' + this.Constraints.unique.nome + '"' + ' UNIQUE';
+            if (this.Constraints.unique) tmpRitorno = tmpRitorno + ' CONSTRAINT ' + '"' + 'cn_' + nomeClasse + '_' + this.Constraints.unique.nome + '"' + ' UNIQUE';
             if (this.Constraints.notNull) tmpRitorno = tmpRitorno + ' NOT NULL';
-            if (this.Constraints.check) tmpRitorno = tmpRitorno + ' CONSTRAINT ' + '"' + 'cn_ck_'+ nomeClasse + '_' + this.Constraints.check.nome + '"' + ' CHECK(' + this.Constraints.check.check + ')';
+            if (this.Constraints.check) tmpRitorno = tmpRitorno + ' CONSTRAINT ' + '"' + 'cn_ck_' + nomeClasse + '_' + this.Constraints.check.nome + '"' + ' CHECK(' + this.Constraints.check.check + ')';
         }
         return tmpRitorno;
     }
@@ -168,8 +160,10 @@ export class TerminaleProprieta implements IProprieta {
             /* Qui creo alter table ecc.. */
             tmpRitorno = `ALTER TABLE ${nomeTabella}
             ADD CONSTRAINT "CO_${nomeTabella}_${this.tipo.tabellaRiferimento}" 
-            FOREIGN KEY (${this.nome}) 
-            REFERENCES ${this.tipo.tabellaRiferimento} (id); `;//${parent_key_columns}
+            FOREIGN KEY ("${this.nome}") 
+            REFERENCES "${this.tipo.tabellaRiferimento}" (id)
+            on delete ${this.tipo.onDelete ?? 'NO ACTION'}
+            on update ${this.tipo.onUpdate ?? 'NO ACTION'}; `;//${parent_key_columns}
         }
         return tmpRitorno;
     }
@@ -186,14 +180,19 @@ export class TerminaleProprieta implements IProprieta {
             }
             let corpoFunzione = '';
             try {
-                const strg = String(element.Validatore);
+                if (typeof element.Validatore === 'function') {
+                    const strg = String(element.Validatore);
 
-                const tt = strg.indexOf('{');
-                const t1 = strg.substring(tt + 1, strg.length);
-                const t2 = t1.lastIndexOf('}');
-                const t3 = t1.substring(0, t2 - 1);
-                corpoFunzione = t3;
-                console.log(strg);
+                    const tt = strg.indexOf('{');
+                    const t1 = strg.substring(tt + 1, strg.length);
+                    const t2 = t1.lastIndexOf('}');
+                    const t3 = t1.substring(0, t2 - 1);
+                    corpoFunzione = t3;
+                    console.log(strg);
+                }
+                else {
+                    corpoFunzione = String(element.Validatore);
+                }
 
             } catch (error) {
                 console.log('\n*****\n' + error + '\n********\n\n');
@@ -205,7 +204,7 @@ export class TerminaleProprieta implements IProprieta {
                 $$
                     ${corpoFunzione}
                 $$
-                LANGUAGE "plv8";
+                LANGUAGE "${element.typeFunction ?? 'plv8'}";
         
                 COMMENT ON FUNCTION "FN_${element.nomeFunzione}"() IS 'Hei tanto roba questa è scritta usando plv8!!';
         

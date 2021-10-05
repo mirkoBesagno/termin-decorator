@@ -21,7 +21,9 @@ export class IstanzaProprieta {
                 (<ORMObject>(<tipo>item.tipo)).tabellaRiferimento) {
                 proprieta.tipo = new ORMObject(
                     (<ORMObject>item.tipo).colonnaRiferimento,
-                    (<ORMObject>item.tipo).tabellaRiferimento
+                    (<ORMObject>item.tipo).tabellaRiferimento,
+                    (<ORMObject>item.tipo).onDelete,
+                    (<ORMObject>item.tipo).onUpdate
                 );
             }
             else {
@@ -31,7 +33,9 @@ export class IstanzaProprieta {
             if (item.descrizione) proprieta.descrizione = item.descrizione;
             if (item.nome) proprieta.nome = item.nome;
             else if (proprieta.nome == '' || proprieta.nome == undefined) proprieta.nome = nomeProprieta;
+
             if (item.trigger) proprieta.trigger = item.trigger;
+            if (item.grant) proprieta.grant = item.grant;
         }
         SalvaListaClasseMetaData(list);
     }

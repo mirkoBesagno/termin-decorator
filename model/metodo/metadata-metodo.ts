@@ -13,6 +13,7 @@ import { ListaTerminaleClasse } from "../classe/lista-classe";
 import fs from "fs";
 import superagent from "superagent";
 import { ListaTerminaleParametro } from "../parametro/lista-parametro";
+import { ITestAPI } from "../test-funzionale/lista-test-funzionale";
 
 
 class MetodoEventi implements IMetodoEventi {
@@ -146,11 +147,7 @@ class MetodoVettori extends MetodoLimitazioni implements IMetodoVettori {
     RisposteDiControllo?: RispostaControllo[];
     swaggerClassi: string[];
     nomiClasseRiferimento?: IClasseRiferimento[];
-    listaTest: {
-        body: any,
-        query: any,
-        header: any
-    }[];
+    listaTest: ITestAPI[];
     listaHtml: IHtml[];
 
     constructor() {
@@ -458,7 +455,7 @@ export class TerminaleMetodo
                     .set(header)
                     .set('accept', 'json')
                     ;
-            } catch (error:any) {
+            } catch (error: any) {
                 //console.log(error);
                 if ('response' in error) {
                     return (<any>error).response.body;

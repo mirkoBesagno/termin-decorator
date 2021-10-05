@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import { ListaTerminaleMetodo } from "../metodo/lista-metodo";
 import { TerminaleMetodo } from "../metodo/metadata-metodo";
-import { IGestorePercorsiPath, IHtml, IRaccoltaPercorsi } from "../utility";
+import { IConstraints, IGestorePercorsiPath, IGrant, IHtml, IPolicy, IRaccoltaPercorsi } from "../utility";
 
 import chiedi from "prompts";
 import { ListaTerminaleProprieta } from "../proprieta/lista-proprieta";
@@ -20,6 +20,9 @@ export interface IClasseORM {
     nomeTabella: string;
     estende?: string;
     creaId: boolean;
+    multiUnique?: { colonneDiRiferimento: string[] }[],
+    policySicurezza?: IPolicy[],
+    grant?: IGrant[]
 }
 
 class ArtefattoClasseORM implements IClasseORM {
@@ -30,6 +33,8 @@ class ArtefattoClasseORM implements IClasseORM {
     abilitaUpdatedAt: boolean;
     abilitaDeletedAt: boolean;
     creaId: boolean;
+    policySicurezza?: IPolicy[] = [];
+    multiUnique?: { colonneDiRiferimento: string[] }[] = [];
     faxSimile_abilitaDeletedAt = `created_at timestamp with time zone  NOT NULL  DEFAULT current_timestamp`;
     faxSimile_abilitaCreatedAt = `updated_at timestamp with time zone  NOT NULL  DEFAULT current_timestamp`;
     faxSimile_abilitaUpdatedAt = `deleted_at timestamp with time zone`;
@@ -61,189 +66,99 @@ class ArtefattoClasseORM implements IClasseORM {
 
     async CostruisciCreazioneDB(client: Client, padreEreditario: boolean) {
         let ritorno = '';
-        let ritornoTmp = '';
         if (this.estende == undefined && this.like == undefined && padreEreditario == true) {
-
-            ritornoTmp = ritornoTmp + this.faxsSimileIntestazione + '"' + this.nomeTabella + '"' + ' (' + '\n';
-            if (this.abilitaCreatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaCreatedAt + ',' + '\n'; }
-            if (this.abilitaDeletedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaDeletedAt + ',' + '\n'; }
-            if (this.abilitaUpdatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaUpdatedAt; }
-            if (this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
-            else ritornoTmp = ritornoTmp + '\n';
-            let checkTmp = false;
-            for (let index = 0; index < this.listaProprieta.length; index++) {
-                const element = this.listaProprieta[index];
-                ritornoTmp = ritornoTmp + element.CostruisciCreazioneDB(this.nomeTabella);
-                if (index + 1 < this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
-                else {
-                    if (this.creaId) {
-                        ritornoTmp = ritornoTmp + ',\n';
-                        ritornoTmp = ritornoTmp + CreaID() + '\n';
-                        checkTmp = true;
-                    } else {
-                        ritornoTmp = ritornoTmp + '\n';
-                    }
-                }
-
-            }
-            if (this.creaId == true && checkTmp == false) {
-                if (this.listaProprieta.length > 0) {
-                    ritornoTmp = ritornoTmp + ',\n';
-                    ritornoTmp = ritornoTmp + CreaID() + '\n';
-                }
-                else if (this.abilitaUpdatedAt || this.abilitaCreatedAt || this.abilitaDeletedAt) {
-                    ritornoTmp = ritornoTmp + ',\n' + CreaID() + '\n';
-                }
-                else {
-                    ritornoTmp = ritornoTmp + CreaID() + '\n';
-                }
-            }
-            ritornoTmp = ritornoTmp + ');' + '\n';
-            await EseguiQueryControllata(client, ritornoTmp);
-            ritorno = ritorno + ritornoTmp;
-            ritornoTmp = '';
-            /* Ora che la tabella esiste vado ad eseguire i trigger */
-            for (let index = 0; index < this.listaProprieta.length; index++) {
-                const element = this.listaProprieta[index];
-                element.CostruisceTrigger(this.nomeTabella, client);
-            }
-            if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
-                ritornoTmp = ritornoTmp + this.TriggerUpdate(this.nomeTabella) + '\n';
-            }
-            await EseguiQueryControllata(client, ritornoTmp);
-            ritorno = ritorno + ritornoTmp;
-            ritornoTmp = '';
-            if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
-                ritornoTmp = ritornoTmp + this.TriggerDeleted_at(this.nomeTabella) + '\n';
-            }
-            await EseguiQueryControllata(client, ritornoTmp);
-            ritorno = ritorno + ritornoTmp;
-            ritornoTmp = '';
+            ritorno = await this.AppoggioACostruisciDB(client, '); \n');
         }
         else if (this.estende && padreEreditario == false) {
-            let ritorno = '';
-            let ritornoTmp = '';
-            ritornoTmp = ritornoTmp + this.faxsSimileIntestazione + '"' + this.nomeTabella + '"' + ' (' + '\n';
-            if (this.abilitaCreatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaCreatedAt + ',' + '\n'; }
-            if (this.abilitaDeletedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaDeletedAt + ',' + '\n'; }
-            if (this.abilitaUpdatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaUpdatedAt; }
-            if (this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
-            else ritornoTmp = ritornoTmp + '\n';
-            let checkTmp = false;
-            for (let index = 0; index < this.listaProprieta.length; index++) {
-                const element = this.listaProprieta[index];
-                ritornoTmp = ritornoTmp + element.CostruisciCreazioneDB(this.nomeTabella);
-                if (index + 1 < this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
-                else {
-                    if (this.creaId) {
-                        ritornoTmp = ritornoTmp + ',\n';
-                        ritornoTmp = ritornoTmp + CreaID() + '\n';
-                        checkTmp = true;
-                    } else {
-                        ritornoTmp = ritornoTmp + '\n';
-                    }
-                }
-
-            }
-            if (this.creaId == true && checkTmp == false) {
-                if (this.listaProprieta.length > 0) {
-                    ritornoTmp = ritornoTmp + ',\n';
-                    ritornoTmp = ritornoTmp + CreaID() + '\n';
-                }
-                else if (this.abilitaUpdatedAt || this.abilitaCreatedAt || this.abilitaDeletedAt) {
-                    ritornoTmp = ritornoTmp + ',\n' + CreaID() + '\n';
-                }
-                else {
-                    ritornoTmp = ritornoTmp + CreaID() + '\n';
-                }
-            }
-            ritornoTmp = ritornoTmp + ') INHERITS("' + this.estende + '");' + '\n';
-            await EseguiQueryControllata(client, ritornoTmp);
-            ritorno = ritorno + ritornoTmp;
-            ritornoTmp = '';
-            /* Ora che la tabella esiste vado ad eseguire i trigger */
-            for (let index = 0; index < this.listaProprieta.length; index++) {
-                const element = this.listaProprieta[index];
-                element.CostruisceTrigger(this.nomeTabella, client);
-            }
-            if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
-                ritornoTmp = ritornoTmp + this.TriggerUpdate(this.nomeTabella) + '\n';
-            }
-            await EseguiQueryControllata(client, ritornoTmp);
-            ritorno = ritorno + ritornoTmp;
-            ritornoTmp = '';
-            if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
-                ritornoTmp = ritornoTmp + this.TriggerDeleted_at(this.nomeTabella) + '\n';
-            }
-            await EseguiQueryControllata(client, ritornoTmp);
-            ritorno = ritorno + ritornoTmp;
-            ritornoTmp = '';
+            ritorno = await this.AppoggioACostruisciDB(client, ') INHERITS("' + this.estende + '");' + '\n');
         }
         else if (this.like && padreEreditario == false) {
-            let ritorno = '';
-            let ritornoTmp = '';
-            ritornoTmp = ritornoTmp + this.faxsSimileIntestazione + '"' + this.nomeTabella + '"' + ' (' + '\n';
-            if (this.abilitaCreatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaCreatedAt + ',' + '\n'; }
-            if (this.abilitaDeletedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaDeletedAt + ',' + '\n'; }
-            if (this.abilitaUpdatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaUpdatedAt; }
-            if (this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
-            else ritornoTmp = ritornoTmp + '\n';
-            let checkTmp = false;
-            for (let index = 0; index < this.listaProprieta.length; index++) {
-                const element = this.listaProprieta[index];
-                ritornoTmp = ritornoTmp + element.CostruisciCreazioneDB(this.nomeTabella);
-                if (index + 1 < this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
-                else {
-                    if (this.creaId) {
-                        ritornoTmp = ritornoTmp + ',\n';
-                        ritornoTmp = ritornoTmp + CreaID() + '\n';
-                        checkTmp = true;
-                    } else {
-                        ritornoTmp = ritornoTmp + '\n';
-                    }
-                }
+            ritorno = await this.AppoggioACostruisciDB(client, 'LIKE "' + this.like + '"' + '\n');
+        }
+        return ritorno;
+    }
+    async AppoggioACostruisciDB(client: Client, rigaDaInserire: string) {
 
-            }
-            if (this.creaId == true && checkTmp == false) {
-                if (this.listaProprieta.length > 0) {
+        let ritorno = '';
+        let ritornoTmp = '';
+        ritornoTmp = ritornoTmp + this.faxsSimileIntestazione + '"' + this.nomeTabella + '"' + ' (' + '\n';
+        if (this.abilitaCreatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaCreatedAt + ',' + '\n'; }
+        if (this.abilitaDeletedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaDeletedAt + ',' + '\n'; }
+        if (this.abilitaUpdatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaUpdatedAt; }
+        if (this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
+        else ritornoTmp = ritornoTmp + '\n';
+        let checkTmp = false;
+        for (let index = 0; index < this.listaProprieta.length; index++) {
+            const element = this.listaProprieta[index];
+            ritornoTmp = ritornoTmp + element.CostruisciCreazioneDB(this.nomeTabella);
+            if (index + 1 < this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
+            else {
+                if (this.creaId) {
                     ritornoTmp = ritornoTmp + ',\n';
                     ritornoTmp = ritornoTmp + CreaID() + '\n';
-                }
-                else if (this.abilitaUpdatedAt || this.abilitaCreatedAt || this.abilitaDeletedAt) {
-                    ritornoTmp = ritornoTmp + ',\n' + CreaID() + '\n';
-                }
-                else {
-                    ritornoTmp = ritornoTmp + CreaID() + '\n';
+                    checkTmp = true;
+                } else {
+                    ritornoTmp = ritornoTmp + '\n';
                 }
             }
+
+        }
+        if (this.creaId == true && checkTmp == false) {
             if (this.listaProprieta.length > 0) {
                 ritornoTmp = ritornoTmp + ',\n';
-                ritornoTmp = ritornoTmp + 'LIKE "'+ this.like+'"' + '\n';
-            }else{
-                ritornoTmp = ritornoTmp + 'LIKE "'+ this.like+'"' + '\n';                
+                ritornoTmp = ritornoTmp + CreaID() + '\n';
             }
-            ritornoTmp = ritornoTmp + ');' + '\n';
-            await EseguiQueryControllata(client, ritornoTmp);
-            ritorno = ritorno + ritornoTmp;
-            ritornoTmp = '';
-            /* Ora che la tabella esiste vado ad eseguire i trigger */
-            for (let index = 0; index < this.listaProprieta.length; index++) {
-                const element = this.listaProprieta[index];
-                element.CostruisceTrigger(this.nomeTabella, client);
+            else if (this.abilitaUpdatedAt || this.abilitaCreatedAt || this.abilitaDeletedAt) {
+                ritornoTmp = ritornoTmp + ',\n' + CreaID() + '\n';
             }
-            if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
-                ritornoTmp = ritornoTmp + this.TriggerUpdate(this.nomeTabella) + '\n';
+            else {
+                ritornoTmp = ritornoTmp + CreaID() + '\n';
             }
-            await EseguiQueryControllata(client, ritornoTmp);
-            ritorno = ritorno + ritornoTmp;
-            ritornoTmp = '';
-            if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
-                ritornoTmp = ritornoTmp + this.TriggerDeleted_at(this.nomeTabella) + '\n';
-            }
-            await EseguiQueryControllata(client, ritornoTmp);
-            ritorno = ritorno + ritornoTmp;
-            ritornoTmp = '';
         }
+
+        if (this.multiUnique) {
+            for (let index = 0; index < this.multiUnique.length; index++) {
+                const element = this.multiUnique[index];
+                let ritornoTmp2 = 'UNIQUE (';
+                for (let ind = 0; ind < element.colonneDiRiferimento.length; ind++) {
+                    const variab = element.colonneDiRiferimento[ind];
+                    ritornoTmp2 = ritornoTmp2 + ' ' + variab;
+                    if (ind + 1 < element.colonneDiRiferimento.length) ritornoTmp2 = ritornoTmp2 + ',';
+                }
+                ritornoTmp2 = ritornoTmp2 + ' )';
+                if (ritornoTmp2 != 'UNIQUE ( )') {
+                    ritornoTmp = ritornoTmp + ritornoTmp2;
+                }
+            }
+        }
+
+        ritornoTmp = ritornoTmp + rigaDaInserire;
+        await EseguiQueryControllata(client, ritornoTmp);
+        ritorno = ritorno + ritornoTmp;
+        ritornoTmp = '';
+        /*  */
+        await EseguiQueryControllata(client, `ALTER TABLE ${this.nomeTabella} ENABLE ROW LEVEL SECURITY;`);
+        ritorno = ritorno + ritornoTmp;
+        ritornoTmp = '';
+        /* Ora che la tabella esiste vado ad eseguire i trigger */
+        for (let index = 0; index < this.listaProprieta.length; index++) {
+            const element = this.listaProprieta[index];
+            element.CostruisceTrigger(this.nomeTabella, client);
+        }
+        if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
+            ritornoTmp = ritornoTmp + this.TriggerUpdate(this.nomeTabella) + '\n';
+        }
+        await EseguiQueryControllata(client, ritornoTmp);
+        ritorno = ritorno + ritornoTmp;
+        ritornoTmp = '';
+        if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
+            ritornoTmp = ritornoTmp + this.TriggerDeleted_at(this.nomeTabella) + '\n';
+        }
+        await EseguiQueryControllata(client, ritornoTmp);
+        ritorno = ritorno + ritornoTmp;
+        ritornoTmp = '';
+
+
         return ritorno;
     }
 

@@ -27,9 +27,29 @@ export class ListaTerminaleTestAPI extends Array<ITestAPI> {
 
 }
 
-export interface ITestAPI{
-    
-        body: any;
-        query: any;
-        header: any;
+export interface ITestAPI {
+    verbo:string, 
+    path:string,
+    numeroSequenza: number,
+    nomeTest: string,
+    body: any,
+    query: any,
+    header: any,
+    Controllo?: (ritorno: any) => boolean
 }
+/* {
+
+    numeroRootTest: number,
+    nome: string,
+    numero: number,
+    //Specifica se il percorso dato deve essere concatenato al percorso della classe o 
+    //se è da prendere singolarmente di default è falso e quindi il percorso andra a sommarsi al percorso della classe 
+    testUnita: {
+        messaggio: {
+            body: any;
+            query: any;
+            header: any;
+        },
+        risposta: string
+    }
+} */

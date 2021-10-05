@@ -11,6 +11,7 @@ import { TerminaleClasse } from "./classe/metadata-classe";
 export const targetTerminale = { name: 'Terminale' };
 import memorycache from "memory-cache";
 import { ListaTerminaleParametro } from "..";
+import { ITestAPI } from "./test-funzionale/lista-test-funzionale";
 
 
 export interface IContieneRaccoltaPercorsi {
@@ -42,13 +43,18 @@ export type tipo = /* "number" | */
     ;
 export class ORMObject {
     tipo: 'object';
-    colonnaRiferimento:  tipo;
+    colonnaRiferimento: tipo;
     tabellaRiferimento: string;
-    constructor(colonnaRiferimento: tipo, tabellaRiferimento: string) {
+    onDelete?: 'NO ACTION' | 'RESTRICT' | 'CASCADE' | 'SET NULL' | 'SET DEFAULT';
+    onUpdate?: 'NO ACTION' | 'RESTRICT' | 'CASCADE' | 'SET NULL' | 'SET DEFAULT'
+    constructor(colonnaRiferimento: tipo, tabellaRiferimento: string,
+        onDelete?: 'NO ACTION' | 'RESTRICT' | 'CASCADE' | 'SET NULL' | 'SET DEFAULT',
+        onUpdate?: 'NO ACTION' | 'RESTRICT' | 'CASCADE' | 'SET NULL' | 'SET DEFAULT') {
         this.tipo = 'object';
         this.colonnaRiferimento = colonnaRiferimento;
         this.tabellaRiferimento = tabellaRiferimento;
-
+        this.onDelete = onDelete;
+        this.onUpdate = onUpdate
     }
 }
 export interface ILogbase {
@@ -356,14 +362,7 @@ export interface IMetodoVettori {
     RisposteDiControllo?: RispostaControllo[];
     swaggerClassi?: string[];
     nomiClasseRiferimento?: IClasseRiferimento[];
-    listaTest?: {
-        /* nomeTest?:string, 
-        posizione?:number,
-        nomeTestGenerico?:string, */
-        body: any,
-        query: any,
-        header: any
-    }[];
+    listaTest?: ITestAPI[];
     listaHtml?: IHtml[];
 }
 export interface IMetodoEventi {
@@ -433,7 +432,14 @@ export interface IConstraints {
     check?: ICheck;
     notNull?: boolean;
     unique?: IUnique;
-
+}
+export interface ITrigger {
+    instantevent: TypeIstantevent,
+    surgevent: TypeSurgevent[],
+    nomeTrigger: string,
+    nomeFunzione: string,
+    Validatore: string | ((nuovo: any, vecchio: any, argomenti: any[], instantevent: any, surgevent: any) => void | Error),
+    typeFunction?: 'plv8' | 'sql'
 }
 
 export interface IProprieta {
@@ -445,24 +451,33 @@ export interface IProprieta {
 
     descrizione: string;
     sommario: string;
-    trigger?: [
-        {
-            instantevent: TypeIstantevent,
-            surgevent: TypeSurgevent[],
-            nomeTrigger: string,
-            nomeFunzione: string,
-            Validatore: (nuovo: any, vecchio: any, argomenti: any[], instantevent: any, surgevent: any) => void | Error;
-        }
-    ],
-    permessi?: [
-        {
-            ruoli: string[],
-            events: 'SELECT' | 'UPDATE' | 'DELET' | 'INSERT',
-            where: (NEW: any, OLD: any) => void | true | Error
-        }
-    ]
+    trigger?: ITrigger[],
+    grant?: IGrant[]
 
 }
+export interface IGrant {
+    ruoli: string[],
+    tabellaDestinazione?: string,
+    colonneRiferimento?: string[]
+    events: ['SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE' | 'REFERENCES' | 'TRIGGER' | 'ALL PRIVILEGES'],
+    // where: (NEW: any, OLD: any) => void | true | Error
+}
+export interface IPolicy {
+    nomePolicy: string,
+    tabellaDestinazione: string,
+    ruoli: string[],
+    azieneScatenente: 'SELECT' | 'UPDATE' | 'DELET' | 'INSERT' | 'ALL',
+    using: (NEW: any, OLD: any) => void | true | Error,
+    check: (NEW: any, OLD: any) => void | true | Error
+    /* 
+    USING : Le righe della tabella esistenti vengono confrontate con l'espressione specificata in USING
+
+    CHECK : Le nuove righe che verrebbero create tramite INSERT o UPDATE vengono confrontate con l'espressione specificata in WITH CHECK
+    */
+    // where: (NEW: any, OLD: any) => void | true | Error
+
+}
+
 
 export type TypeIstantevent = 'BEFORE' | 'AFTER' | 'INSTEAD OF';
 

@@ -2,6 +2,7 @@ import { ListaTerminaleParametro, Main, mpClas, mpMet, mpMetGen, mpPar, IParamet
 import { IReturnTest } from "./model/test-funzionale/utility-test-funzionale";
 import { IMetodoEventi, IMetodoParametri } from "./model/utility";
 import { Client } from "pg";
+import { Role } from "./model/main/metadata-main";
 
 interface IPersona {
     nome: string
@@ -103,10 +104,10 @@ export class Persona implements IPersona {
         abilitaDeletedAt: true,
         abilitaUpdatedAt: true,
         nomeTriggerAutoCreateUpdated_Created_Deleted: 'TracciamentoOperazioni_I_liv',
-        creaId: true
+        creaId: true,
+        policySicurezza: [],
     })
 export class Maggiordomo {
-
 
     @mpProp({
         Constraints: {
@@ -130,7 +131,13 @@ export class Maggiordomo {
                     }
                 }
             }
-        ]
+        ],
+       /*  grant: [
+            {
+                events: ['UPDATE'],
+                ruoli: ['']
+            }
+        ] */
     })
     nome: string;
 
@@ -160,13 +167,14 @@ export class Maggiordomo {
     })
     cognome: string;
 
-
     @mpProp({
         descrizione: 'descrizProp',
         tipo: {
             tipo: 'object',
             colonnaRiferimento: 'serial',
-            tabellaRiferimento: 'persona'
+            tabellaRiferimento: 'persona',
+            onDelete: 'NO ACTION',
+            onUpdate: 'NO ACTION'
         },
         sommario: 'sommarioProp',
     })
@@ -194,18 +202,39 @@ const main = new Main('api');
 
 main.Inizializza("localhost", 8080, true, true);
 
+
+
 const client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'test',
-    password: 'postgres',
+    password: 'password',//'postgres',
     port: 5432,
 })
 client.connect().then(async (result) => {
 
 
 
-    const orm = await main.InizializzaORM(client, 'test');
+    const orm = await main.InizializzaORM(client, 'test', [
+        {
+            nome: 'utente1',
+            password: 'password',
+            inRole: [], inGroup: [], connectionLimit: 1,
+            option: {
+                creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
+                login: true
+            }
+        },
+        {
+            nome: 'utente2',
+            password: 'password',
+            inRole: [], inGroup: [], connectionLimit: 1,
+            option: {
+                creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
+                login: true
+            }
+        }
+    ]);
     console.log('\n\n\n\n' + orm + '\n\n\n\n\n\n');
 
     console.log('*******');
@@ -295,6 +324,9 @@ client.connect().then(async (result) => {
     .catch((err: any) => {
         console.log("ciao");
     });
+
+main.AggiungiTestAPI([
+]);
 
 
 main.AggiungiTest([
