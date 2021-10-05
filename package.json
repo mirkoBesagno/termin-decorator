@@ -7,6 +7,7 @@
     "start-js": "node ./out/index.js",
     "start": "ts-node ./index.ts",
     "start-esempio": "ts-node ./index-esempio.ts",
+    "start-esempio-connessione": "ts-node ./esempio-connessione.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:copy": "ts-node -T scripts/copyFiles.ts",
     "build:tsc": "tsc --build tsconfig.json",

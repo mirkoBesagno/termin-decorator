@@ -7,7 +7,6 @@ export class TerminaleProprieta implements IProprieta {
 
     //funzione 
     Constraints?: IConstraints;
-    grant?: IGrant[];
     /*  */
 
 
@@ -19,6 +18,7 @@ export class TerminaleProprieta implements IProprieta {
     sommario: string;
 
     trigger?: ITrigger[];
+    grants?: IGrant[];
 
     constructor(nome: string, tipo: tipo) {
         this.nome = nome;

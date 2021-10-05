@@ -452,14 +452,15 @@ export interface IProprieta {
     descrizione: string;
     sommario: string;
     trigger?: ITrigger[],
-    grant?: IGrant[]
+    grants?: IGrant[]
 
 }
+export type typeGrantEvent= 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE' | 'REFERENCES' | 'TRIGGER' | 'ALL PRIVILEGES'
 export interface IGrant {
     ruoli: string[],
     tabellaDestinazione?: string,
     colonneRiferimento?: string[]
-    events: ['SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE' | 'REFERENCES' | 'TRIGGER' | 'ALL PRIVILEGES'],
+    events: typeGrantEvent[],
     // where: (NEW: any, OLD: any) => void | true | Error
 }
 export interface IPolicy {

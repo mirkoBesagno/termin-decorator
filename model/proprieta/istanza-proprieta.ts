@@ -35,7 +35,7 @@ export class IstanzaProprieta {
             else if (proprieta.nome == '' || proprieta.nome == undefined) proprieta.nome = nomeProprieta;
 
             if (item.trigger) proprieta.trigger = item.trigger;
-            if (item.grant) proprieta.grant = item.grant;
+            if (item.grants) proprieta.grants = item.grants;
         }
         SalvaListaClasseMetaData(list);
     }

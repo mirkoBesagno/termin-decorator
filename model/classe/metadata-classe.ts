@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import { ListaTerminaleMetodo } from "../metodo/lista-metodo";
 import { TerminaleMetodo } from "../metodo/metadata-metodo";
-import { IConstraints, IGestorePercorsiPath, IGrant, IHtml, IPolicy, IRaccoltaPercorsi } from "../utility";
+import { IConstraints, IGestorePercorsiPath, IGrant, IHtml, IPolicy, IRaccoltaPercorsi, typeGrantEvent } from "../utility";
 
 import chiedi from "prompts";
 import { ListaTerminaleProprieta } from "../proprieta/lista-proprieta";
@@ -17,12 +17,12 @@ export interface IClasseORM {
     abilitaCreatedAt: boolean;
     abilitaUpdatedAt: boolean;
     abilitaDeletedAt: boolean;
-    nomeTabella: string;
+    nomeTabella?: string;
     estende?: string;
     creaId: boolean;
     multiUnique?: { colonneDiRiferimento: string[] }[],
     policySicurezza?: IPolicy[],
-    grant?: IGrant[]
+    grants?: IGrant[]
 }
 
 class ArtefattoClasseORM implements IClasseORM {
@@ -34,6 +34,7 @@ class ArtefattoClasseORM implements IClasseORM {
     abilitaDeletedAt: boolean;
     creaId: boolean;
     policySicurezza?: IPolicy[] = [];
+    grants?: IGrant[]
     multiUnique?: { colonneDiRiferimento: string[] }[] = [];
     faxSimile_abilitaDeletedAt = `created_at timestamp with time zone  NOT NULL  DEFAULT current_timestamp`;
     faxSimile_abilitaCreatedAt = `updated_at timestamp with time zone  NOT NULL  DEFAULT current_timestamp`;
@@ -75,6 +76,7 @@ class ArtefattoClasseORM implements IClasseORM {
         else if (this.like && padreEreditario == false) {
             ritorno = await this.AppoggioACostruisciDB(client, 'LIKE "' + this.like + '"' + '\n');
         }
+        EseguiQueryControllata(client, ritorno);
         return ritorno;
     }
     async AppoggioACostruisciDB(client: Client, rigaDaInserire: string) {
@@ -158,6 +160,12 @@ class ArtefattoClasseORM implements IClasseORM {
         ritorno = ritorno + ritornoTmp;
         ritornoTmp = '';
 
+        if (this.grants) {
+            for (let index = 0; index < this.grants.length; index++) {
+                const element = this.grants[index];
+                const tmp = `GRANT ${element.events}`;
+            }
+        }
 
         return ritorno;
     }
@@ -170,9 +178,98 @@ class ArtefattoClasseORM implements IClasseORM {
         for (let index = 0; index < this.listaProprieta.length; index++) {
             const element = this.listaProprieta[index];
             const tmp = element.CostruisciRelazioniDB(this.nomeTabella);
-            EseguiQueryControllata(client, tmp);
+            await EseguiQueryControllata(client, tmp);
         }
 
+    }
+
+    async CostruisceGrant(grants: IGrant[], client: Client) {
+        let ritorno='';
+        for (let index = 0; index < grants.length; index++) {
+            const element = grants[index];
+            const eventitesto = this.CostruisciEvents(element.events);
+            const ruolitesto = this.CostruisciRuoli(element.ruoli);
+            const tmp = `GRANT ${eventitesto}
+            ON ${this.nomeTabella} 
+            TO ${ruolitesto}
+            ;`;
+            await EseguiQueryControllata(client, tmp);
+            ritorno = ritorno + tmp;
+        }
+        for (let index = 0; index < this.listaProprieta.length; index++) {
+            const element = this.listaProprieta[index];
+
+            for (let index = 0; element.grants && index < element.grants.length; index++) {
+                const element2 = grants[index];
+                const eventitesto = this.CostruisciEvents(element2.events, element.nome);
+                const ruolitesto = this.CostruisciRuoli(element2.ruoli);
+                const tmp = `GRANT ${eventitesto} 
+                ON "${this.nomeTabella}" 
+                TO ${ruolitesto}
+                ;`;
+                ritorno = ritorno + tmp;
+                await EseguiQueryControllata(client, tmp);
+            }
+        }
+        return ritorno;
+    }
+    
+    async CostruiscePolicySicurezza(grants: IPolicy[], client: Client) {
+        let ritorno = '';
+       /*  grants[0]. */
+        for (let index = 0; index < grants.length; index++) {
+            const element = grants[index];
+            /* const eventitesto = this.CostruisciEvents(element.events);
+            const ruolitesto = this.CostruisciRuoli(element.ruoli);
+            const tmp = `GRANT ${eventitesto}
+            ON ${this.nomeTabella} 
+            TO ${ruolitesto}
+            ;`;
+            await EseguiQueryControllata(client, tmp); */
+            ritorno = ritorno + '' /* tmp */;
+        }
+        /* for (let index = 0; index < this.listaProprieta.length; index++) {
+            const element = this.listaProprieta[index];
+
+            for (let index = 0; element.grants && index < element.grants.length; index++) {
+                const element2 = grants[index];
+                const eventitesto = this.CostruisciEvents(element2.events, element.nome);
+                const ruolitesto = this.CostruisciRuoli(element2.ruoli);
+                const tmp = `GRANT ${eventitesto} 
+                ON "${this.nomeTabella}" 
+                TO ${ruolitesto}
+                ;`;
+                ritorno = ritorno + tmp;
+                await EseguiQueryControllata(client, tmp);
+            }
+        } */
+        return ritorno;
+    }
+    CostruisciRuoli(ruoli: string[]) {
+        let ritorno = '';
+        for (let index = 0; index < ruoli.length; index++) {
+            const element = ruoli[index];
+            ritorno = ritorno + element;
+            if (ruoli.length > 2 && index + 1 < ruoli.length) {
+                ritorno = ritorno + ', ';
+            }
+        }
+        return ritorno;
+    }
+    CostruisciEvents(events: typeGrantEvent[], nome?: string) {
+        let ritorno = '';
+        for (let index = 0; index < events.length; index++) {
+            const element = events[index];
+            if (nome) {
+                ritorno = ritorno + element + '("' + nome + '")';
+            } else {
+                ritorno = ritorno + element;
+            }
+            if (events.length > 2 && index + 1 < events.length) {
+                ritorno = ritorno + ', ';
+            }
+        }
+        return ritorno;
     }
 }
 export function CreaID() {

@@ -16,6 +16,7 @@ import { CreateDataBase, DropAllTable, DropDataBase, EseguiQueryControllata, Tri
 import { Client } from "pg";
 
 import superagent from "superagent";
+import { Role } from "../postgres/role";
 
 /* export class User {
     nome: string;
@@ -30,32 +31,6 @@ import superagent from "superagent";
         this.inGroup = [];
     }
 } */
-export class Role {
-    nome: string;
-    option: {
-        isSuperUser: boolean,
-        creaTabelle: boolean,
-        creaDB: boolean,
-        creaUser: boolean,
-        login: boolean,
-        connectionLimit?: number,
-        passwordCriptografia?: string,
-        validUntil?: Date
-    };
-    inGroup: string[];
-    inRole: string[];
-    connectionLimit: number;
-    password: string;
-
-    constructor() {
-        this.nome = '';
-        this.option = { creaTabelle: false, creaUser: false, login: false, isSuperUser: false, creaDB: false };
-        this.inGroup = [];
-        this.inRole = [];
-        this.connectionLimit = 1;
-        this.password = 'password';
-    }
-}
 
 
 export class Main implements IGestorePercorsiPath {
@@ -120,16 +95,20 @@ export class Main implements IGestorePercorsiPath {
         let ritornoTmp = '';
         if (nomeDatabase)
             ritornoTmp = ritornoTmp + DropAllTable() + '\n';
-        EseguiQueryControllata(client, ritornoTmp);
+        await EseguiQueryControllata(client, ritornoTmp);
         ritorno = ritorno + ritornoTmp;
         ritornoTmp = '';
 
         ritornoTmp = ritornoTmp + TriggerUpdate_updated_at_column() + '\n';
-        EseguiQueryControllata(client, ritornoTmp);
-
-        ritorno = ritorno + this.InizializzaRuoli(client, listaRuoli);
-
+        await EseguiQueryControllata(client, ritornoTmp);
+        ritorno = ritorno + ritornoTmp;
         ritornoTmp = '';
+
+        ritornoTmp = ritornoTmp + this.InizializzaRuoli(client, listaRuoli);
+        await EseguiQueryControllata(client, ritornoTmp);
+        ritorno = ritorno + ritornoTmp;
+        ritornoTmp = '';
+
         for await (const element of this.listaTerminaleClassi) {
             ritorno = ritorno + await element.CostruisciCreazioneDB(client, true);
         }
@@ -138,6 +117,15 @@ export class Main implements IGestorePercorsiPath {
         }
         for await (const element of this.listaTerminaleClassi) {
             ritorno = ritorno + await element.CostruisciRelazioniDB(client);
+        }
+        for await (const element of this.listaTerminaleClassi) {
+            if (element.grants)
+                ritorno = ritorno + await element.CostruisceGrant(element.grants, client);
+        }
+        
+        for await (const element of this.listaTerminaleClassi) {
+            if (element.policySicurezza)
+                ritorno = ritorno + await element.CostruiscePolicySicurezza(element.policySicurezza, client);
         }
         return ritorno;
     }
@@ -156,8 +144,8 @@ export class Main implements IGestorePercorsiPath {
                 NOREPLICATION  
                 NOBYPASSRLS 
                 PASSWORD '${element.password}' 
-                ${element.option.connectionLimit != undefined ? 'CONNECTION LIMIT ' + element.option.connectionLimit : 'CONNECTION LIMIT UNLIMITED'} 
-                ;`;
+                ${element.option.connectionLimit != undefined ? 'CONNECTION LIMIT ' + element.option.connectionLimit : ''} 
+                ; \n`;
                 EseguiQueryControllata(client, faxs);
                 ritornoTmp = ritornoTmp + faxs;
             }
