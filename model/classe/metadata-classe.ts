@@ -160,13 +160,13 @@ class ArtefattoClasseORM implements IClasseORM {
         ritorno = ritorno + ritornoTmp;
         ritornoTmp = '';
 
-        if (this.grants) {
-            for (let index = 0; index < this.grants.length; index++) {
-                const element = this.grants[index];
-                const tmp = `GRANT ${element.events}`;
-            }
-        }
-
+        /*  if (this.grants) {
+             for (let index = 0; index < this.grants.length; index++) {
+                 const element = this.grants[index];
+                 const tmp = `GRANT ${element.events}`;
+             }
+         }
+        */
         return ritorno;
     }
 
@@ -184,7 +184,7 @@ class ArtefattoClasseORM implements IClasseORM {
     }
 
     async CostruisceGrant(grants: IGrant[], client: Client) {
-        let ritorno='';
+        let ritorno = '';
         for (let index = 0; index < grants.length; index++) {
             const element = grants[index];
             const eventitesto = this.CostruisciEvents(element.events);
@@ -213,19 +213,37 @@ class ArtefattoClasseORM implements IClasseORM {
         }
         return ritorno;
     }
-    
-    async CostruiscePolicySicurezza(grants: IPolicy[], client: Client) {
+
+    CostruisciFunzione(item: any) {
         let ritorno = '';
-       /*  grants[0]. */
-        for (let index = 0; index < grants.length; index++) {
-            const element = grants[index];
-            /* const eventitesto = this.CostruisciEvents(element.events);
+        if (typeof item === 'function') {
+            const strg = String(item);
+
+            const tt = strg.indexOf('{');
+            const t1 = strg.substring(tt + 1, strg.length);
+            const t2 = t1.lastIndexOf('}');
+            const t3 = t1.substring(0, t2 - 1);
+            ritorno = t3;
+            console.log(strg);
+        }
+        else {
+            ritorno = String(item);
+        }
+        return ritorno;
+    }
+    async CostruiscePolicySicurezza(policy: IPolicy[], client: Client) {
+        let ritorno = '';
+        /*  grants[0]. */
+        for (let index = 0; index < policy.length; index++) {
+            const element = policy[index];
             const ruolitesto = this.CostruisciRuoli(element.ruoli);
-            const tmp = `GRANT ${eventitesto}
-            ON ${this.nomeTabella} 
+            const tmp = `CREATE POLICY "PO_MP_${element.nomePolicy}" 
+            ON "${this.nomeTabella}" 
             TO ${ruolitesto}
+            ${element.using ? 'USING ' + this.CostruisciFunzione(element.using) : ''}
+            ${element.check ? 'WITH CHECK ' + this.CostruisciFunzione(element.check) : ''} 
             ;`;
-            await EseguiQueryControllata(client, tmp); */
+            await EseguiQueryControllata(client, tmp);
             ritorno = ritorno + '' /* tmp */;
         }
         /* for (let index = 0; index < this.listaProprieta.length; index++) {

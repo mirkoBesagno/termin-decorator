@@ -16,7 +16,7 @@ import { CreateDataBase, DropAllTable, DropDataBase, EseguiQueryControllata, Tri
 import { Client } from "pg";
 
 import superagent from "superagent";
-import { Role } from "../postgres/role";
+import { Role, User } from "../postgres/role";
 
 /* export class User {
     nome: string;
@@ -85,7 +85,7 @@ export class Main implements IGestorePercorsiPath {
     InizializzaClassi(lista: IstanzaClasse[]) {
         return true;
     }
-    async InizializzaORM(client: Client, nomeDatabase?: string, listaRuoli?: Role[]) {
+    async InizializzaORM(client: Client, nomeDatabase?: string, listaRuoli?: Role[], listaUser?: User[]) {
         try {
             await client.query(`CREATE EXTENSION plv8;`);
         } catch (error) {
@@ -109,6 +109,12 @@ export class Main implements IGestorePercorsiPath {
         ritorno = ritorno + ritornoTmp;
         ritornoTmp = '';
 
+        /* qui creo gli user e li connetto ai ruoli */
+        ritornoTmp = ritornoTmp + this.InizializzaUser(client, listaUser);
+        ritorno = ritorno + ritornoTmp;
+        ritornoTmp = '';
+        /*  */
+
         for await (const element of this.listaTerminaleClassi) {
             ritorno = ritorno + await element.CostruisciCreazioneDB(client, true);
         }
@@ -122,7 +128,7 @@ export class Main implements IGestorePercorsiPath {
             if (element.grants)
                 ritorno = ritorno + await element.CostruisceGrant(element.grants, client);
         }
-        
+
         for await (const element of this.listaTerminaleClassi) {
             if (element.policySicurezza)
                 ritorno = ritorno + await element.CostruiscePolicySicurezza(element.policySicurezza, client);
@@ -151,6 +157,40 @@ export class Main implements IGestorePercorsiPath {
             }
         }
         return ritornoTmp;
+    }
+
+    InizializzaUser(client: Client, listaUser?: User[]) {
+        let ritornoTmp = '';
+        if (listaUser) {
+            for (let index = 0; index < listaUser.length; index++) {
+                const element = listaUser[index];
+                const costruisciRuoli = this.CostruisciRuoli(element.inRole);
+                const faxs = `CREATE USER ${element.nome} WITH 
+                ${element.option.isSuperUser != undefined && element.option.isSuperUser == true ? 'SUPERUSER' : 'NOSUPERUSER'} 
+                ${element.option.creaDB != undefined && element.option.creaDB == true ? 'CREATEDB' : 'NOCREATEDB'}
+                ${element.option.creaUser != undefined && element.option.creaUser == true ? 'CREATEROLE' : 'NOCREATEROLE'} 
+                INHERIT 
+                ${element.option.login != undefined && element.option.login == true ? 'LOGIN' : 'NOLOGIN'} 
+                NOREPLICATION  
+                NOBYPASSRLS 
+                PASSWORD '${element.password}' 
+                ${element.option.connectionLimit != undefined ? 'CONNECTION LIMIT ' + element.option.connectionLimit : ''} 
+                IN ROLE ${costruisciRuoli}
+                ; \n`;
+                EseguiQueryControllata(client, faxs);
+                ritornoTmp = ritornoTmp + faxs;
+            }
+        }
+        return ritornoTmp;
+    }
+    CostruisciRuoli(item: string[]) {
+        let ritorno = '';
+        for (let index = 0; index < item.length; index++) {
+            const element = item[index];
+            if (index + 1 < item.length) ritorno = ritorno + ', ' + element;
+            else ritorno = ritorno + ' ' + element;
+        }
+        return ritorno;
     }
 
     async StartTestAPI() {

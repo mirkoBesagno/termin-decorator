@@ -465,11 +465,11 @@ export interface IGrant {
 }
 export interface IPolicy {
     nomePolicy: string,
-    tabellaDestinazione: string,
+    tabellaDestinazione?: string,
     ruoli: string[],
     azieneScatenente: 'SELECT' | 'UPDATE' | 'DELET' | 'INSERT' | 'ALL',
-    using: (NEW: any, OLD: any) => void | true | Error,
-    check: (NEW: any, OLD: any) => void | true | Error
+    using?: (NEW: any, OLD: any) => void | true | Error,
+    check?: (NEW: any, OLD: any) => void | true | Error
     /* 
     USING : Le righe della tabella esistenti vengono confrontate con l'espressione specificata in USING
 

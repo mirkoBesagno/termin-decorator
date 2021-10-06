@@ -28,18 +28,37 @@ client.connect().then(async (result) => {
 
     const orm = await main.InizializzaORM(client, 'test', [
         {
-            nome: 'utente1',
+            nome: 'medico',
             password: 'password1',
-            inRole: [], inGroup: [], connectionLimit: 1,
+            inRole: [], connectionLimit: 1,
             option: {
                 creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
-                login: true
+                login: false
             }
         },
         {
-            nome: 'utente2',
+            nome: 'paziente',
             password: 'password2',
-            inRole: [], inGroup: [], connectionLimit: 2,
+            inRole: [], connectionLimit: 2,
+            option: {
+                creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
+                login: false
+            }
+        },
+        {
+            nome: 'admin',
+            password: 'password3',
+            inRole: [], connectionLimit: 2,
+            option: {
+                creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
+                login: false
+            }
+        }
+    ], [
+        {
+            nome: 'utente1',
+            password: 'password2',
+            inRole: [''], connectionLimit: 2,
             option: {
                 creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
                 login: true

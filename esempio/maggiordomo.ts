@@ -12,7 +12,13 @@ import { Persona } from "./persona";
         abilitaUpdatedAt: true,
         nomeTriggerAutoCreateUpdated_Created_Deleted: 'TracciamentoOperazioni_I_liv',
         creaId: true,
-        policySicurezza: [],
+        policySicurezza: [
+            {
+                azieneScatenente: 'UPDATE',
+                nomePolicy: 'policytest',
+                ruoli: ['utente1']
+            }
+        ],
     })
 export class Maggiordomo {
 
@@ -69,6 +75,12 @@ export class Maggiordomo {
                         throw new Error("Attenzione valore illegale.");
                     }
                 }
+            }
+        ],
+        grants: [
+            {
+                events: ['INSERT'],
+                ruoli: ['utente1']
             }
         ]
     })
