@@ -3,6 +3,12 @@ import { Persona } from "./persona";
 
 
 
+type Tabella<T> = {
+    valoreIstantaneo: number,
+    valoreRisolto: Promise<T> | T
+};
+
+
 @mpClas({ percorso: 'maggiordomo' },
     {
         nomeTabella: 'maggiordomo',
@@ -97,7 +103,7 @@ export class Maggiordomo {
         },
         sommario: 'sommarioProp',
     })
-    personaRiferimento: Persona;
+    personaRiferimento: Tabella<Persona>;
 
     @mpProp({
         descrizione: 'descrizProp',
@@ -108,7 +114,11 @@ export class Maggiordomo {
 
     constructor(nome: string, cognome: string) {
         //super('nome construct', 'congome construct');
-        this.personaRiferimento = new Persona('nome default', 'cognome default');
+        this.personaRiferimento = {
+            valoreIstantaneo: 0,
+            valoreRisolto: new Persona('nome default', 'cognome default')
+        }
+        //this.personaRiferimento.valoreRisolto = new Persona('nome default', 'cognome default');
         this.nome = nome;
         this.cognome = cognome;
     }
