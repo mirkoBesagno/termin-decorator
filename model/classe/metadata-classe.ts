@@ -200,8 +200,8 @@ class ArtefattoClasseORM implements IClasseORM {
 
             for (let index = 0; element.grants && index < element.grants.length; index++) {
                 const element2 = grants[index];
-                const eventitesto = this.CostruisciEvents(element2.events, element.nome);
-                const ruolitesto = this.CostruisciRuoli(element2.ruoli);
+                const eventitesto = CostruisciEvents(element2.events, element.nome);
+                const ruolitesto = CostruisciRuoli(element2.ruoli);
                 const tmp = `GRANT ${eventitesto} 
                 ON "${this.nomeTabella}" 
                 TO ${ruolitesto}
@@ -213,37 +213,7 @@ class ArtefattoClasseORM implements IClasseORM {
         return ritorno;
     }
 
-    async CostruisciFunzione(item: any, nomeFunzioneCheck: string, nomePolicy: string, typeFunctionCheck: string,
-        carattere: string | 'CK' | 'US', client: Client) {
-        let corpoFunzione = '';
-        if (item) {
-            if (typeof item === 'function') {
-                const strg = String(item);
 
-                const tt = strg.indexOf('{');
-                const t1 = strg.substring(tt + 1, strg.length);
-                const t2 = t1.lastIndexOf('}');
-                const t3 = t1.substring(0, t2 - 1);
-                corpoFunzione = t3;
-                console.log(strg);
-            }
-            else {
-                corpoFunzione = String(item);
-            }
-
-            const tmp = `
-                    CREATE OR REPLACE FUNCTION "${carattere}_FN_${nomeFunzioneCheck}_xTR_${nomePolicy}"() RETURNS boolean AS
-                    $$
-                        ${corpoFunzione}
-                    $$
-                    LANGUAGE "${typeFunctionCheck ?? 'plv8'}";
-                    `;
-            const ritorno = '' + carattere + '_FN_' + nomeFunzioneCheck + '_xTR_' + nomePolicy + '';
-            await EseguiQueryControllata(client, tmp);
-            return ritorno;
-        }
-        return '';
-    }
 
     async CostruiscePolicySicurezza(policy: IPolicy[], client: Client) {
         let ritorno = '';
@@ -292,32 +262,64 @@ class ArtefattoClasseORM implements IClasseORM {
         } */
         return ritorno;
     }
-    CostruisciRuoli(ruoli: string[]) {
-        let ritorno = '';
-        for (let index = 0; index < ruoli.length; index++) {
-            const element = ruoli[index];
+
+}
+export async function CostruisciFunzione(item: any, nomeFunzioneCheck: string, nomePolicy: string, typeFunctionCheck: string,
+    carattere: string | 'CK' | 'US', client: Client): Promise<string> {
+    let corpoFunzione = '';
+    if (item) {
+        if (typeof item === 'function') {
+            const strg = String(item);
+
+            const tt = strg.indexOf('{');
+            const t1 = strg.substring(tt + 1, strg.length);
+            const t2 = t1.lastIndexOf('}');
+            const t3 = t1.substring(0, t2 - 1);
+            corpoFunzione = t3;
+            console.log(strg);
+        }
+        else {
+            corpoFunzione = String(item);
+        }
+
+        const tmp = `
+                CREATE OR REPLACE FUNCTION "${carattere}_FN_${nomeFunzioneCheck}_xTR_${nomePolicy}"() RETURNS boolean AS
+                $$
+                    ${corpoFunzione}
+                $$
+                LANGUAGE "${typeFunctionCheck ?? 'plv8'}";
+                `;
+        const ritorno = '' + carattere + '_FN_' + nomeFunzioneCheck + '_xTR_' + nomePolicy + '';
+        await EseguiQueryControllata(client, tmp);
+        return ritorno;
+    }
+    return '';
+}
+export function CostruisciRuoli(ruoli: string[]) {
+    let ritorno = '';
+    for (let index = 0; index < ruoli.length; index++) {
+        const element = ruoli[index];
+        ritorno = ritorno + element;
+        if (ruoli.length > 2 && index + 1 < ruoli.length) {
+            ritorno = ritorno + ', ';
+        }
+    }
+    return ritorno;
+}
+export function CostruisciEvents(events: typeGrantEvent[], nome?: string) {
+    let ritorno = '';
+    for (let index = 0; index < events.length; index++) {
+        const element = events[index];
+        if (nome) {
+            ritorno = ritorno + element + '("' + nome + '")';
+        } else {
             ritorno = ritorno + element;
-            if (ruoli.length > 2 && index + 1 < ruoli.length) {
-                ritorno = ritorno + ', ';
-            }
         }
-        return ritorno;
-    }
-    CostruisciEvents(events: typeGrantEvent[], nome?: string) {
-        let ritorno = '';
-        for (let index = 0; index < events.length; index++) {
-            const element = events[index];
-            if (nome) {
-                ritorno = ritorno + element + '("' + nome + '")';
-            } else {
-                ritorno = ritorno + element;
-            }
-            if (events.length > 2 && index + 1 < events.length) {
-                ritorno = ritorno + ', ';
-            }
+        if (events.length > 2 && index + 1 < events.length) {
+            ritorno = ritorno + ', ';
         }
-        return ritorno;
     }
+    return ritorno;
 }
 export function CreaID() {
     return "id SERIAL PRIMARY KEY";
