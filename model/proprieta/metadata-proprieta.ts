@@ -1,12 +1,15 @@
 import { TerminaleParametro } from "../parametro/metadata-parametro";
-import { IConstraints, IGrant, IParametro, IProprieta, IRitornoValidatore, ITrigger, ORMObject, tipo, TypeIstantevent, TypeSurgevent } from "../utility";
+import { ICheck, IConstraints, IGrant, IParametro, IProprieta, IRitornoValidatore, ITrigger, ORMObject, tipo, TypeIstantevent, TypeSurgevent } from "../utility";
 import { Client, types } from "pg";
+import { EseguiQueryControllata } from "../classe/metadata-classe";
+import { Trigger } from "../postgres/trigger";
+import { Constraint } from "../postgres/constraint";
 
 
 export class TerminaleProprieta implements IProprieta {
 
     //funzione 
-    Constraints?: IConstraints;
+    Constraints?: Constraint;
     /*  */
 
 
@@ -17,7 +20,7 @@ export class TerminaleProprieta implements IProprieta {
     descrizione: string;
     sommario: string;
 
-    trigger?: ITrigger[];
+    trigger?: Trigger[];
     grants?: IGrant[];
 
     constructor(nome: string, tipo: tipo) {
@@ -148,12 +151,43 @@ export class TerminaleProprieta implements IProprieta {
             tmpRitorno = this.AppoggioCostruzioneStringa(this.tipo);
         }
         if (this.Constraints) {
-            if (this.Constraints.unique) tmpRitorno = tmpRitorno + ' CONSTRAINT ' + '"' + 'cn_' + nomeClasse + '_' + this.Constraints.unique.nome + '"' + ' UNIQUE';
-            if (this.Constraints.notNull) tmpRitorno = tmpRitorno + ' NOT NULL';
-            if (this.Constraints.check) tmpRitorno = tmpRitorno + ' CONSTRAINT ' + '"' + 'cn_ck_' + nomeClasse + '_' + this.Constraints.check.nome + '"' + ' CHECK(' + this.Constraints.check.check + ')';
+            tmpRitorno = tmpRitorno +  this.Constraints.CostruisciConstraint(nomeClasse)
         }
         return tmpRitorno;
     }
+    /* CostruisciCkeck(element: ICheck, client: Client) {
+
+        let corpoFunzione = '';
+        try {
+            if (typeof element.check === 'function') {
+                const strg = String(element.check);
+
+                const tt = strg.indexOf('{');
+                const t1 = strg.substring(tt + 1, strg.length);
+                const t2 = t1.lastIndexOf('}');
+                const t3 = t1.substring(0, t2 - 1);
+                corpoFunzione = t3;
+                console.log(strg);
+            }
+            else {
+                corpoFunzione = String(element.check);
+                return '';
+            }
+
+        } catch (error) {
+            console.log('\n*****\n' + error + '\n********\n\n');
+            corpoFunzione = '';
+        }
+        const tmp = `
+        CREATE OR REPLACE FUNCTION "FN_cn_ck_${element.nome}"() RETURNS boolean AS
+        $$
+            ${corpoFunzione}
+        $$
+        LANGUAGE "plv8";
+        `
+        EseguiQueryControllata(client, tmp);
+        return 'FN_cn_ck_' + element.nome;
+    } */
     CostruisciRelazioniDB(nomeTabella: string) {
         let tmpRitorno = '';
         if (this.tipo instanceof ORMObject) {
@@ -167,61 +201,21 @@ export class TerminaleProprieta implements IProprieta {
         }
         return tmpRitorno;
     }
-    async CostruisceTrigger(nomeTabella: string, client: Client,) {
-        for (let index = 0; this.trigger && index < this.trigger.length; index++) {
-            const element = this.trigger[index];
-            let tmp = '';
-            for (let index = 0; index < element.surgevent.length; index++) {
-                const el = element.surgevent[index];
-                tmp = tmp + el;
-                if (index + 1 < element.surgevent.length) {
-                    tmp = tmp + ' OR ';
-                }
-            }
-            let corpoFunzione = '';
-            try {
-                if (typeof element.Validatore === 'function') {
-                    const strg = String(element.Validatore);
 
-                    const tt = strg.indexOf('{');
-                    const t1 = strg.substring(tt + 1, strg.length);
-                    const t2 = t1.lastIndexOf('}');
-                    const t3 = t1.substring(0, t2 - 1);
-                    corpoFunzione = t3;
-                    console.log(strg);
-                }
-                else {
-                    corpoFunzione = String(element.Validatore);
-                }
-
-            } catch (error) {
-                console.log('\n*****\n' + error + '\n********\n\n');
-                corpoFunzione = '';
-            }
-            try {
-                const queri1 = `
-                CREATE OR REPLACE FUNCTION "FN_${element.nomeFunzione}"() RETURNS trigger AS
-                $$
-                    ${corpoFunzione}
-                $$
-                LANGUAGE "${element.typeFunction ?? 'plv8'}";
-        
-                COMMENT ON FUNCTION "FN_${element.nomeFunzione}"() IS 'Hei tanto roba questa è scritta usando plv8!!';
-        
-                DROP TRIGGER IF EXISTS "TR_${element.nomeTrigger}" ON persona;
-        
-                CREATE TRIGGER "TR_${element.nomeTrigger}"
-                    ${element.instantevent} 
-                    ${tmp} 
-                    ON ${nomeTabella} 
-                    FOR EACH ROW
-                    EXECUTE PROCEDURE "FN_${element.nomeFunzione}"();
-                `;
-                await client.query(queri1);
-            } catch (error) {
-                console.log('\n*****\n' + error + '\n********\n\n');
+    CostruisciListaTrigger(vet: ITrigger[]) {
+        this.trigger = [];
+        for (let index = 0; index < vet.length; index++) {
+            const element = vet[index];
+            this.trigger.push(new Trigger(element));
+        }
+    }
+    async CostruisceTrigger(nomeTabella: string, client: Client) {
+        if (this.trigger) {
+            for (let index = 0; index < this.trigger.length; index++) {
+                const element = this.trigger[index];
+                const query = element.CostruisceTrigger(nomeTabella);
+                await EseguiQueryControllata(client, query??'');
             }
         }
-
     }
 }

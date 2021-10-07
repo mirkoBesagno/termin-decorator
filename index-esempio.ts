@@ -3,6 +3,7 @@ import { IReturnTest } from "./model/test-funzionale/utility-test-funzionale";
 import { Client } from "pg";
 import { Persona } from "./esempio/persona";
 import { Maggiordomo } from "./esempio/maggiordomo";
+import { Test1 } from "./esempio/test1";
 
 
 const main = new Main('api');
@@ -11,8 +12,9 @@ const main = new Main('api');
 main.Inizializza("localhost", 8080, true, true);
 
 
-const persone = new Persona('mirko io persona', '3543543534');
-const magg = new Maggiordomo('magg mirko', 'magg mirko');
+/* const persone = new Persona('mirko io persona', '3543543534');
+const magg = new Maggiordomo('magg mirko', 'magg mirko'); */
+const test1 = new Test1('nome test1');
 const client = new Client({
     user: 'postgres',
     host: 'localhost',
@@ -27,6 +29,16 @@ client.connect().then(async (result) => {
 
 
     const orm = await main.InizializzaORM(client, 'test', [
+        {
+            nome: 'admin_admin',
+            password: 'password3',
+            inRole: [], connectionLimit: 2,
+            option: {
+                creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
+                login: false
+            }
+        }
+    ]/* , [
         {
             nome: 'medico',
             password: 'password1',
@@ -64,7 +76,7 @@ client.connect().then(async (result) => {
                 login: true
             }
         }
-    ]);
+    ] */);
     console.log('\n\n\n\n' + orm + '\n\n\n\n\n\n');
 
     console.log('*******');

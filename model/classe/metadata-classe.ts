@@ -13,7 +13,6 @@ import { Client } from "pg";
 export interface IClasseORM {
 
     like?: string;
-    nomeTriggerAutoCreateUpdated_Created_Deleted: string,
     abilitaCreatedAt: boolean;
     abilitaUpdatedAt: boolean;
     abilitaDeletedAt: boolean;
@@ -26,7 +25,6 @@ export interface IClasseORM {
 }
 
 class ArtefattoClasseORM implements IClasseORM {
-    nomeTriggerAutoCreateUpdated_Created_Deleted = 'update_updated_at_column';
     like?: string;
     estende?: string;
     abilitaCreatedAt: boolean;
@@ -63,7 +61,7 @@ class ArtefattoClasseORM implements IClasseORM {
         this.abilitaUpdatedAt = false;
     }
 
-    faxsSimileIntestazione = 'CREATE TABLE  IF NOT EXISTS  ';
+    faxsSimileIntestazione = 'CREATE TABLE IF NOT EXISTS ';
 
     async CostruisciCreazioneDB(client: Client, padreEreditario: boolean) {
         let ritorno = '';
@@ -183,6 +181,7 @@ class ArtefattoClasseORM implements IClasseORM {
 
     }
 
+
     async CostruisceGrant(grants: IGrant[], client: Client) {
         let ritorno = '';
         for (let index = 0; index < grants.length; index++) {
@@ -214,36 +213,66 @@ class ArtefattoClasseORM implements IClasseORM {
         return ritorno;
     }
 
-    CostruisciFunzione(item: any) {
-        let ritorno = '';
-        if (typeof item === 'function') {
-            const strg = String(item);
+    async CostruisciFunzione(item: any, nomeFunzioneCheck: string, nomePolicy: string, typeFunctionCheck: string,
+        carattere: string | 'CK' | 'US', client: Client) {
+        let corpoFunzione = '';
+        if (item) {
+            if (typeof item === 'function') {
+                const strg = String(item);
 
-            const tt = strg.indexOf('{');
-            const t1 = strg.substring(tt + 1, strg.length);
-            const t2 = t1.lastIndexOf('}');
-            const t3 = t1.substring(0, t2 - 1);
-            ritorno = t3;
-            console.log(strg);
+                const tt = strg.indexOf('{');
+                const t1 = strg.substring(tt + 1, strg.length);
+                const t2 = t1.lastIndexOf('}');
+                const t3 = t1.substring(0, t2 - 1);
+                corpoFunzione = t3;
+                console.log(strg);
+            }
+            else {
+                corpoFunzione = String(item);
+            }
+
+            const tmp = `
+                    CREATE OR REPLACE FUNCTION "${carattere}_FN_${nomeFunzioneCheck}_xTR_${nomePolicy}"() RETURNS boolean AS
+                    $$
+                        ${corpoFunzione}
+                    $$
+                    LANGUAGE "${typeFunctionCheck ?? 'plv8'}";
+                    `;
+            const ritorno = '' + carattere + '_FN_' + nomeFunzioneCheck + '_xTR_' + nomePolicy + '';
+            await EseguiQueryControllata(client, tmp);
+            return ritorno;
         }
-        else {
-            ritorno = String(item);
-        }
-        return ritorno;
+        return '';
     }
+
     async CostruiscePolicySicurezza(policy: IPolicy[], client: Client) {
         let ritorno = '';
         /*  grants[0]. */
         for (let index = 0; index < policy.length; index++) {
             const element = policy[index];
             const ruolitesto = this.CostruisciRuoli(element.ruoli);
-            const tmp = `CREATE POLICY "PO_MP_${element.nomePolicy}" 
-            ON "${this.nomeTabella}" 
-            TO ${ruolitesto}
-            ${element.using ? 'USING ' + this.CostruisciFunzione(element.using) : ''}
-            ${element.check ? 'WITH CHECK ' + this.CostruisciFunzione(element.check) : ''} 
-            ;`;
-            await EseguiQueryControllata(client, tmp);
+            const nomeFunzioneCK = await this.CostruisciFunzione(element.check, element.nomeFunzioneCheck ?? '', element.nomePolicy, element.typeFunctionCheck ?? 'psql', 'CK', client);
+            const nomeFunzioneUS = await this.CostruisciFunzione(element.using, element.nomeFunzioneUsing ?? '', element.nomePolicy, element.typeFunctionUsing ?? 'psql', 'US', client);
+
+            /*  */
+            try {
+                //COMMENT ON FUNCTION "FN_${element.nomeFunzione}"() IS 'Hei tanto roba questa è scritta usando plv8!!';
+                const queri1 = `
+
+                    CREATE POLICY "PO_MP_${element.nomePolicy}"
+                        ON "${this.nomeTabella}" 
+                        FOR ${element.azieneScatenente}
+                        TO ${ruolitesto}
+                        ${element.using && nomeFunzioneUS != "" ? 'USING "' + nomeFunzioneUS + '"()' : ''}
+                        ${element.check && nomeFunzioneCK != "" ? 'WITH CHECK ("' + nomeFunzioneCK + '"())' : ''} 
+                        ;
+                    `;
+                await EseguiQueryControllata(client, queri1);
+            } catch (error) {
+                console.log('\n*****\n' + error + '\n********\n\n');
+            }
+
+            /*  */
             ritorno = ritorno + '' /* tmp */;
         }
         /* for (let index = 0; index < this.listaProprieta.length; index++) {

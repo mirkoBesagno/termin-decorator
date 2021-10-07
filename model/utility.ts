@@ -420,7 +420,7 @@ export interface IClasse {
 }
 
 export interface ICheck {
-    check?: any,
+    check?: string /* | ((NEW: any, OLD: any) => void | true | Error) */,
     nome?: string,
 }
 
@@ -455,7 +455,7 @@ export interface IProprieta {
     grants?: IGrant[]
 
 }
-export type typeGrantEvent= 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE' | 'REFERENCES' | 'TRIGGER' | 'ALL PRIVILEGES'
+export type typeGrantEvent = 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE' | 'REFERENCES' | 'TRIGGER' | 'ALL PRIVILEGES'
 export interface IGrant {
     ruoli: string[],
     tabellaDestinazione?: string,
@@ -468,8 +468,12 @@ export interface IPolicy {
     tabellaDestinazione?: string,
     ruoli: string[],
     azieneScatenente: 'SELECT' | 'UPDATE' | 'DELET' | 'INSERT' | 'ALL',
-    using?: (NEW: any, OLD: any) => void | true | Error,
-    check?: (NEW: any, OLD: any) => void | true | Error
+    using?: string | ((NEW: any, OLD: any) => void | true | Error),
+    check?: string | ((NEW: any, OLD: any) => void | true | Error),
+    typeFunctionCheck?: 'plv8' | 'sql',
+    typeFunctionUsing?: 'plv8' | 'sql',
+    nomeFunzioneCheck?: string,
+    nomeFunzioneUsing?: string
     /* 
     USING : Le righe della tabella esistenti vengono confrontate con l'espressione specificata in USING
 

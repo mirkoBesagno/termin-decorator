@@ -16,13 +16,17 @@ type Tabella<T> = {
         abilitaCreatedAt: true,
         abilitaDeletedAt: true,
         abilitaUpdatedAt: true,
-        nomeTriggerAutoCreateUpdated_Created_Deleted: 'TracciamentoOperazioni_I_liv',
         creaId: true,
         policySicurezza: [
             {
                 azieneScatenente: 'UPDATE',
                 nomePolicy: 'policytest',
-                ruoli: ['utente1']
+                ruoli: ['utente1'],
+                check: (NEW: Maggiordomo, OLD: Maggiordomo) => {
+                    return true;
+                },
+                nomeFunzioneCheck: 'policytest',
+                typeFunctionCheck: 'plv8'
             }
         ],
     })
@@ -32,7 +36,10 @@ export class Maggiordomo {
         Constraints: {
             unique: { nome: 'uniqueOnNome', unique: true },
             notNull: true,
-            check: { nome: 'checkOnNome', check: "nome != 'Ernesto'" }
+            check: {
+                nome: 'checkOnNome',
+                check: "nome != 'Ernesto'"
+            }
         },
         descrizione: 'descrizProp',
         tipo: 'text',
@@ -43,6 +50,7 @@ export class Maggiordomo {
                 nomeFunzione: 'controlloNome',
                 nomeTrigger: 'controlloNome',
                 surgevent: ['INSERT'],
+                typeFunction: 'plv8',
                 Validatore: (NEW: Persona, HOLD: Persona, TG_ARGV: any[], /* instantevent */TG_OP: any, /* surgevent */TG_WHEN: any) => {
 
                     if (NEW.nome == 'Mirko') {

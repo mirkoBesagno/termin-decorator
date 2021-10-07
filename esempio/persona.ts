@@ -11,7 +11,6 @@ import { IMetodoEventi, IMetodoParametri, IParametriEstratti } from "../model/ut
         abilitaCreatedAt: true,
         abilitaDeletedAt: true,
         abilitaUpdatedAt: true,
-        nomeTriggerAutoCreateUpdated_Created_Deleted: 'TracciamentoOperazioni_I_liv',
         creaId: true,
         grants: [
             {

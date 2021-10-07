@@ -1,4 +1,5 @@
 import { ListaTerminaleClasse } from "../classe/lista-classe";
+import { Constraint } from "../postgres/constraint";
 import { CheckClasseMetaData, GetListaClasseMetaData, IClasse, IProprieta, ORMObject, SalvaListaClasseMetaData, tipo } from "../utility";
 
 
@@ -14,7 +15,7 @@ export class IstanzaProprieta {
         const proprieta = classe.CercaProprietaSeNoAggiungiProprieta(nomeProprieta.toString());
 
         if (item) {
-            if (item.Constraints) proprieta.Constraints = item.Constraints;
+            if (item.Constraints) proprieta.Constraints = new Constraint(item.Constraints);
             if (item.sommario) proprieta.sommario = item.sommario;
             if ((<ORMObject>(<tipo>item.tipo)).tipo &&
                 (<ORMObject>(<tipo>item.tipo)).colonnaRiferimento &&
@@ -34,7 +35,7 @@ export class IstanzaProprieta {
             if (item.nome) proprieta.nome = item.nome;
             else if (proprieta.nome == '' || proprieta.nome == undefined) proprieta.nome = nomeProprieta;
 
-            if (item.trigger) proprieta.trigger = item.trigger;
+            if (item.trigger) proprieta.CostruisciListaTrigger(item.trigger);
             if (item.grants) proprieta.grants = item.grants;
         }
         SalvaListaClasseMetaData(list);
