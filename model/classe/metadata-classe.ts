@@ -186,8 +186,8 @@ class ArtefattoClasseORM implements IClasseORM {
         let ritorno = '';
         for (let index = 0; index < grants.length; index++) {
             const element = grants[index];
-            const eventitesto = this.CostruisciEvents(element.events);
-            const ruolitesto = this.CostruisciRuoli(element.ruoli);
+            const eventitesto = CostruisciEvents(element.events);
+            const ruolitesto = CostruisciRuoli(element.ruoli);
             const tmp = `GRANT ${eventitesto}
             ON ${this.nomeTabella} 
             TO ${ruolitesto}

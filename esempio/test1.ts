@@ -24,13 +24,13 @@ const plv8: any = {};
                 nomeFunzioneCheck: 'policytest',
                 typeFunctionCheck: 'plv8'
             }
-        ],
+        ]/* ,
         grants: [
             {
                 events: ['INSERT'],
                 ruoli: ['admin_admin']
             }
-        ] 
+        ]  */
     })
 export class Test1 {
 

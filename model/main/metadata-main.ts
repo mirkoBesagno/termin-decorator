@@ -125,8 +125,7 @@ export class Main implements IGestorePercorsiPath {
             ritorno = ritorno + await element.CostruisciRelazioniDB(client);
         }
         for await (const element of this.listaTerminaleClassi) {
-            if (element.grants)
-                ritorno = ritorno + await element.CostruisceGrant(element.grants, client);
+            ritorno = ritorno + await element.CostruisceGrant(element.grants ?? [], client);
         }
 
         for await (const element of this.listaTerminaleClassi) {
