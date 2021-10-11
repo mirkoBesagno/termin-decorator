@@ -13,24 +13,24 @@ const plv8: any = {};
         abilitaDeletedAt: true,
         abilitaUpdatedAt: true,
         creaId: true,
-        policySicurezza: [
+        listaPolicy: [
             {
                 azieneScatenente: 'UPDATE',
                 nomePolicy: 'policytest',
-                ruoli: ['admin_admin'],
+                ruoli: ['admin_admin','utente1'],
                 check: (NEW: any, OLD: any) => {
                     return true;
                 },
                 nomeFunzioneCheck: 'policytest',
                 typeFunctionCheck: 'plv8'
             }
-        ]/* ,
+        ],
         grants: [
             {
                 events: ['INSERT'],
-                ruoli: ['admin_admin']
+                ruoli: ['admin_admin', 'utente1']
             }
-        ]  */
+        ]
     })
 export class Test1 {
 
@@ -62,7 +62,7 @@ export class Test1 {
         ],
         grants: [
             {
-                events: ['SELECT'], ruoli: ['admin_admin']
+                events: ['SELECT', 'INSERT'], ruoli: ['admin_admin', 'utente1']
             }
         ]
     })

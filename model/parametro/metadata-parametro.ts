@@ -107,7 +107,7 @@ export class TerminaleParametro implements IDescrivibile, IParametro {
             }
             return true;
         } catch (error) {
-            console.log('ciao');
+            console.log('');
             throw error;
         }
     }

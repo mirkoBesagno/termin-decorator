@@ -1254,7 +1254,7 @@ class ArtefattoExpress {
             return undefined;
             throw new Error("Attenzione qualcosa è andato storto.");
         } catch (error: any) {
-            console.log('ciao');
+            console.log('');
             throw error;
         }
     }

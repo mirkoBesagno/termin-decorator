@@ -31,7 +31,6 @@ export class Trigger implements ITrigger {
                 const t2 = t1.lastIndexOf('}');
                 const t3 = t1.substring(0, t2 - 1);
                 corpoFunzione = t3;
-                console.log(strg);
             }
             else {
                 corpoFunzione = String(this.Validatore);

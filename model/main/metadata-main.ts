@@ -12,7 +12,7 @@ import { GetListaTestAPIMetaData, GetListaTestMetaData, IReturnTest, ITest, Salv
 import { IstanzaClasse } from "../classe/istanza-classe";
 import { TerminaleTest, TerminaleTestAPI } from "../test-funzionale/metadata-test-funzionale";
 import { StartMonitoring } from "./utility-main";
-import { CreateDataBase, DropAllTable, DropDataBase, EseguiQueryControllata, TriggerUpdate_updated_at_column } from "../classe/metadata-classe";
+import { CreateDataBase, DropAllTable, DropDataBase, EseguiQueryControllata, TriggerUpdate_updated_at_column } from "../postgres/tabella";
 import { Client } from "pg";
 
 import superagent from "superagent";
@@ -85,57 +85,38 @@ export class Main implements IGestorePercorsiPath {
     InizializzaClassi(lista: IstanzaClasse[]) {
         return true;
     }
-    async InizializzaORM(client: Client, nomeDatabase?: string, listaRuoli?: Role[], listaUser?: User[]) {
-        try {
-            await client.query(`CREATE EXTENSION plv8;`);
-        } catch (error) {
-            console.log('\n\n****\n' + error + '\n****\n\n');
-        }
-        let ritorno = '';
-        let ritornoTmp = '';
-        if (nomeDatabase)
-            ritornoTmp = ritornoTmp + DropAllTable() + '\n';
-        await EseguiQueryControllata(client, ritornoTmp);
-        ritorno = ritorno + ritornoTmp;
-        ritornoTmp = '';
+    async InizializzaORM(/* client: Client */elencoQuery: string[], nomeDatabase?: string, listaRuoli?: Role[], listaUser?: User[]) {
+        const ritorno = '';
+        elencoQuery.push(`CREATE EXTENSION plv8;`);
 
-        ritornoTmp = ritornoTmp + TriggerUpdate_updated_at_column() + '\n';
-        await EseguiQueryControllata(client, ritornoTmp);
-        ritorno = ritorno + ritornoTmp;
-        ritornoTmp = '';
+        elencoQuery.push(DropAllTable());
 
-        ritornoTmp = ritornoTmp + this.InizializzaRuoli(client, listaRuoli);
-        await EseguiQueryControllata(client, ritornoTmp);
-        ritorno = ritorno + ritornoTmp;
-        ritornoTmp = '';
-
-        /* qui creo gli user e li connetto ai ruoli */
-        ritornoTmp = ritornoTmp + this.InizializzaUser(client, listaUser);
-        ritorno = ritorno + ritornoTmp;
-        ritornoTmp = '';
+        elencoQuery.push(TriggerUpdate_updated_at_column());
+        this.InizializzaRuoli(elencoQuery, listaRuoli);
+        elencoQuery.push(this.InizializzaUser(elencoQuery, listaUser));
         /*  */
 
         for await (const element of this.listaTerminaleClassi) {
-            ritorno = ritorno + await element.CostruisciCreazioneDB(client, true);
+            await element.CostruisciCreazioneDB(elencoQuery, true);
         }
         for await (const element of this.listaTerminaleClassi) {
-            ritorno = ritorno + await element.CostruisciCreazioneDB(client, false);
+            await element.CostruisciCreazioneDB(elencoQuery, false);
         }
         for await (const element of this.listaTerminaleClassi) {
-            ritorno = ritorno + await element.CostruisciRelazioniDB(client);
+            await element.CostruisciRelazioniDB(elencoQuery);
         }
         for await (const element of this.listaTerminaleClassi) {
-            ritorno = ritorno + await element.CostruisceGrant(element.grants ?? [], client);
+            await element.CostruisceGrant(element.grants ?? [], elencoQuery);
         }
 
         for await (const element of this.listaTerminaleClassi) {
-            if (element.policySicurezza)
-                ritorno = ritorno + await element.CostruiscePolicySicurezza(element.policySicurezza, client);
+            if (element.listaPolicy)
+                await element.listaPolicy.CostruiscePolicySicurezza(elencoQuery);
         }
         return ritorno;
     }
 
-    InizializzaRuoli(client: Client, listaRuoli?: Role[]) {
+    InizializzaRuoli(/* client: Client */elencoQuery: string[], listaRuoli?: Role[]) {
         let ritornoTmp = '';
         if (listaRuoli) {
             for (let index = 0; index < listaRuoli.length; index++) {
@@ -146,19 +127,19 @@ export class Main implements IGestorePercorsiPath {
                 ${element.option.creaUser != undefined && element.option.creaUser == true ? 'CREATEROLE' : 'NOCREATEROLE'} 
                 INHERIT 
                 ${element.option.login != undefined && element.option.login == true ? 'LOGIN' : 'NOLOGIN'} 
-                NOREPLICATION  
+                NOREPLICATION   
                 NOBYPASSRLS 
-                PASSWORD '${element.password}' 
+                ENCRYPTED PASSWORD '${element.password}' 
                 ${element.option.connectionLimit != undefined ? 'CONNECTION LIMIT ' + element.option.connectionLimit : ''} 
                 ; \n`;
-                EseguiQueryControllata(client, faxs);
-                ritornoTmp = ritornoTmp + faxs;
+                elencoQuery.push(faxs);
+                ritornoTmp = faxs;
             }
         }
         return ritornoTmp;
     }
 
-    InizializzaUser(client: Client, listaUser?: User[]) {
+    InizializzaUser(/* client: Client */elencoQuery: string[], listaUser?: User[]) {
         let ritornoTmp = '';
         if (listaUser) {
             for (let index = 0; index < listaUser.length; index++) {
@@ -176,7 +157,7 @@ export class Main implements IGestorePercorsiPath {
                 ${element.option.connectionLimit != undefined ? 'CONNECTION LIMIT ' + element.option.connectionLimit : ''} 
                 IN ROLE ${costruisciRuoli}
                 ; \n`;
-                EseguiQueryControllata(client, faxs);
+                elencoQuery.push(faxs);
                 ritornoTmp = ritornoTmp + faxs;
             }
         }

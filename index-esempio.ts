@@ -4,6 +4,7 @@ import { Client } from "pg";
 import { Persona } from "./esempio/persona";
 import { Maggiordomo } from "./esempio/maggiordomo";
 import { Test1 } from "./esempio/test1";
+import { EseguiQueryControllata } from "./model/postgres/tabella";
 
 
 const main = new Main('api');
@@ -19,16 +20,16 @@ const client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'test',
-    password: 'password',
+    password: 'postgres',
     port: 5432,
 });
 
 
 client.connect().then(async (result) => {
 
+    const vett: string[] = [];
 
-
-    const orm = await main.InizializzaORM(client, 'test', [
+    const orm = await main.InizializzaORM(vett, 'test', [
         {
             nome: 'admin_admin',
             password: 'password3',
@@ -38,7 +39,19 @@ client.connect().then(async (result) => {
                 login: false
             }
         }
-    ]/* , [
+    ],
+        [
+            {
+                nome: 'utente1',
+                password: 'utente1',
+                connectionLimit: 1,
+                inRole: ['admin_admin'],
+                option: {
+                    creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
+                    login: true
+                }
+            }
+        ]/* , [
         {
             nome: 'medico',
             password: 'password1',
@@ -77,7 +90,12 @@ client.connect().then(async (result) => {
             }
         }
     ] */);
-    console.log('\n\n\n\n' + orm + '\n\n\n\n\n\n');
+    console.log('\n!!!!!!?????######\n\n\n\n' + orm + '\n\n\n\n\n\n!!!!!!?????######\n');
+
+    for (let index = 0; index < vett.length; index++) {
+        const element = vett[index];
+        await EseguiQueryControllata(client, element)
+    }
 
     console.log('*******');
     console.log('\n\n\n');

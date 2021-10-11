@@ -1,6 +1,6 @@
 import { IClasse } from "../utility";
 import { IstanzaClasse, IstanzaCLasseORM } from "./istanza-classe";
-import { IClasseORM } from "./metadata-classe";
+import { IClasseORM } from "../postgres/tabella";
 
 /**
  * inizializza la classe, crea un rotta in express mediante il percorso specificato. 

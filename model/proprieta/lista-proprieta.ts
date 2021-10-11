@@ -27,6 +27,7 @@ export class ListaTerminaleProprieta extends Array<TerminaleProprieta> {
         this.push(item);
         return item;
     }
+    
     /* ConfiguraListaRotteApplicazione(app: any, percorsi: IRaccoltaPercorsi) {
         for (let index = 0; index < this.length; index++) {
             const element = this[index];

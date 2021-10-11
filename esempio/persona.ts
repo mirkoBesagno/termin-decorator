@@ -92,7 +92,6 @@ export class Persona {
     }
     @mpMetGen(undefined, <IMetodoEventi>{
         Istanziatore: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => {
-            console.log(parametri);
             return new Persona('fjilbsgbjlk dfhjle jhbiasdlgkd', 'dsgsdfgs324567346356');
         }
     })

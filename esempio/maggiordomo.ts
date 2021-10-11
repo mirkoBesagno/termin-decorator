@@ -17,7 +17,7 @@ type Tabella<T> = {
         abilitaDeletedAt: true,
         abilitaUpdatedAt: true,
         creaId: true,
-        policySicurezza: [
+        listaPolicy: [
             {
                 azieneScatenente: 'UPDATE',
                 nomePolicy: 'policytest',

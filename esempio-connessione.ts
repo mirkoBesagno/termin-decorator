@@ -5,7 +5,7 @@ const client = new Client({
     user: 'utente1',
     host: 'localhost',
     database: 'test',
-    password: 'password1',
+    password: 'utente1',
     port: 5432,
 });
 
@@ -13,8 +13,8 @@ client.connect().then(async (result: any) => {
     console.log(result);
 
     let query = {
-        text: 'INSERT INTO maggiordomo(nome, cognome) VALUES($1, $2)',
-        values: ['Mag Michele', 'Mag Carotta'],
+        text: 'INSERT INTO test1(nome) VALUES($1);',
+        values: ['Mag Michele'],
     }
     // callback
 
@@ -41,7 +41,7 @@ client.connect().then(async (result: any) => {
     await client.end()
 
 
-    const magg = new Client({
+   /*  const magg = new Client({
         user: 'utente2',
         host: 'localhost',
         database: 'test',
@@ -61,7 +61,7 @@ client.connect().then(async (result: any) => {
     }
 
 
-    await magg.end()
+    await magg.end() */
 }).catch((err: any) => {
     console.log(err);
 

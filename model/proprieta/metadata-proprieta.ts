@@ -1,9 +1,9 @@
 import { TerminaleParametro } from "../parametro/metadata-parametro";
 import { ICheck, IConstraints, IGrant, IParametro, IProprieta, IRitornoValidatore, ITrigger, ORMObject, tipo, TypeIstantevent, TypeSurgevent } from "../utility";
 import { Client, types } from "pg";
-import { EseguiQueryControllata } from "../classe/metadata-classe";
 import { Trigger } from "../postgres/trigger";
 import { Constraint } from "../postgres/constraint";
+import { EseguiQueryControllata } from "../postgres/tabella";
 
 
 export class TerminaleProprieta implements IProprieta {
@@ -151,7 +151,7 @@ export class TerminaleProprieta implements IProprieta {
             tmpRitorno = this.AppoggioCostruzioneStringa(this.tipo);
         }
         if (this.Constraints) {
-            tmpRitorno = tmpRitorno +  this.Constraints.CostruisciConstraint(nomeClasse)
+            tmpRitorno = tmpRitorno + this.Constraints.CostruisciConstraint(nomeClasse)
         }
         return tmpRitorno;
     }
@@ -209,12 +209,14 @@ export class TerminaleProprieta implements IProprieta {
             this.trigger.push(new Trigger(element));
         }
     }
-    async CostruisceTrigger(nomeTabella: string, client: Client) {
+    async CostruisceTrigger(nomeTabella: string, elencoQuery: string[]/* client: Client */) {
         if (this.trigger) {
             for (let index = 0; index < this.trigger.length; index++) {
                 const element = this.trigger[index];
                 const query = element.CostruisceTrigger(nomeTabella);
-                await EseguiQueryControllata(client, query??'');
+                //await EseguiQueryControllata(client, query??'');
+                if (query)
+                    elencoQuery.push(query);
             }
         }
     }

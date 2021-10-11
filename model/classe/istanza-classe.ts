@@ -3,7 +3,8 @@ import { ListaTerminaleClasse } from "./lista-classe";
 import fs from 'fs';
 import { IstanzaMetodo } from "../metodo/istanza-metodo";
 import { CheckClasseMetaData, GetListaClasseMetaData, IClasse, SalvaListaClasseMetaData } from "../utility";
-import { IClasseORM } from "./metadata-classe";
+import { ListaPolicy } from "../postgres/policy";
+import { IClasseORM } from "../postgres/tabella";
 
 export class IstanzaClasse {
     constructor(parametri: IClasse, nomeClasse: string, listaMetodi?: IstanzaMetodo[]) {
@@ -104,10 +105,10 @@ export class IstanzaCLasseORM {
         classe.estende = parametri.estende;
         classe.like = parametri.like;
         classe.multiUnique = parametri.multiUnique;
-        classe.policySicurezza = parametri.policySicurezza;
-        classe.grants = parametri.grants;
         classe.nomeTabella = parametri.nomeTabella ?? nomeClasse;
-        
+        classe.listaPolicy = new ListaPolicy(parametri.listaPolicy, classe.nomeTabella);//classe.policySicurezza = parametri.policySicurezza;
+        classe.grants = parametri.grants;
+
         SalvaListaClasseMetaData(list);
     }
 }
