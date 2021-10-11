@@ -93,7 +93,7 @@ export class Main implements IGestorePercorsiPath {
 
         elencoQuery.push(TriggerUpdate_updated_at_column());
         this.InizializzaRuoli(elencoQuery, listaRuoli);
-        elencoQuery.push(this.InizializzaUser(elencoQuery, listaUser));
+        this.InizializzaUser(elencoQuery, listaUser);
         /*  */
 
         for await (const element of this.listaTerminaleClassi) {
@@ -113,6 +113,9 @@ export class Main implements IGestorePercorsiPath {
             if (element.listaPolicy)
                 await element.listaPolicy.CostruiscePolicySicurezza(elencoQuery);
         }
+
+        this.InizializzaRuoliGrantGenerale(elencoQuery, listaRuoli);
+        this.InizializzaUserGrantGenerale(elencoQuery, listaUser);
         return ritorno;
     }
 
@@ -132,13 +135,32 @@ export class Main implements IGestorePercorsiPath {
                 ENCRYPTED PASSWORD '${element.password}' 
                 ${element.option.connectionLimit != undefined ? 'CONNECTION LIMIT ' + element.option.connectionLimit : ''} 
                 ; \n`;
+                const faxsDrop = `DROP ROLE IF EXISTS ${element.nome};`;
+                elencoQuery.push(faxsDrop);
                 elencoQuery.push(faxs);
                 ritornoTmp = faxs;
             }
         }
         return ritornoTmp;
     }
-
+    InizializzaRuoliGrantGenerale(/* client: Client */elencoQuery: string[], listaRuoli?: Role[]) {
+        let ritornoTmp = '';
+        if (listaRuoli) {
+            for (let index = 0; index < listaRuoli.length; index++) {
+                const element = listaRuoli[index];
+                const faxSchema = `GRANT USAGE
+                ON ALL SEQUENCES IN SCHEMA public
+                TO ${element.nome} ;`;
+                elencoQuery.push(faxSchema);
+                const faxFunction = `GRANT EXECUTE
+                ON ALL functions IN SCHEMA public
+                    TO ${element.nome};`;
+                elencoQuery.push(faxFunction);
+                ritornoTmp = faxSchema;
+            }
+        }
+        return ritornoTmp;
+    }
     InizializzaUser(/* client: Client */elencoQuery: string[], listaUser?: User[]) {
         let ritornoTmp = '';
         if (listaUser) {
@@ -157,8 +179,32 @@ export class Main implements IGestorePercorsiPath {
                 ${element.option.connectionLimit != undefined ? 'CONNECTION LIMIT ' + element.option.connectionLimit : ''} 
                 IN ROLE ${costruisciRuoli}
                 ; \n`;
+
+                const faxsDrop = `DROP USER IF EXISTS ${element.nome};`;
+                elencoQuery.push(faxsDrop);
                 elencoQuery.push(faxs);
+
                 ritornoTmp = ritornoTmp + faxs;
+            }
+        }
+        return ritornoTmp;
+    }
+    InizializzaUserGrantGenerale(/* client: Client */elencoQuery: string[], listaUser?: User[]) {
+        let ritornoTmp = '';
+        if (listaUser) {
+            for (let index = 0; index < listaUser.length; index++) {
+                const element = listaUser[index];
+
+                const faxSchema = `GRANT USAGE
+                ON ALL SEQUENCES IN SCHEMA public
+                TO ${element.nome} ;`;
+                elencoQuery.push(faxSchema);
+                const faxFunction = `GRANT EXECUTE
+                ON ALL functions IN SCHEMA public
+                    TO ${element.nome};`;
+                elencoQuery.push(faxFunction);
+
+                ritornoTmp = ritornoTmp + faxSchema;
             }
         }
         return ritornoTmp;

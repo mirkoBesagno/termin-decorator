@@ -15,20 +15,24 @@ const plv8: any = {};
         creaId: true,
         listaPolicy: [
             {
-                azieneScatenente: 'UPDATE',
+                azieneScatenente: 'SELECT',
                 nomePolicy: 'policytest',
-                ruoli: ['admin_admin','utente1'],
-                check: (NEW: any, OLD: any) => {
+                ruoli: ['utente1'],
+                /*check: 'true'  (NEW: any, OLD: any) => {
                     return true;
-                },
+                } ,
                 nomeFunzioneCheck: 'policytest',
-                typeFunctionCheck: 'plv8'
+                typeFunctionCheck: 'sql'*/
             }
         ],
         grants: [
             {
                 events: ['INSERT'],
-                ruoli: ['admin_admin', 'utente1']
+                ruoli: ['admin_admin']
+            },
+            {
+                events: ['UPDATE'],
+                ruoli: ['utente2']
             }
         ]
     })
@@ -57,14 +61,15 @@ export class Test1 {
                     if (NEW.nome == 'Mirko') {
                         throw new Error("Attenzione valore illegale.");
                     }
-                }
+                },
+                typeFunction: 'plv8'
             }
-        ],
+        ]/* ,
         grants: [
             {
                 events: ['SELECT', 'INSERT'], ruoli: ['admin_admin', 'utente1']
             }
-        ]
+        ] */
     })
     nome: string;
 

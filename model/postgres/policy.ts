@@ -9,6 +9,7 @@ export class ListaPolicy extends Array<Policy> {
         if (item) {
             for (let index = 0; index < item.length; index++) {
                 const element = item[index];
+                element.tabellaDestinazione= nomeTabella;
                 this.push(new Policy(element))
             }
         }
@@ -61,7 +62,7 @@ export class Policy implements IPolicy {
             //COMMENT ON FUNCTION "FN_${this.nomeFunzione}"() IS 'Hei tanto roba questa è scritta usando plv8!!';
             const queri1 = `
                     CREATE POLICY "PO_MP_${this.nomePolicy}"
-                        ON "${nomeTabella}" 
+                        ON ${nomeTabella}
                         FOR ${this.azieneScatenente}
                         TO ${ruolitesto}
                         ${this.using && nomeFunzioneUS != "" ? 'USING "' + nomeFunzioneUS + '"()' : ''}

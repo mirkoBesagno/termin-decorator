@@ -115,8 +115,10 @@ export class TabellaORM implements IClasseORM {
 
         ritornoTmp = ritornoTmp + rigaDaInserire;
         elencoQuery.push(ritornoTmp);
+        
         /*  */
-        elencoQuery.push(`ALTER TABLE ${this.nomeTabella} ENABLE ROW LEVEL SECURITY;`);
+        //elencoQuery.push(`ALTER TABLE ${this.nomeTabella} ENABLE ROW LEVEL SECURITY;`);
+        
         ritornoTmp = '';
         /* Ora che la tabella esiste vado ad eseguire i trigger */
         for (let index = 0; index < this.listaProprieta.length; index++) {
@@ -151,7 +153,7 @@ export class TabellaORM implements IClasseORM {
             const element = grants[index];
             const eventitesto = CostruisciEvents(element.events);
             const ruolitesto = CostruisciRuoli(element.ruoli);
-            const tmp = `GRANT ${eventitesto}
+            const tmp = `GRANT ${eventitesto} 
             ON ${this.nomeTabella} 
             TO ${ruolitesto}
             ;`;
@@ -281,7 +283,9 @@ export async function EseguiQueryControllata(client: Client, query: string) {
         return query;
     } catch (error) {
         console.log('\n\nINIZIO Errroe : \n**********************\n\n');
-        console.log(error);
+        console.log('-Query:\n'+ query+'\n\n');
+        
+        console.log('-Error:\n'+error);
         console.log('\n\nFINE Errroe : \n**********************\n\n');
     }
 }

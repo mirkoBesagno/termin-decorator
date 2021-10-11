@@ -1,6 +1,5 @@
 import { Client } from "pg";
 
-
 const client = new Client({
     user: 'utente1',
     host: 'localhost',
@@ -8,13 +7,33 @@ const client = new Client({
     password: 'utente1',
     port: 5432,
 });
+/* const client = new Client({
+    user: 'utente2',
+    host: 'localhost',
+    database: 'test',
+    password: 'utente2',
+    port: 5432,
+}); */
+/* const client = new Client({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'test',
+    password: 'postgres',
+    port: 5432,
+}); */
 
 client.connect().then(async (result: any) => {
     console.log(result);
 
+    try {
+        await client.query('SELECT * FROM test1;');
+    } catch (error) {
+        console.log('\n*****\n' + error + '\n********\n\n');
+    }
+
     let query = {
         text: 'INSERT INTO test1(nome) VALUES($1);',
-        values: ['Mag Michele'],
+        values: ['Mag Michele jj'],
     }
     // callback
 
@@ -41,27 +60,27 @@ client.connect().then(async (result: any) => {
     await client.end()
 
 
-   /*  const magg = new Client({
-        user: 'utente2',
-        host: 'localhost',
-        database: 'test',
-        password: 'password2',
-        port: 5432,
-    });
-
-    try {
-        await magg.connect()
-        console.log(result);
-
-        console.log('passato');
-    } catch (error) {
-        console.log(error);
-
-        console.log("errore");
-    }
-
-
-    await magg.end() */
+    /*  const magg = new Client({
+         user: 'utente2',
+         host: 'localhost',
+         database: 'test',
+         password: 'password2',
+         port: 5432,
+     });
+ 
+     try {
+         await magg.connect()
+         console.log(result);
+ 
+         console.log('passato');
+     } catch (error) {
+         console.log(error);
+ 
+         console.log("errore");
+     }
+ 
+ 
+     await magg.end() */
 }).catch((err: any) => {
     console.log(err);
 

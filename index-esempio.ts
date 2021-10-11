@@ -50,6 +50,16 @@ client.connect().then(async (result) => {
                     creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
                     login: true
                 }
+            },
+            {
+                nome: 'utente2',
+                password: 'utente2',
+                connectionLimit: 1,
+                inRole: ['admin_admin'],
+                option: {
+                    creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
+                    login: true
+                }
             }
         ]/* , [
         {
