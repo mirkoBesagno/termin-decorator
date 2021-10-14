@@ -3,7 +3,7 @@ import { IReturnTest } from "./model/test-funzionale/utility-test-funzionale";
 import { Client } from "pg";
 import { Persona } from "./esempio/persona";
 import { Maggiordomo } from "./esempio/maggiordomo";
-import { Test1 } from "./esempio/test1";
+import { Test1, Test2 } from "./esempio/test1";
 import { EseguiQueryControllata } from "./model/postgres/tabella";
 
 
@@ -16,11 +16,12 @@ main.Inizializza("localhost", 8080, true, true);
 /* const persone = new Persona('mirko io persona', '3543543534');
 const magg = new Maggiordomo('magg mirko', 'magg mirko'); */
 const test1 = new Test1('nome test1');
+const test2 = new Test2('nome test1');
 const client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'test',
-    password: 'postgres',
+    password: 'password',
     port: 5432,
 });
 
