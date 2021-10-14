@@ -27,8 +27,8 @@ const plv8: any = {};
         ],
         grants: [
             {
-                events: ['INSERT'],
-                ruoli: ['admin_admin']
+                events: ['INSERT','SELECT'],
+                ruoli: ['utente1']
             },
             {
                 events: ['UPDATE'],
@@ -100,8 +100,8 @@ export class Test1 {
         ],
         grants: [
             {
-                events: ['INSERT'],
-                ruoli: ['admin_admin']
+                events: ['INSERT', 'SELECT'],
+                ruoli: ['utente2']
             },
             {
                 events: ['UPDATE'],
@@ -151,10 +151,112 @@ export class Test2 {
     }
 }
 
-/* @mpView({
-    query:`select nome, cognome from test1, test2`,
-    variabili:[]
-})
-export class TestVista {
 
-} */
+
+
+
+@mpClas({ percorso: 'test3' },
+    {
+        queryPerVista:'select t1.nome , t2.cognome from test1 t1, test2 t2 where t1.id  = t2.id;',
+        nomeTabella: 'test3',
+        abilitaCreatedAt: true,
+        abilitaDeletedAt: true,
+        abilitaUpdatedAt: true,
+        creaId: true,
+        listaPolicy: [
+            {
+                azieneScatenente: 'SELECT',
+                nomePolicy: 'policytest',
+                ruoli: ['utente1'],
+                /*check: 'true'  (NEW: any, OLD: any) => {
+                    return true;
+                } ,
+                nomeFunzioneCheck: 'policytest',
+                typeFunctionCheck: 'sql'*/
+            }
+        ],
+        grants: [
+            {
+                events: ['SELECT'],
+                ruoli: ['admin_admin']
+            }
+        ]
+    })
+export class Test3 {
+
+    @mpProp({
+        Constraints: {
+            unique: { nome: 'uniqueOnCognome', unique: true },
+            notNull: true,
+            check: { nome: 'checkOnCognome', check: "cognome != 'Ernesto'" }
+        },
+        descrizione: 'descrizProp',
+        tipo: 'text',
+        sommario: 'sommarioProp',
+        trigger: [
+            {
+                instantevent: 'BEFORE',
+                nomeFunzione: 'controlloCognome',
+                nomeTrigger: 'controlloCognome',
+                surgevent: ['INSERT'],
+                Validatore: (NEW: Test2, HOLD: Test2, TG_ARGV: any[], TG_OP: any, TG_WHEN: any) => {
+
+                    if (NEW.cognome.toLocaleLowerCase() == 'luca') {
+                        throw new Error("Attenzione Luca non puoi entrare");
+                    }
+                    if (NEW.cognome == 'Mirko') {
+                        throw new Error("Attenzione valore illegale.");
+                    }
+                },
+                typeFunction: 'plv8'
+            }
+        ]/* ,
+        grants: [
+            {
+                events: ['SELECT', 'INSERT'], ruoli: ['admin_admin', 'utente1']
+            }
+        ] */
+    })
+    cognome: string;
+
+
+    @mpProp({
+        Constraints: {
+            unique: { nome: 'uniqueOnNome', unique: true },
+            notNull: true,
+            check: { nome: 'checkOnNome', check: "nome != 'Ernesto'" }
+        },
+        descrizione: 'descrizProp',
+        tipo: 'text',
+        sommario: 'sommarioProp',
+        trigger: [
+            {
+                instantevent: 'BEFORE',
+                nomeFunzione: 'controlloNome',
+                nomeTrigger: 'controlloNome',
+                surgevent: ['INSERT'],
+                Validatore: (NEW: Test1, HOLD: Test1, TG_ARGV: any[], TG_OP: any, TG_WHEN: any) => {
+
+                    if (NEW.nome.toLocaleLowerCase() == 'luca') {
+                        throw new Error("Attenzione Luca non puoi entrare");
+                    }
+                    if (NEW.nome == 'Mirko') {
+                        throw new Error("Attenzione valore illegale.");
+                    }
+                },
+                typeFunction: 'plv8'
+            }
+        ]/* ,
+        grants: [
+            {
+                events: ['SELECT', 'INSERT'], ruoli: ['admin_admin', 'utente1']
+            }
+        ] */
+    })
+    nome: string;
+
+    constructor(cognome: string, nome: string) {
+        this.cognome = cognome;
+        this.nome = nome;
+    }
+}

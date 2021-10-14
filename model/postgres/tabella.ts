@@ -6,7 +6,7 @@ import { ListaPolicy } from "./policy";
 
 
 export interface IClasseORM {
-
+    queryPerVista?: string;
     like?: string;
     abilitaCreatedAt: boolean;
     abilitaUpdatedAt: boolean;
@@ -20,6 +20,8 @@ export interface IClasseORM {
 }
 
 export class TabellaORM implements IClasseORM {
+    queryPerVista?: string;
+
     like?: string;
     estende?: string;
     abilitaCreatedAt: boolean;
@@ -45,93 +47,100 @@ export class TabellaORM implements IClasseORM {
         this.abilitaUpdatedAt = false;
     }
     faxsSimileIntestazione = 'CREATE TABLE IF NOT EXISTS ';
+    faxsSimileIntestazioneView = 'CREATE OR REPLACE VIEW ';
     async CostruisciCreazioneDB(/* client: Client */elencoQuery: string[], padreEreditario: boolean) {
-        let ritorno = '';
-        if (this.estende == undefined && this.like == undefined && padreEreditario == true) {
-            ritorno = await this.AppoggioACostruisciDB(elencoQuery, '); \n');
-        }
-        else if (this.estende && padreEreditario == false) {
-            ritorno = await this.AppoggioACostruisciDB(elencoQuery, ') INHERITS("' + this.estende + '");' + '\n');
-        }
-        else if (this.like && padreEreditario == false) {
-            ritorno = await this.AppoggioACostruisciDB(elencoQuery, 'LIKE "' + this.like + '"' + '\n');
-        }
-        return ritorno;
-    }
-    async AppoggioACostruisciDB(/* client: Client */elencoQuery: string[], rigaDaInserire: string) {
-
-        const ritorno = '';
+        let rigaDaInserire = '';
         let ritornoTmp = '';
-        ritornoTmp = ritornoTmp + this.faxsSimileIntestazione + '"' + this.nomeTabella + '"' + ' (' + '\n';
-        if (this.abilitaCreatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaCreatedAt + ',' + '\n'; }
-        if (this.abilitaDeletedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaDeletedAt + ',' + '\n'; }
-        if (this.abilitaUpdatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaUpdatedAt; }
-        if (this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
-        else ritornoTmp = ritornoTmp + '\n';
-        let checkTmp = false;
-        for (let index = 0; index < this.listaProprieta.length; index++) {
-            const element = this.listaProprieta[index];
-            ritornoTmp = ritornoTmp + element.CostruisciCreazioneDB(this.nomeTabella);
-            if (index + 1 < this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
+        if (this.estende == undefined && this.like == undefined && padreEreditario == true) rigaDaInserire = '); \n';
+        else if (this.estende && padreEreditario == false) rigaDaInserire = ') INHERITS("' + this.estende + '");' + '\n';
+        else if (this.like && padreEreditario == false) rigaDaInserire = 'LIKE "' + this.like + '"' + '\n';
+        else { rigaDaInserire = ''; }
+        if (rigaDaInserire && rigaDaInserire != '') {
+            let checkTmp = false;
+            if (this.queryPerVista == undefined || this.queryPerVista == '') {
+                ritornoTmp = ritornoTmp + this.faxsSimileIntestazione + '"' + this.nomeTabella + '"' + ' (' + '\n';
+                if (this.abilitaCreatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaCreatedAt + ',' + '\n'; }
+                if (this.abilitaDeletedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaDeletedAt + ',' + '\n'; }
+                if (this.abilitaUpdatedAt) { ritornoTmp = ritornoTmp + this.faxSimile_abilitaUpdatedAt; }
+                if (this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
+                else ritornoTmp = ritornoTmp + '\n';
+
+                for (let index = 0; index < this.listaProprieta.length; index++) {
+                    const element = this.listaProprieta[index];
+                    ritornoTmp = ritornoTmp + element.CostruisciCreazioneDB(this.nomeTabella);
+                    if (index + 1 < this.listaProprieta.length) ritornoTmp = ritornoTmp + ',' + '\n';
+                    else {
+                        if (this.creaId) {
+                            ritornoTmp = ritornoTmp + ',\n';
+                            ritornoTmp = ritornoTmp + CreaID() + '\n';
+                            checkTmp = true;
+                        } else {
+                            ritornoTmp = ritornoTmp + '\n';
+                        }
+                    }
+                }
+                if (this.creaId == true && checkTmp == false) {
+                    if (this.listaProprieta.length > 0) {
+                        ritornoTmp = ritornoTmp + ',\n';
+                        ritornoTmp = ritornoTmp + CreaID() + '\n';
+                    }
+                    else if (this.abilitaUpdatedAt || this.abilitaCreatedAt || this.abilitaDeletedAt) {
+                        ritornoTmp = ritornoTmp + ',\n' + CreaID() + '\n';
+                    }
+                    else {
+                        ritornoTmp = ritornoTmp + CreaID() + '\n';
+                    }
+                }
+                if (this.multiUnique) {
+                    for (let index = 0; index < this.multiUnique.length; index++) {
+                        const element = this.multiUnique[index];
+                        let ritornoTmp2 = 'UNIQUE (';
+                        for (let ind = 0; ind < element.colonneDiRiferimento.length; ind++) {
+                            const variab = element.colonneDiRiferimento[ind];
+                            ritornoTmp2 = ritornoTmp2 + ' ' + variab;
+                            if (ind + 1 < element.colonneDiRiferimento.length) ritornoTmp2 = ritornoTmp2 + ',';
+                        }
+                        ritornoTmp2 = ritornoTmp2 + ' )';
+                        if (ritornoTmp2 != 'UNIQUE ( )') {
+                            ritornoTmp = ritornoTmp + ritornoTmp2;
+                        }
+                    }
+                }
+                ritornoTmp = ritornoTmp + rigaDaInserire;
+            }
             else {
-                if (this.creaId) {
-                    ritornoTmp = ritornoTmp + ',\n';
-                    ritornoTmp = ritornoTmp + CreaID() + '\n';
-                    checkTmp = true;
-                } else {
-                    ritornoTmp = ritornoTmp + '\n';
+                ritornoTmp = ritornoTmp + this.faxsSimileIntestazioneView + '"' + this.nomeTabella + '"' + ' (';
+
+                for (let index = this.listaProprieta.length - 1; index >= 0; index--) {
+                    const element = this.listaProprieta[index];
+                    ritornoTmp = ritornoTmp + " " + element.nome + " ";
+                    if (index - 1 >= 0) ritornoTmp = ritornoTmp + ', ';
+
                 }
+                ritornoTmp = ritornoTmp + " )\n AS " + this.queryPerVista + '\n';
             }
 
-        }
-        if (this.creaId == true && checkTmp == false) {
-            if (this.listaProprieta.length > 0) {
-                ritornoTmp = ritornoTmp + ',\n';
-                ritornoTmp = ritornoTmp + CreaID() + '\n';
-            }
-            else if (this.abilitaUpdatedAt || this.abilitaCreatedAt || this.abilitaDeletedAt) {
-                ritornoTmp = ritornoTmp + ',\n' + CreaID() + '\n';
-            }
-            else {
-                ritornoTmp = ritornoTmp + CreaID() + '\n';
-            }
-        }
 
-        if (this.multiUnique) {
-            for (let index = 0; index < this.multiUnique.length; index++) {
-                const element = this.multiUnique[index];
-                let ritornoTmp2 = 'UNIQUE (';
-                for (let ind = 0; ind < element.colonneDiRiferimento.length; ind++) {
-                    const variab = element.colonneDiRiferimento[ind];
-                    ritornoTmp2 = ritornoTmp2 + ' ' + variab;
-                    if (ind + 1 < element.colonneDiRiferimento.length) ritornoTmp2 = ritornoTmp2 + ',';
-                }
-                ritornoTmp2 = ritornoTmp2 + ' )';
-                if (ritornoTmp2 != 'UNIQUE ( )') {
-                    ritornoTmp = ritornoTmp + ritornoTmp2;
-                }
+            elencoQuery.push(ritornoTmp); //CREAZIONE TABELLA :CREATE NEW TABLE ECC..
+
+            /*  */
+            //elencoQuery.push(`ALTER TABLE ${this.nomeTabella} ENABLE ROW LEVEL SECURITY;`);
+
+            ritornoTmp = '';
+            /* Ora che la tabella esiste vado ad eseguire i trigger */
+            for (let index = 0; index < this.listaProprieta.length; index++) {
+                const element = this.listaProprieta[index];
+                element.CostruisceTrigger(this.nomeTabella, elencoQuery);
+            }
+            if (this.abilitaDeletedAt && this.abilitaUpdatedAt && this.queryPerVista == undefined) {
+                elencoQuery.push(TriggerUpdate(this.nomeTabella));
+            }
+            if (this.abilitaDeletedAt && this.abilitaUpdatedAt && this.queryPerVista == undefined) {
+                elencoQuery.push(TriggerDeleted_at(this.nomeTabella));
             }
         }
+        return ritornoTmp;
 
-        ritornoTmp = ritornoTmp + rigaDaInserire;
-        elencoQuery.push(ritornoTmp);
-        
-        /*  */
-        //elencoQuery.push(`ALTER TABLE ${this.nomeTabella} ENABLE ROW LEVEL SECURITY;`);
-        
-        ritornoTmp = '';
-        /* Ora che la tabella esiste vado ad eseguire i trigger */
-        for (let index = 0; index < this.listaProprieta.length; index++) {
-            const element = this.listaProprieta[index];
-            element.CostruisceTrigger(this.nomeTabella, elencoQuery);
-        }
-        if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
-            elencoQuery.push(TriggerUpdate(this.nomeTabella));
-        }
-        if (this.abilitaDeletedAt && this.abilitaUpdatedAt) {
-            elencoQuery.push(TriggerDeleted_at(this.nomeTabella));
-        }
-        return ritorno;
     }
     async CostruisciRelazioniDB(/* client: Client */elencoQuery: string[]) {
         let ritorno = '';
@@ -273,19 +282,41 @@ export function DropAllTable() {
     GRANT ALL ON SCHEMA public TO public;
     COMMENT ON SCHEMA public IS 'standard public schema';`;
 }
-export async function EseguiQueryControllata(client: Client, query: string) {
+
+export interface ReturnQueryControllata {
+    risultato?: string, errore?: {
+        query: string,
+        errore: string
+    }, index: number
+}
+export async function EseguiQueryControllata(client: Client, query: string): Promise<ReturnQueryControllata> {
     try {
         if (query != "") {
             const result = await client.query(query);
             console.log('ESEGUITOO : \n' + query);
-            return query;
+            return {
+                index: 0,
+                errore: undefined,
+                risultato: query
+            }
         }
-        return query;
+        return {
+            index: 0,
+            errore: undefined,
+            risultato: query
+        }
     } catch (error) {
         console.log('\n\nINIZIO Errroe : \n**********************\n\n');
-        console.log('-Query:\n'+ query+'\n\n');
-        
-        console.log('-Error:\n'+error);
+        console.log('-Query:\n' + query + '\n\n');
+        console.log('-Error:\n' + error);
         console.log('\n\nFINE Errroe : \n**********************\n\n');
+        return {
+            index: 0,
+            errore: {
+                query: query,
+                errore: '' + error
+            },
+            risultato: undefined
+        }
     }
 }

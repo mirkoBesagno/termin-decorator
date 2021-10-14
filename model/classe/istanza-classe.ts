@@ -108,7 +108,7 @@ export class IstanzaCLasseORM {
         classe.nomeTabella = parametri.nomeTabella ?? nomeClasse;
         classe.listaPolicy = new ListaPolicy(parametri.listaPolicy, classe.nomeTabella);//classe.policySicurezza = parametri.policySicurezza;
         classe.grants = parametri.grants;
-
+        classe.queryPerVista = parametri.queryPerVista;
         SalvaListaClasseMetaData(list);
     }
 }

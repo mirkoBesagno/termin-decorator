@@ -3,8 +3,8 @@ import { IReturnTest } from "./model/test-funzionale/utility-test-funzionale";
 import { Client } from "pg";
 import { Persona } from "./esempio/persona";
 import { Maggiordomo } from "./esempio/maggiordomo";
-import { Test1, Test2 } from "./esempio/test1";
-import { EseguiQueryControllata } from "./model/postgres/tabella";
+import { Test1, Test2, Test3 } from "./esempio/test1";
+import { EseguiQueryControllata, ReturnQueryControllata } from "./model/postgres/tabella";
 
 
 const main = new Main('api');
@@ -17,11 +17,12 @@ main.Inizializza("localhost", 8080, true, true);
 const magg = new Maggiordomo('magg mirko', 'magg mirko'); */
 const test1 = new Test1('nome test1');
 const test2 = new Test2('nome test1');
+const test3 = new Test3('x', 'y');
 const client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'test',
-    password: 'password',
+    password: 'postgres',
     port: 5432,
 });
 
@@ -62,62 +63,61 @@ client.connect().then(async (result) => {
                     login: true
                 }
             }
-        ]/* , [
-        {
-            nome: 'medico',
-            password: 'password1',
-            inRole: [], connectionLimit: 1,
-            option: {
-                creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
-                login: false
-            }
-        },
-        {
-            nome: 'paziente',
-            password: 'password2',
-            inRole: [], connectionLimit: 2,
-            option: {
-                creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
-                login: false
-            }
-        },
-        {
-            nome: 'admin',
-            password: 'password3',
-            inRole: [], connectionLimit: 2,
-            option: {
-                creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
-                login: false
-            }
-        }
-    ], [
-        {
-            nome: 'utente1',
-            password: 'password2',
-            inRole: [''], connectionLimit: 2,
-            option: {
-                creaDB: false, creaTabelle: false, creaUser: false, isSuperUser: false,
-                login: true
-            }
-        }
-    ] */);
+        ]);
     console.log('\n!!!!!!?????######\n\n\n\n' + orm + '\n\n\n\n\n\n!!!!!!?????######\n');
 
+    const vetRisultatiQuery: ReturnQueryControllata[] = [];
     for (let index = 0; index < vett.length; index++) {
         const element = vett[index];
-        await EseguiQueryControllata(client, element)
+        const tmp = await EseguiQueryControllata(client, element);
+        tmp.index = index;
+        vetRisultatiQuery.push(tmp);
     }
 
     console.log('*******');
     console.log('\n\n\n');
-    console.log(orm);
+    /* console.log(orm); */
     console.log('\n\n\n');
     console.log('*******');
 
-})
-    .catch((err: any) => {
-        console.log("ciao");
-    });
+    let count = 0;
+    const tmp1 = [];
+    for (let index = 0; index < vetRisultatiQuery.length; index++) {
+        const element = vetRisultatiQuery[index];
+        if (element.errore) {
+            console.log(element.errore);
+            tmp1.push(element.errore);
+            count++;
+        }
+    }
+    console.log('*******');
+    console.log('\n\n\n');
+    console.log('Query finiti in errore: \n');
+    /* console.log(orm); */
+    console.log(count);
+    console.log('\n\n\n');
+    console.log('*******');
+    const tmp2 = [];
+    count = 0;
+    for (let index = 0; index < vetRisultatiQuery.length; index++) {
+        const element = vetRisultatiQuery[index];
+        if (element.risultato) {
+            console.log(element.risultato);
+            tmp2.push(element.risultato)
+            count++;
+        }
+    }
+    console.log('*******');
+    console.log('\n\n\n');
+    console.log('Query finiti in eseguite: \n');
+    /* console.log(orm); */
+    console.log(count);
+    console.log('\n\n\n');
+    console.log('*******');
+    count = 0;
+}).catch((err: any) => {
+    console.log("ciao");
+});
 
 main.AggiungiTestAPI([
 ]);
