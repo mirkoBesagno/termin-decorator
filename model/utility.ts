@@ -452,7 +452,10 @@ export interface IProprieta {
     descrizione: string;
     sommario: string;
     trigger?: ITrigger[],
-    grants?: IGrant[]
+    grants?: IGrant[],
+    
+    getCheck?: (valore: any) => boolean | Error,
+    setCheck?: (valore: any) => boolean | any | Error
 
 }
 export type typeGrantEvent = 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE' | 'REFERENCES' | 'TRIGGER' | 'ALL PRIVILEGES'

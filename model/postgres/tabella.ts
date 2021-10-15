@@ -5,7 +5,7 @@ import { ListaPolicy } from "./policy";
 
 
 
-export interface IClasseORM {
+export interface IArtefattoClassePostgres {
     queryPerVista?: string;
     like?: string;
     abilitaCreatedAt: boolean;
@@ -19,7 +19,7 @@ export interface IClasseORM {
     grants?: IGrant[]
 }
 
-export class TabellaORM implements IClasseORM {
+export class ArtefattoClassePostgres implements IArtefattoClassePostgres {
     queryPerVista?: string;
 
     like?: string;
@@ -48,7 +48,7 @@ export class TabellaORM implements IClasseORM {
     }
     faxsSimileIntestazione = 'CREATE TABLE IF NOT EXISTS ';
     faxsSimileIntestazioneView = 'CREATE OR REPLACE VIEW ';
-    async CostruisciCreazioneDB(/* client: Client */elencoQuery: string[], padreEreditario: boolean) {
+    CostruisciCreazioneDB(/* client: Client */elencoQuery: string[], padreEreditario: boolean) {
         let rigaDaInserire = '';
         let ritornoTmp = '';
         if (this.estende == undefined && this.like == undefined && padreEreditario == true) rigaDaInserire = '); \n';
@@ -142,7 +142,7 @@ export class TabellaORM implements IClasseORM {
         return ritornoTmp;
 
     }
-    async CostruisciRelazioniDB(/* client: Client */elencoQuery: string[]) {
+    CostruisciRelazioniDB(/* client: Client */elencoQuery: string[]) {
         let ritorno = '';
         /* if (this.estende) {
             const query = `ALTER TABLE ${this.nomeTabella} INHERIT ${this.estende};`
@@ -156,7 +156,7 @@ export class TabellaORM implements IClasseORM {
         }
         return ritorno;
     }
-    async CostruisceGrant(grants: IGrant[],/*  client: Client */ elencoQuery: string[]) {
+    CostruisceGrant(grants: IGrant[],/*  client: Client */ elencoQuery: string[]) {
         let ritorno = '';
         for (let index = 0; index < grants.length; index++) {
             const element = grants[index];
@@ -199,8 +199,8 @@ export function TriggerUpdate(nomeTabella: string) {
         FOR EACH ROW
         EXECUTE PROCEDURE update_updated_at_column();`
 }
-export async function CostruisciFunzione(item: any, nomeFunzioneCheck: string, nomePolicy: string, typeFunctionCheck: string,
-    carattere: string | 'CK' | 'US', /* client: Client */elencoQuery: string[]): Promise<string> {
+export function CostruisciFunzione(item: any, nomeFunzioneCheck: string, nomePolicy: string, typeFunctionCheck: string,
+    carattere: string | 'CK' | 'US', /* client: Client */elencoQuery: string[]): string {
     let corpoFunzione = '';
     if (item) {
         if (typeof item === 'function') {

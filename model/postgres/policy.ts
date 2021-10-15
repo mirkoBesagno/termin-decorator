@@ -16,11 +16,11 @@ export class ListaPolicy extends Array<Policy> {
         if (nomeTabella) this.nomeTabella = nomeTabella;
         else this.nomeTabella = '';
     }
-    async CostruiscePolicySicurezza(/* client: Client */elencoQuery: string[]) {
+     CostruiscePolicySicurezza(/* client: Client */elencoQuery: string[]) {
         let ritorno = '';
         for (let index = 0; index < this.length; index++) {
             const element = this[index];
-            const tmp = await element.CostruiscePolicySicurezza(elencoQuery, this.nomeTabella);
+            const tmp =  element.CostruiscePolicySicurezza(elencoQuery, this.nomeTabella);
             ritorno = ritorno + '' + tmp;
         }
         return ritorno;
@@ -52,11 +52,11 @@ export class Policy implements IPolicy {
         this.nomeFunzioneUsing = item.nomeFunzioneUsing;
     }
 
-    async CostruiscePolicySicurezza(/* client: Client */elencoQuery: string[], nomeTabella: string) {
+    CostruiscePolicySicurezza(/* client: Client */elencoQuery: string[], nomeTabella: string) {
         let ritorno = '';
         const ruolitesto = CostruisciRuoli(this.ruoli);
-        const nomeFunzioneCK = await CostruisciFunzione(this.check, this.nomeFunzioneCheck ?? '', this.nomePolicy, this.typeFunctionCheck ?? 'psql', 'CK', elencoQuery);
-        const nomeFunzioneUS = await CostruisciFunzione(this.using, this.nomeFunzioneUsing ?? '', this.nomePolicy, this.typeFunctionUsing ?? 'psql', 'US', elencoQuery);
+        const nomeFunzioneCK = CostruisciFunzione(this.check, this.nomeFunzioneCheck ?? '', this.nomePolicy, this.typeFunctionCheck ?? 'psql', 'CK', elencoQuery);
+        const nomeFunzioneUS = CostruisciFunzione(this.using, this.nomeFunzioneUsing ?? '', this.nomePolicy, this.typeFunctionUsing ?? 'psql', 'US', elencoQuery);
 
         try {
             //COMMENT ON FUNCTION "FN_${this.nomeFunzione}"() IS 'Hei tanto roba questa è scritta usando plv8!!';

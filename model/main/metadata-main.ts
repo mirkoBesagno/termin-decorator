@@ -9,7 +9,6 @@ import swaggerUI from "swagger-ui-express";
 import * as http from 'http';
 import { ITestAPI, ListaTerminaleTest, ListaTerminaleTestAPI } from "../test-funzionale/lista-test-funzionale";
 import { GetListaTestAPIMetaData, GetListaTestMetaData, IReturnTest, ITest, SalvaListaTestAPIMetaData, SalvaListaTestMetaData } from "../test-funzionale/utility-test-funzionale";
-import { IstanzaClasse } from "../classe/istanza-classe";
 import { TerminaleTest, TerminaleTestAPI } from "../test-funzionale/metadata-test-funzionale";
 import { StartMonitoring } from "./utility-main";
 import { CreateDataBase, DropAllTable, DropDataBase, EseguiQueryControllata, TriggerUpdate_updated_at_column } from "../postgres/tabella";
@@ -82,10 +81,7 @@ export class Main implements IGestorePercorsiPath {
         const list = GetListaClasseMetaData();
         console.log('');
     }
-    InizializzaClassi(lista: IstanzaClasse[]) {
-        return true;
-    }
-    async InizializzaORM(/* client: Client */elencoQuery: string[], nomeDatabase?: string, listaRuoli?: Role[], listaUser?: User[]) {
+    InizializzaORM(/* client: Client */elencoQuery: string[], nomeDatabase?: string, listaRuoli?: Role[], listaUser?: User[]) {
         const ritorno = '';
         elencoQuery.push(`CREATE EXTENSION plv8;`);
 
@@ -96,22 +92,22 @@ export class Main implements IGestorePercorsiPath {
         this.InizializzaUser(elencoQuery, listaUser);
         /*  */
 
-        for await (const element of this.listaTerminaleClassi) {
-            await element.CostruisciCreazioneDB(elencoQuery, true);
+        for (const element of this.listaTerminaleClassi) {
+            element.CostruisciCreazioneDB(elencoQuery, true);
         }
-        for await (const element of this.listaTerminaleClassi) {
-            await element.CostruisciCreazioneDB(elencoQuery, false);
+        for (const element of this.listaTerminaleClassi) {
+            element.CostruisciCreazioneDB(elencoQuery, false);
         }
-        for await (const element of this.listaTerminaleClassi) {
-            await element.CostruisciRelazioniDB(elencoQuery);
+        for (const element of this.listaTerminaleClassi) {
+            element.CostruisciRelazioniDB(elencoQuery);
         }
-        for await (const element of this.listaTerminaleClassi) {
-            await element.CostruisceGrant(element.grants ?? [], elencoQuery);
+        for (const element of this.listaTerminaleClassi) {
+            element.CostruisceGrant(element.grants ?? [], elencoQuery);
         }
 
-        for await (const element of this.listaTerminaleClassi) {
+        for (const element of this.listaTerminaleClassi) {
             if (element.listaPolicy)
-                await element.listaPolicy.CostruiscePolicySicurezza(elencoQuery);
+                element.listaPolicy.CostruiscePolicySicurezza(elencoQuery);
         }
 
         this.InizializzaRuoliGrantGenerale(elencoQuery, listaRuoli);
