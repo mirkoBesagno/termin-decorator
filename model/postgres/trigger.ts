@@ -10,7 +10,7 @@ export class Trigger implements ITrigger {
     nomeTrigger: string;
     nomeFunzione: string;
     Validatore: string | ((nuovo: any, vecchio: any, argomenti: any[], instantevent: any, surgevent: any) => void | Error);
-    typeFunction?: 'plv8' | 'sql';
+    typeFunction?: 'plv8' | 'sql' | 'plpgsql';
 
     CostruisceTrigger(nomeTabella: string) {
         let tmp = '';
