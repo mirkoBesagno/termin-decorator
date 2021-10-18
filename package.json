@@ -6,9 +6,6 @@
   "scripts": {
     "start-js": "node ./out/index.js",
     "start": "ts-node ./index.ts",
-    "start-esempio": "ts-node ./index-esempio.ts",
-    "start-esempio-connessione": "ts-node ./esempio-connessione.ts",
-    "start-esempio-knexjs": "ts-node ./esempi/esempio-knexjs.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:copy": "ts-node -T scripts/copyFiles.ts",
     "build:tsc": "tsc --build tsconfig.json",
@@ -22,6 +19,7 @@
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "eslint": "^7.22.0",
+    "http-proxy-middleware": "^2.0.1",
     "typescript": "^4.2.3"
   },
   "dependencies": {

@@ -15,6 +15,9 @@ import superagent from "superagent";
 import { ListaTerminaleParametro } from "../parametro/lista-parametro";
 import { ITestAPI } from "../test-funzionale/lista-test-funzionale";
 
+import { spawn } from "child_process";
+import { Main } from "../..";
+
 
 class MetodoEventi implements IMetodoEventi {
 
@@ -102,6 +105,9 @@ class MetodoParametri extends MetodoEventi implements IMetodoParametri {
     } */
 }
 class MetodoLimitazioni extends MetodoParametri implements IMetodoLimitazioni {
+
+    isSpawTrigger?: string;
+
     slow_down: OptSlowDows;
     rate_limit: OptRateLimit;
     cors: any;
@@ -137,6 +143,7 @@ class MetodoLimitazioni extends MetodoParametri implements IMetodoLimitazioni {
         this.cacheOptionMemory = { durationSecondi: 1 };
     }
     InitMetodoLimitazioni(init: IMetodoLimitazioni) {
+        if (init.isSpawTrigger) this.isSpawTrigger = init.isSpawTrigger;
         if (init.slow_down) this.slow_down = init.slow_down;
         if (init.rate_limit) this.rate_limit = init.rate_limit;
         if (init.cacheOptionMemory) this.cacheOptionMemory = init.cacheOptionMemory ?? { durationSecondi: 1 };
@@ -999,6 +1006,10 @@ class ArtefattoExpress {
                 if (tmp != undefined) {
                     if (metodo.onRispostaControllatePradefinita && ArtefattoExpress.VerificaPresenzaRispostaControllata(metodo, tmp) == false) {
                         const rispostaPilotata = await metodo.onRispostaControllatePradefinita(tmp)
+                        if (metodo.isSpawTrigger && this.VerificaPresenzaSpawnTrigger(metodo.isSpawTrigger, rispostaPilotata)) {
+                            console.log('è un evento scatenante dovrei avviare un nuovo processo.');
+
+                        }
                         Rispondi(res, rispostaPilotata, key, durationSecondi);
                         //throw new Error("Attenzione, cosa stai facendo?");
                     }
@@ -1007,6 +1018,22 @@ class ArtefattoExpress {
                             if (!ArtefattoExpress.VerificaTrigger(metodo, req)) {
                                 if (ArtefattoExpress.VerificaPresenzaRispostaControllata(metodo, tmp)) {
                                     tmp = await ArtefattoExpress.EseguiRispostaControllata(metodo, tmp);
+                                }
+                                try {
+                                    if (metodo.isSpawTrigger && this.VerificaPresenzaSpawnTrigger(metodo.isSpawTrigger, tmp)) {
+                                        if (tmp.body instanceof Object) {
+                                            const tt = (<any>tmp.body)[metodo.isSpawTrigger];
+                                            if (tt != undefined && tt != ''
+                                                && Main.vettoreProcessi.find(x => { x.nomeVariabile == metodo.isSpawTrigger && x.valoreValiabile == tt ? true : false }) == undefined) {
+                                                // const proc = spawn(`ts-node ${Main.pathExe} --port=0010`); //qui vado ad eseguire il processo in parallelo
+                                                const proc = spawn(`npm run start-esempio --port=9090`);
+                                                Main.vettoreProcessi.push({ porta: 0, nomeVariabile: metodo.isSpawTrigger, valoreValiabile: tt, processo: proc });
+
+                                            }
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.log(error);
                                 }
                                 Rispondi(res, tmp ?? ConstruisciErrore('Attenzione! Rimpiazzato.'), key, durationSecondi);
                             }
@@ -1304,6 +1331,20 @@ class ArtefattoExpress {
             }
         }
 
+        return false;
+    }
+
+    static VerificaPresenzaSpawnTrigger(item: string, res: IReturn) {
+        if (res.body instanceof Object) {
+            if (item in res.body) {
+                return true;
+            }
+        }
+
+        /*  for (let index = 0; index < Main.vettoreProcessi.length; index++) {
+             const element = Main.vettoreProcessi[index];
+             if(element.nomeVariabile)
+         } */
         return false;
     }
 

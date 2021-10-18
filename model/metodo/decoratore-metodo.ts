@@ -41,18 +41,22 @@ function decoratoreMetodoGenerico(listaParametri?: IParametro[], ...parametri: A
             IstanzaMetodo.ParametriMetodo(listaParametri, propertyKey.toString(), target.constructor.name);
         for (let index = 0; index < parametri.length; index++) {
             const element = parametri[index];
-            if (instanceOfIMetodoVettori(element)) {
-                IstanzaMetodo.Vettori(element, propertyKey.toString(), target.constructor.name, descriptor);
-            }
-            if (instanceOfIMetodoEventi(element)) {
-                IstanzaMetodo.Eventi(element, propertyKey.toString(), target.constructor.name, descriptor);
-            }
-            if (instanceOfIMetodoLimitazioni(element)) {
-                IstanzaMetodo.Limitazioni(element, propertyKey.toString(), target.constructor.name, descriptor);
-            }
-            if (instanceOfIMetodoParametri(element)) {
-                IstanzaMetodo.Parametri(element, propertyKey.toString(), target.constructor.name, -1, descriptor);
-            }
+            IstanzaMetodo.Vettori(<IMetodoVettori>element, propertyKey.toString(), target.constructor.name, descriptor);
+            IstanzaMetodo.Eventi(<IMetodoEventi>element, propertyKey.toString(), target.constructor.name, descriptor);
+            IstanzaMetodo.Limitazioni(<IMetodoLimitazioni>element, propertyKey.toString(), target.constructor.name, descriptor);
+            IstanzaMetodo.Parametri(<IMetodoParametri>element, propertyKey.toString(), target.constructor.name, -1, descriptor);
+            /*  if (instanceOfIMetodoVettori(element)) {
+                 IstanzaMetodo.Vettori(element, propertyKey.toString(), target.constructor.name, descriptor);
+             }
+             if (instanceOfIMetodoEventi(element)) {
+                 IstanzaMetodo.Eventi(element, propertyKey.toString(), target.constructor.name, descriptor);
+             }
+             if (instanceOfIMetodoLimitazioni(element)) {
+                 IstanzaMetodo.Limitazioni(element, propertyKey.toString(), target.constructor.name, descriptor);
+             }
+             if (instanceOfIMetodoParametri(element)) {
+                 IstanzaMetodo.Parametri(element, propertyKey.toString(), target.constructor.name, -1, descriptor);
+             } */
         }
         if (parametri == undefined || parametri.length == undefined || parametri.length == 0) {
             IstanzaMetodo.Semplice(propertyKey.toString(), target.constructor.name, descriptor);

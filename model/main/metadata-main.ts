@@ -33,6 +33,11 @@ import { Role, User } from "../postgres/role";
 
 
 export class Main implements IGestorePercorsiPath {
+
+    static vettoreProcessi: { porta: number, nomeVariabile: string, valoreValiabile: string, processo: any }[] = [];
+    static pathExe = '';
+
+
     percorsi: IRaccoltaPercorsi;
     path: string;
     serverExpressDecorato: express.Express;
@@ -50,6 +55,10 @@ export class Main implements IGestorePercorsiPath {
         else this.serverExpressDecorato = server;
         this.listaTerminaleClassi = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         this.listaTerminaleTest = Reflect.getMetadata(ListaTerminaleTest.nomeMetadataKeyTarget, targetTerminale);
+    }
+
+    InizializzaPathExe(item: string) {
+        Main.pathExe = item;
     }
 
     Inizializza(patheader: string, porta: number, rottaBase: boolean, creaFile?: boolean, pathDoveScrivereFile?: string) {
@@ -562,7 +571,7 @@ export class Main implements IGestorePercorsiPath {
                 }
             } for (let index = 0; index < query.length; index++) {
                 const element = query[index];
-                fs.mkdirSync(pathDoveScrivereFile + '/FileGenerati_MP/lista_query_'+new Date().toLocaleDateString(), { recursive: true });
+                fs.mkdirSync(pathDoveScrivereFile + '/FileGenerati_MP/lista_query_' + new Date().toLocaleDateString(), { recursive: true });
                 fs.writeFileSync(pathDoveScrivereFile + '/FileGenerati_MP/lista_query' + '/query_' + index, element);
             }
         } catch (error) {
