@@ -17,6 +17,8 @@ import { Client } from "pg";
 import superagent from "superagent";
 import { Role, User } from "../postgres/role";
 
+import { createProxyMiddleware } from "http-proxy-middleware";
+
 /* export class User {
     nome: string;
     option: {
@@ -36,7 +38,7 @@ export class Main implements IGestorePercorsiPath {
 
     static vettoreProcessi: { porta: number, nomeVariabile: string, valoreValiabile: string, processo: any }[] = [];
     static pathExe = '';
-
+    static isSottoProcesso = false;
 
     percorsi: IRaccoltaPercorsi;
     path: string;
@@ -61,8 +63,13 @@ export class Main implements IGestorePercorsiPath {
         Main.pathExe = item;
     }
 
-    Inizializza(patheader: string, porta: number, rottaBase: boolean, creaFile?: boolean, pathDoveScrivereFile?: string) {
+    Inizializza(patheader: string, porta: number, rottaBase: boolean, creaFile?: boolean,
+        pathDoveScrivereFile?: string, sottoprocesso?: boolean) {
         //const tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
+
+        if (sottoprocesso) {
+            Main.isSottoProcesso = sottoprocesso;
+        }
 
         const tmp = GetListaClasseMetaData();
 
@@ -73,8 +80,31 @@ export class Main implements IGestorePercorsiPath {
             const pathGlobal = '/' + this.path;
             this.percorsi.pathGlobal = pathGlobal;
 
+            const options = {
+                changeOrigin: true, // needed for virtual hosted sites
+                router: function (req: any) {
+                    if (Main.vettoreProcessi.length && Main.vettoreProcessi.length > 0) {
+                        for (let index = 0; index < Main.vettoreProcessi.length; index++) {
+                            const element = Main.vettoreProcessi[index];
+                            element.porta;
+                        }
+                        return {
+                            protocol: 'http:', // The : is required
+                            host: 'localhost',
+                            port: 8080
+                        };
+                    }
+                    else{
+                        //ciao
+                    }
+                }
+            };
+
+            const exampleProxy = createProxyMiddleware(options);
+
+            (<any>this.serverExpressDecorato).use(exampleProxy);
             (<any>this.serverExpressDecorato).use(express.json());
-            (<any>this.serverExpressDecorato).use(cookieParser())
+            (<any>this.serverExpressDecorato).use(cookieParser());
 
             tmp.ConfiguraListaRotteApplicazione(this.path, this.percorsi, this.serverExpressDecorato);
 
@@ -285,8 +315,58 @@ export class Main implements IGestorePercorsiPath {
 
     }
     StartHttpServer() {
-        this.httpServer.listen(this.percorsi.porta);
-        StartMonitoring();
+
+        try {
+            if (Main.vettoreProcessi.length > 0) {
+                let resto = true;
+                let tmp = 8080 + parseInt((Math.random() * (Math.random() * 10)).toString());
+                while (resto) {
+                    if (tmp > 9999) tmp = 5000;
+                    let esco = false;
+                    tmp = tmp + parseInt((Math.random() * (Math.random() * 10)).toString());
+                    for (let index = 0; index < Main.vettoreProcessi.length && esco == false; index++) {
+                        const element = Main.vettoreProcessi[index];
+                        if (element.porta == tmp) {
+                            esco = true;
+                        }
+                    }
+                    if (esco == false)
+                        resto = false;
+                }
+                this.percorsi.porta = tmp;
+                this.httpServer.listen(this.percorsi.porta);
+                StartMonitoring();
+            }
+            else {
+                this.httpServer.listen(this.percorsi.porta);
+                StartMonitoring();
+            }
+
+        } catch (error) {
+            if (Main.vettoreProcessi.length > 0) {
+                let resto = true;
+                let tmp = 8080 + parseInt((Math.random() * (Math.random() * 10)).toString());
+                while (resto) {
+                    if (tmp > 9999) tmp = 5000;
+                    let esco = false;
+                    tmp = tmp + parseInt((Math.random() * (Math.random() * 10)).toString());
+                    for (let index = 0; index < Main.vettoreProcessi.length && esco == false; index++) {
+                        const element = Main.vettoreProcessi[index];
+                        if (element.porta == tmp) {
+                            esco = true;
+                        }
+                    }
+                    if (esco == false)
+                        resto = false;
+                }
+                this.percorsi.porta = tmp;
+                this.httpServer.listen(this.percorsi.porta);
+                StartMonitoring();
+            }
+            else {
+                throw error;
+            }
+        }
     }
     StartExpress() {
 

@@ -15,7 +15,7 @@ import superagent from "superagent";
 import { ListaTerminaleParametro } from "../parametro/lista-parametro";
 import { ITestAPI } from "../test-funzionale/lista-test-funzionale";
 
-import { spawn } from "child_process";
+import { exec, spawn } from "child_process";
 import { Main } from "../..";
 
 
@@ -843,145 +843,177 @@ export class TerminaleMetodo
 
 class ArtefattoExpress {
     static async ConfiguraRotteSwitch(metodo: TerminaleMetodo, app: any, percorsoTmp: string, middlew: any[]) {
+
         let corsOptions = {};
         const apiRateLimiter = rateLimit(metodo.rate_limit);
         const apiSpeedLimiter = slowDown(metodo.slow_down);
-        //const csrfProtection = csrf({ cookie: true }) 
-        switch (metodo.tipo) {
-            case 'get':
-                (<IReturn>metodo.metodoAvviabile).body;
-                corsOptions = {
-                    methods: 'GET',
-                }
-                if (metodo.cors == undefined) {
-                    metodo.cors = cors(corsOptions);
-                }
-                if (metodo.helmet == undefined) {
-                    metodo.helmet = helmet();
-                }
-                app.get(percorsoTmp,
-                    metodo.cors,
-                    metodo.helmet,
-                    middlew,
-                    //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 , client: redisClient }),
-                    apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
-                    async (req: Request, res: Response) => {
-                        //console.log("GET");
-                        await ArtefattoExpress.ChiamataGenerica(metodo, req, res);
+
+        if (metodo.isSpawTrigger && Main.isSottoProcesso == true) {
+            //
+            (<IReturn>metodo.metodoAvviabile).body;
+            corsOptions = {
+                methods: 'GET',
+            }
+            if (metodo.cors == undefined) {
+                metodo.cors = cors(corsOptions);
+            }
+            if (metodo.helmet == undefined) {
+                metodo.helmet = helmet();
+            }
+            app.get(percorsoTmp,
+                metodo.cors,
+                metodo.helmet,
+                middlew,
+                //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 , client: redisClient }),
+                apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
+                async (req: Request, res: Response) => {
+                    //console.log("GET");
+                    res.statusCode = 999;
+                    res.send({
+                        dalleFondamentaConFurore: 'Hei? sei molto in basso ma non puoi scavare piu di cosi! Sei sicuro di stare ad andare nella direzione giusta?'
                     });
-                break;
-            case 'post':
-                corsOptions = {
-                    methods: 'POST'
-                }
-                if (metodo.helmet == undefined) {
-                    metodo.helmet = helmet();
-                }
-                if (metodo.cors == undefined) {
-                    metodo.cors = cors(corsOptions);
-                }
-                (<IReturn>metodo.metodoAvviabile).body;
-                app.post(percorsoTmp,
-                    metodo.cors,
-                    metodo.helmet,
-                    middlew,
-                    //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
-                    apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
-                    async (req: Request, res: Response) => {
-                        //console.log("POST");
-                        await ArtefattoExpress.ChiamataGenerica(metodo, req, res);
-                    });
-                break;
-            case 'delete':
-                (<IReturn>metodo.metodoAvviabile).body;
-                corsOptions = {
-                    methods: "DELETE"
-                }
-                if (metodo.helmet == undefined) {
-                    metodo.helmet = helmet();
-                }
-                if (metodo.cors == undefined) {
-                    metodo.cors = cors(corsOptions);
-                }
-                app.delete(percorsoTmp,
-                    metodo.cors,
-                    metodo.helmet,
-                    middlew,
-                    //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
-                    apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
-                    async (req: Request, res: Response) => {
-                        //console.log("DELETE");
-                        await ArtefattoExpress.ChiamataGenerica(metodo, req, res);
-                    });
-                break;
-            case 'patch':
-                corsOptions = {
-                    methods: "PATCH"
-                };
-                if (metodo.helmet == undefined) {
-                    metodo.helmet = helmet();
-                }
-                if (metodo.cors == undefined) {
-                    metodo.cors = cors(corsOptions);
-                }
-                (<IReturn>metodo.metodoAvviabile).body;
-                app.patch(percorsoTmp,
-                    metodo.cors,
-                    metodo.helmet,
-                    middlew,
-                    //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
-                    apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
-                    async (req: Request, res: Response) => {
-                        //console.log("PATCH");
-                        await ArtefattoExpress.ChiamataGenerica(metodo, req, res);
-                    });
-                break;
-            case 'purge':
-                corsOptions = {
-                    methods: "PURGE"
-                };
-                if (metodo.helmet == undefined) {
-                    metodo.helmet = helmet();
-                }
-                if (metodo.cors == undefined) {
-                    metodo.cors = cors(corsOptions);
-                }
-                (<IReturn>metodo.metodoAvviabile).body;
-                app.purge(percorsoTmp,
-                    metodo.cors,
-                    metodo.helmet,
-                    middlew,
-                    //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
-                    apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
-                    async (req: Request, res: Response) => {
-                        //console.log("PURGE");
-                        await ArtefattoExpress.ChiamataGenerica(metodo, req, res);
-                    });
-                break;
-            case 'put':
-                corsOptions = {
-                    methods: "PUT"
-                };
-                if (metodo.helmet == undefined) {
-                    metodo.helmet = helmet();
-                }
-                if (metodo.cors == undefined) {
-                    metodo.cors = cors(corsOptions);
-                }
-                (<IReturn>metodo.metodoAvviabile).body;
-                app.put(percorsoTmp,
-                    metodo.cors,
-                    metodo.helmet,
-                    middlew,
-                    //cacheMiddleware.route(metodo.cacheOptionRedis ?? {}),
-                    apiRateLimiter,
-                    apiSpeedLimiter,/*csrfProtection,*/
-                    async (req: Request, res: Response) => {
-                        //console.log("PUT");
-                        await ArtefattoExpress.ChiamataGenerica(metodo, req, res);
-                    });
-                break;
+                });
         }
+        else {
+            //
+            //const csrfProtection = csrf({ cookie: true }) 
+            switch (metodo.tipo) {
+                case 'get':
+                    (<IReturn>metodo.metodoAvviabile).body;
+                    corsOptions = {
+                        methods: 'GET',
+                    }
+                    if (metodo.cors == undefined) {
+                        metodo.cors = cors(corsOptions);
+                    }
+                    if (metodo.helmet == undefined) {
+                        metodo.helmet = helmet();
+                    }
+                    app.get(percorsoTmp,
+                        metodo.cors,
+                        metodo.helmet,
+                        middlew,
+                        //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 , client: redisClient }),
+                        apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
+                        async (req: Request, res: Response) => {
+                            //console.log("GET");
+                            await ArtefattoExpress.ChiamataGenerica(metodo, req, res);
+                        });
+                    break;
+                case 'post':
+                    corsOptions = {
+                        methods: 'POST'
+                    }
+                    if (metodo.helmet == undefined) {
+                        metodo.helmet = helmet();
+                    }
+                    if (metodo.cors == undefined) {
+                        metodo.cors = cors(corsOptions);
+                    }
+                    (<IReturn>metodo.metodoAvviabile).body;
+                    app.post(percorsoTmp,
+                        metodo.cors,
+                        metodo.helmet,
+                        middlew,
+                        //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
+                        apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
+                        async (req: Request, res: Response) => {
+                            //console.log("POST");
+                            await ArtefattoExpress.ChiamataGenerica(metodo, req, res);
+                        });
+                    break;
+                case 'delete':
+                    (<IReturn>metodo.metodoAvviabile).body;
+                    corsOptions = {
+                        methods: "DELETE"
+                    }
+                    if (metodo.helmet == undefined) {
+                        metodo.helmet = helmet();
+                    }
+                    if (metodo.cors == undefined) {
+                        metodo.cors = cors(corsOptions);
+                    }
+                    app.delete(percorsoTmp,
+                        metodo.cors,
+                        metodo.helmet,
+                        middlew,
+                        //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
+                        apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
+                        async (req: Request, res: Response) => {
+                            //console.log("DELETE");
+                            await ArtefattoExpress.ChiamataGenerica(metodo, req, res);
+                        });
+                    break;
+                case 'patch':
+                    corsOptions = {
+                        methods: "PATCH"
+                    };
+                    if (metodo.helmet == undefined) {
+                        metodo.helmet = helmet();
+                    }
+                    if (metodo.cors == undefined) {
+                        metodo.cors = cors(corsOptions);
+                    }
+                    (<IReturn>metodo.metodoAvviabile).body;
+                    app.patch(percorsoTmp,
+                        metodo.cors,
+                        metodo.helmet,
+                        middlew,
+                        //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
+                        apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
+                        async (req: Request, res: Response) => {
+                            //console.log("PATCH");
+                            await ArtefattoExpress.ChiamataGenerica(metodo, req, res);
+                        });
+                    break;
+                case 'purge':
+                    corsOptions = {
+                        methods: "PURGE"
+                    };
+                    if (metodo.helmet == undefined) {
+                        metodo.helmet = helmet();
+                    }
+                    if (metodo.cors == undefined) {
+                        metodo.cors = cors(corsOptions);
+                    }
+                    (<IReturn>metodo.metodoAvviabile).body;
+                    app.purge(percorsoTmp,
+                        metodo.cors,
+                        metodo.helmet,
+                        middlew,
+                        //cacheMiddleware.route(metodo.cacheOptionRedis ?? <OptionsCache>{ expire: 1 /* secondi */, client: redisClient }),
+                        apiRateLimiter, apiSpeedLimiter,/*csrfProtection,*/
+                        async (req: Request, res: Response) => {
+                            //console.log("PURGE");
+                            await ArtefattoExpress.ChiamataGenerica(metodo, req, res);
+                        });
+                    break;
+                case 'put':
+                    corsOptions = {
+                        methods: "PUT"
+                    };
+                    if (metodo.helmet == undefined) {
+                        metodo.helmet = helmet();
+                    }
+                    if (metodo.cors == undefined) {
+                        metodo.cors = cors(corsOptions);
+                    }
+                    (<IReturn>metodo.metodoAvviabile).body;
+                    app.put(percorsoTmp,
+                        metodo.cors,
+                        metodo.helmet,
+                        middlew,
+                        //cacheMiddleware.route(metodo.cacheOptionRedis ?? {}),
+                        apiRateLimiter,
+                        apiSpeedLimiter,/*csrfProtection,*/
+                        async (req: Request, res: Response) => {
+                            //console.log("PUT");
+                            await ArtefattoExpress.ChiamataGenerica(metodo, req, res);
+                        });
+                    break;
+            }
+        }
+
     }
 
     /**
@@ -1023,11 +1055,45 @@ class ArtefattoExpress {
                                     if (metodo.isSpawTrigger && this.VerificaPresenzaSpawnTrigger(metodo.isSpawTrigger, tmp)) {
                                         if (tmp.body instanceof Object) {
                                             const tt = (<any>tmp.body)[metodo.isSpawTrigger];
-                                            if (tt != undefined && tt != ''
-                                                && Main.vettoreProcessi.find(x => { x.nomeVariabile == metodo.isSpawTrigger && x.valoreValiabile == tt ? true : false }) == undefined) {
+                                            let t1 = false;
+                                            for (let index = 0; index < Main.vettoreProcessi.length && t1 == false; index++) {
+                                                const x = Main.vettoreProcessi[index];
+                                                if (String(x.nomeVariabile) == String(metodo.isSpawTrigger)
+                                                    && String(x.valoreValiabile) == String(tt)) {
+                                                    t1 = true;
+                                                }
+                                            }
+                                            if (tt != undefined && tt != '' && t1 == false) {
                                                 // const proc = spawn(`ts-node ${Main.pathExe} --port=0010`); //qui vado ad eseguire il processo in parallelo
-                                                const proc = spawn(`npm run start-esempio --port=9090`);
-                                                Main.vettoreProcessi.push({ porta: 0, nomeVariabile: metodo.isSpawTrigger, valoreValiabile: tt, processo: proc });
+                                                let porta = metodo.percorsi.porta;
+                                                try {
+                                                    if (Main.vettoreProcessi.length > 0) {
+                                                        if ('porta' in Main.vettoreProcessi[Main.vettoreProcessi.length - 1])
+                                                            porta = Main.vettoreProcessi[Main.vettoreProcessi.length - 1].porta + 1;
+                                                    }
+                                                    if (Main.vettoreProcessi.length == 0) {
+                                                        porta = porta + (Math.random() * 100 + 30) +
+                                                            (
+                                                                (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) +
+                                                                (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) -
+                                                                (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) +
+                                                                (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) -
+                                                                (Math.random() * 10 * Math.random() * 20 * Math.random() * 30)
+                                                            );
+                                                    }
+                                                } catch (error) {
+                                                    porta = porta + (Math.random() * 100 + 30) +
+                                                        (
+                                                            (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) +
+                                                            (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) -
+                                                            (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) +
+                                                            (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) -
+                                                            (Math.random() * 10 * Math.random() * 20 * Math.random() * 30)
+                                                        );
+                                                }
+                                                porta = Number(porta.toFixed(0));
+                                                const proc = exec(`node ./dist/index-esempio.js --porta=${porta}`); //exec(`npm run start-esempio`);
+                                                Main.vettoreProcessi.push({ porta: porta, nomeVariabile: metodo.isSpawTrigger, valoreValiabile: tt, processo: proc });
 
                                             }
                                         }
