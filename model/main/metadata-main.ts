@@ -38,6 +38,8 @@ export class Main implements IGestorePercorsiPath {
     serverExpressDecorato: express.Express;
     listaTerminaleClassi: ListaTerminaleClasse;
     listaTerminaleTest: ListaTerminaleTest;
+    listaRuoli?: Role[];
+    listaUser?: User[];
     httpServer: any;
 
 
@@ -81,8 +83,11 @@ export class Main implements IGestorePercorsiPath {
         const list = GetListaClasseMetaData();
         console.log('');
     }
-    InizializzaORM(/* client: Client */elencoQuery: string[], nomeDatabase?: string, listaRuoli?: Role[], listaUser?: User[]) {
+    InizializzaORM(/* client: Client */elencoQuery: string[], listaRuoli?: Role[], listaUser?: User[]) {
         const ritorno = '';
+        if (listaRuoli) this.listaRuoli = listaRuoli;
+        if (listaUser) this.listaUser = listaUser;
+
         elencoQuery.push(`CREATE EXTENSION plv8;`);
 
         elencoQuery.push(DropAllTable());
@@ -543,6 +548,23 @@ export class Main implements IGestorePercorsiPath {
                 }
             }
             fs.writeFileSync(pathDoveScrivereFile + '/FileGenerati_MP' + '/api', ritorno);
+        } catch (error) {
+            return ritorno;
+        }
+        ritorno = '';
+        try {
+            const query: string[] = [];
+            for (let index = 0; index < this.InizializzaORM(query, this.listaRuoli, this.listaUser).length; index++) {
+                const classe = this.listaTerminaleClassi[index];
+                for (let index = 0; index < classe.listaMetodi.length; index++) {
+                    const metodo = classe.listaMetodi[index];
+                    ritorno = ritorno + '' + metodo.PrintStruttura() + '';
+                }
+            } for (let index = 0; index < query.length; index++) {
+                const element = query[index];
+                fs.mkdirSync(pathDoveScrivereFile + '/FileGenerati_MP/lista_query_'+new Date().toLocaleDateString(), { recursive: true });
+                fs.writeFileSync(pathDoveScrivereFile + '/FileGenerati_MP/lista_query' + '/query_' + index, element);
+            }
         } catch (error) {
             return ritorno;
         }
