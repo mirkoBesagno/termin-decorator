@@ -17,6 +17,7 @@ import { ITestAPI } from "../test-funzionale/lista-test-funzionale";
 
 import { exec, spawn } from "child_process";
 import { Main } from "../..";
+import { ICache } from "../main/metadata-main";
 
 
 class MetodoEventi implements IMetodoEventi {
@@ -1032,7 +1033,7 @@ class ArtefattoExpress {
             //console.log('Inizio Chiamata generica per : ' + metodo.percorsi.pathGlobal);
             logIn = InizializzaLogbaseIn(req, metodo.nome.toString());
             if (metodo.onPrimaDiEseguire) req = await metodo.onPrimaDiEseguire(req);
-            const cachedBody = memorycache.get(key)
+            const cachedBody = key == undefined ? undefined : Main.cache.get<ICache>(key);
             if (cachedBody == undefined || cachedBody == null) {
                 tmp = await ArtefattoExpress.Esegui(metodo, req);
                 if (tmp != undefined) {

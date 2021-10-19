@@ -9,11 +9,9 @@ import os from "os";
 import { ListaTerminaleClasse } from "./classe/lista-classe";
 import { TerminaleClasse } from "./classe/metadata-classe";
 export const targetTerminale = { name: 'Terminale' };
-import memorycache from "memory-cache";
-import nodecache from "node-cache";
-const cache = new nodecache();
-import { ListaTerminaleParametro } from "..";
+import { ListaTerminaleParametro, Main } from "..";
 import { ITestAPI } from "./test-funzionale/lista-test-funzionale";
+import { ICache } from "./main/metadata-main";
 
 
 export interface IContieneRaccoltaPercorsi {
@@ -676,11 +674,8 @@ export function Rispondi(res: Response, item: IReturn, key?: string, durationSec
     res.send(item.body);
     if (key != undefined) {
         const tempo = (durationSecondi ?? 1);
-        cache.set(key, { body: item.body, stato: res.statusCode }, tempo * 1000);
-            memorycache.put(key, { body: item.body, stato: res.statusCode }, tempo * 1000);
+        Main.cache.set<ICache>(key, <ICache>{ body: item.body, stato: res.statusCode }, tempo * 1000);
     }
-    /* let key = '__express__' + url;
-    memorycache.put(key, body, ) */
 }
 
 export function ConstruisciErrore(messaggio: any): IReturn {

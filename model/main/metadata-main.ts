@@ -19,6 +19,10 @@ import { Role, User } from "../postgres/role";
 
 import { createProxyMiddleware } from "http-proxy-middleware";
 import httpProxy from "http-proxy";
+
+
+import nodecache from "node-cache";
+
 /* export class User {
     nome: string;
     option: {
@@ -33,9 +37,10 @@ import httpProxy from "http-proxy";
     }
 } */
 
+export interface ICache { body: object, stato: number }
 
 export class Main implements IGestorePercorsiPath {
-
+    static cache = new nodecache();
     static vettoreProcessi: { porta: number, nomeVariabile: string, valoreValiabile: string, processo: any }[] = [];
     static pathExe = '';
     static isSottoProcesso = false;
@@ -71,6 +76,15 @@ export class Main implements IGestorePercorsiPath {
 
         if (sottoprocesso) {
             Main.isSottoProcesso = sottoprocesso;
+
+
+            httpProxy.createServer({
+                target: {
+                    host: 'localhost',
+                    port: 8080
+                },
+            }).listen(8000);
+
         }
 
         const tmp = GetListaClasseMetaData();
@@ -341,35 +355,6 @@ export class Main implements IGestorePercorsiPath {
                 StartMonitoring();
             }
             else {
-                //
-                // Create your proxy server
-                //
-                /* httpProxy.createServer({
-                    target: {
-                        host: 'localhost',
-                        port: 8080
-                    },
-                }).listen(8000); */
-                if (Main.isSottoProcesso == false) {
-
-                    httpProxy.createServer({
-                        target: {
-                            host: 'localhost',
-                            port: 8080
-                        },
-                    }).listen(8000);
-                    /* const proxy = httpProxy.createProxyServer({});
-
-                    httpProxy.createServer({selfHandleResponse}).listen(8000); */
-
-                    /* 
-                        (req, res)=> {
-                        proxy.web(req, res, { target: 'http://mytarget.com:8080' });
-                    }
-                    */
-                }
-
-
                 this.httpServer.listen(this.percorsi.porta);
                 StartMonitoring();
             }
