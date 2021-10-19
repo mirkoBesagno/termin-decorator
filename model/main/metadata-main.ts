@@ -18,7 +18,7 @@ import superagent from "superagent";
 import { Role, User } from "../postgres/role";
 
 import { createProxyMiddleware } from "http-proxy-middleware";
-
+import httpProxy from "http-proxy";
 /* export class User {
     nome: string;
     option: {
@@ -48,6 +48,8 @@ export class Main implements IGestorePercorsiPath {
     listaRuoli?: Role[];
     listaUser?: User[];
     httpServer: any;
+
+    httpProxy: any;
 
 
     constructor(path: string, server?: express.Express) {
@@ -80,29 +82,30 @@ export class Main implements IGestorePercorsiPath {
             const pathGlobal = '/' + this.path;
             this.percorsi.pathGlobal = pathGlobal;
 
-            const options = {
-                changeOrigin: true, // needed for virtual hosted sites
-                router: function (req: any) {
-                    if (Main.vettoreProcessi.length && Main.vettoreProcessi.length > 0) {
-                        for (let index = 0; index < Main.vettoreProcessi.length; index++) {
-                            const element = Main.vettoreProcessi[index];
-                            element.porta;
-                        }
-                        return {
-                            protocol: 'http:', // The : is required
-                            host: 'localhost',
-                            port: 8080
-                        };
-                    }
-                    else{
-                        //ciao
-                    }
-                }
-            };
-
-            const exampleProxy = createProxyMiddleware(options);
-
-            (<any>this.serverExpressDecorato).use(exampleProxy);
+            /*  const options = {
+                 changeOrigin: true, // needed for virtual hosted sites
+                 router: function (req: any) {
+                     if (Main.vettoreProcessi.length && Main.vettoreProcessi.length > 0) {
+                         for (let index = 0; index < Main.vettoreProcessi.length; index++) {
+                             const element = Main.vettoreProcessi[index];
+                             element.porta;
+                         }
+                         return {
+                             protocol: 'http:', // The : is required
+                             host: 'localhost',
+                             port: 8080
+                         };
+                     }
+                     else {
+                         //ciao
+                         console.log('da qui sono passato.');
+                     }
+                 }
+             };
+ 
+             const exampleProxy = createProxyMiddleware(options);
+ 
+             (<any>this.serverExpressDecorato).use(exampleProxy); */
             (<any>this.serverExpressDecorato).use(express.json());
             (<any>this.serverExpressDecorato).use(cookieParser());
 
@@ -253,7 +256,7 @@ export class Main implements IGestorePercorsiPath {
         let ritorno = '';
         for (let index = 0; index < item.length; index++) {
             const element = item[index];
-            if (index + 1 < item.length) ritorno = ritorno + ', ' + element;
+            if (index + 1 <= item.length && index != 0) ritorno = ritorno + ', ' + element;
             else ritorno = ritorno + ' ' + element;
         }
         return ritorno;
@@ -338,6 +341,35 @@ export class Main implements IGestorePercorsiPath {
                 StartMonitoring();
             }
             else {
+                //
+                // Create your proxy server
+                //
+                /* httpProxy.createServer({
+                    target: {
+                        host: 'localhost',
+                        port: 8080
+                    },
+                }).listen(8000); */
+                if (Main.isSottoProcesso == false) {
+
+                    httpProxy.createServer({
+                        target: {
+                            host: 'localhost',
+                            port: 8080
+                        },
+                    }).listen(8000);
+                    /* const proxy = httpProxy.createProxyServer({});
+
+                    httpProxy.createServer({selfHandleResponse}).listen(8000); */
+
+                    /* 
+                        (req, res)=> {
+                        proxy.web(req, res, { target: 'http://mytarget.com:8080' });
+                    }
+                    */
+                }
+
+
                 this.httpServer.listen(this.percorsi.porta);
                 StartMonitoring();
             }
@@ -374,7 +406,7 @@ export class Main implements IGestorePercorsiPath {
         /* this.serverExpressDecorato.use(function (req, res) {
             res.send(404);
         });
-
+    
         this.serverExpressDecorato.all('*', function (req, res) {
             res.redirect('/');
         }); */
@@ -501,7 +533,7 @@ export class Main implements IGestorePercorsiPath {
         }));
         // Setting template Engine
         this.serverExpressDecorato.set('view engine', 'hbs');
-
+    
         // routes
         this.serverExpressDecorato.get('/', (req, res) => {
             res.render('home', { msg: 'This is home page' });

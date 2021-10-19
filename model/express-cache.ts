@@ -27,13 +27,16 @@ export const cacheMiddleware = expressRedisCache({ client: redisClient, expire: 
 
 */
 
-import { sha1 } from "object-hash";
+import crypto from "crypto";
 
 export function CalcolaChiaveMemoryCache(req: Request) {
+    const keySHA = 'Besagno'
+
     const tmp = '-' + JSON.stringify(req.body) + '-' + JSON.stringify(req.header) + '-' + JSON.stringify(req.query) + '-';
-    const tmpmd = sha1((tmp));
-    const key = '__express__' + req.url + '__MP__' + tmpmd + '__';
-    return key;
+    const tmpmd = crypto.createHmac('sha1', keySHA)
+        .update(tmp);
+    const ritorno = '__express__' + req.url + '__MP__' + tmpmd + '__';
+    return ritorno;
 }
 /* 
 export const memoCache = (durationSecondi: number) => {
