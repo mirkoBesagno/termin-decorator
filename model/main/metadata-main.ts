@@ -1,4 +1,4 @@
-import { GetListaClasseMetaData, IGestorePercorsiPath, IRaccoltaPercorsi, SalvaListaClasseMetaData, targetTerminale } from "../utility";
+import { GetListaClasseMetaData, IGestorePercorsiPath, IRaccoltaPercorsi, ISpawTrigger, SalvaListaClasseMetaData, targetTerminale } from "../utility";
 
 import { ListaTerminaleClasse } from "../classe/lista-classe";
 
@@ -17,7 +17,6 @@ import { Client } from "pg";
 import superagent from "superagent";
 import { Role, User } from "../postgres/role";
 
-import { createProxyMiddleware } from "http-proxy-middleware";
 import httpProxy from "http-proxy";
 
 
@@ -41,10 +40,14 @@ export interface ICache { body: object, stato: number }
 
 export class Main implements IGestorePercorsiPath {
     static cache = new nodecache();
-    static vettoreProcessi: { porta: number, nomeVariabile: string, valoreValiabile: string, processo: any }[] = [];
-    static pathExe = '';
+    static proxyServer: any;
+    static portaProxy = 8080;
+    static portaProcesso = 8081;
+    static vettoreProcessi: { porta: number, nomeVariabile: string, valoreValiabile: string, vettorePossibiliPosizioni: ISpawTrigger[], processo: any }[] = [];
+    static pathExe = './dist/index-esempio.js --porta=';
     static isSottoProcesso = false;
 
+    /* isMultiProcesso = false; */
     percorsi: IRaccoltaPercorsi;
     path: string;
     serverExpressDecorato: express.Express;
@@ -57,7 +60,11 @@ export class Main implements IGestorePercorsiPath {
     httpProxy: any;
 
 
-    constructor(path: string, server?: express.Express) {
+    constructor(path: string, server?: express.Express, isMultiProcesso?: boolean) {
+        if (isMultiProcesso) {
+            Main.isSottoProcesso = isMultiProcesso;
+            //this.isMultiProcesso = isMultiProcesso;
+        }
         this.path = path;
         this.percorsi = { pathGlobal: "", patheader: "", porta: 0 };
         if (server == undefined) this.serverExpressDecorato = express();
@@ -74,19 +81,6 @@ export class Main implements IGestorePercorsiPath {
         pathDoveScrivereFile?: string, sottoprocesso?: boolean) {
         //const tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
 
-        if (sottoprocesso) {
-            Main.isSottoProcesso = sottoprocesso;
-
-
-            httpProxy.createServer({
-                target: {
-                    host: 'localhost',
-                    port: 8080
-                },
-            }).listen(8000);
-
-        }
-
         const tmp = GetListaClasseMetaData();
 
         console.log('');
@@ -96,30 +90,6 @@ export class Main implements IGestorePercorsiPath {
             const pathGlobal = '/' + this.path;
             this.percorsi.pathGlobal = pathGlobal;
 
-            /*  const options = {
-                 changeOrigin: true, // needed for virtual hosted sites
-                 router: function (req: any) {
-                     if (Main.vettoreProcessi.length && Main.vettoreProcessi.length > 0) {
-                         for (let index = 0; index < Main.vettoreProcessi.length; index++) {
-                             const element = Main.vettoreProcessi[index];
-                             element.porta;
-                         }
-                         return {
-                             protocol: 'http:', // The : is required
-                             host: 'localhost',
-                             port: 8080
-                         };
-                     }
-                     else {
-                         //ciao
-                         console.log('da qui sono passato.');
-                     }
-                 }
-             };
- 
-             const exampleProxy = createProxyMiddleware(options);
- 
-             (<any>this.serverExpressDecorato).use(exampleProxy); */
             (<any>this.serverExpressDecorato).use(express.json());
             (<any>this.serverExpressDecorato).use(cookieParser());
 
@@ -335,8 +305,10 @@ export class Main implements IGestorePercorsiPath {
 
         try {
             if (Main.vettoreProcessi.length > 0) {
+                /* qui non arrivero mai! Perche il processo che viene avviato è un processo figlio, 
+                questo vuol dire che sara con una porta gia definita */
                 let resto = true;
-                let tmp = 8080 + parseInt((Math.random() * (Math.random() * 10)).toString());
+                let tmp = this.percorsi.porta + parseInt((Math.random() * (Math.random() * 10)).toString());
                 while (resto) {
                     if (tmp > 9999) tmp = 5000;
                     let esco = false;
@@ -355,14 +327,68 @@ export class Main implements IGestorePercorsiPath {
                 StartMonitoring();
             }
             else {
-                this.httpServer.listen(this.percorsi.porta);
-                StartMonitoring();
-            }
+                if (Main.isSottoProcesso == true) {
+                    this.httpServer.listen(this.percorsi.porta);
+                } else {
+                    Main.portaProxy = this.percorsi.porta;
+                    Main.portaProcesso = this.percorsi.porta + 1;
+                    this.httpServer.listen(Main.portaProcesso);
+                    StartMonitoring();
+                    /*  */
+                    const proxy = httpProxy.createProxyServer();
+                    //httpProxy.createProxyServer({ target: 'http://localhost:3001' }).listen(3333);
 
+                    Main.proxyServer = http.createServer(function (req, res) {
+                        // You can define here your custom logic to handle the request
+                        // and then proxy the request.
+                        const variabileValore = '1';
+                        let esco = false;
+                        for (let index = 0; index < Main.vettoreProcessi.length && esco == false; index++) {
+                            const processo = Main.vettoreProcessi[index];
+
+                            processo.vettorePossibiliPosizioni;
+                            /*  */
+                            //devo estrarre il dato per poterlo verificare con la variabile
+                            let ritorno: any | undefined = undefined;
+
+                            for (let index = 0; index < processo.vettorePossibiliPosizioni.length && esco == false; index++) {
+                                const element = processo.vettorePossibiliPosizioni[index];
+                                /* if (richiesta..body[element.nome] != undefined && element.posizione == 'body') {
+                                    tmp = richiesta.body[element.nome];
+                                }
+                                else if (richiesta.query[element.nome] != undefined && element.posizione == 'query') {
+                                    tmp = richiesta.query[element.nome];
+                                }
+                                else */ if (req.headers[element.nome] != undefined && element.posizione == 'header') {
+                                    ritorno = req.headers[element.nome];
+                                    if (processo.valoreValiabile == req.headers[element.nome]) {
+                                        res.setHeader("proxy", "->http://localhost:" + processo.porta);
+                                        proxy.web(req, res, { target: 'http://localhost:' + processo.porta });
+                                        esco = true;
+                                    }
+                                }
+                            }
+                            /*  */
+
+                            /* if (element.valoreValiabile == variabileValore) {
+                                res.setHeader("proxy", "->http://localhost:" + element.porta);
+                                proxy.web(req, res, { target: 'http://localhost:' + element.porta });
+                                esco = true;
+                            } */
+                        }
+                        if (esco == false) {
+                            res.setHeader("proxy", "->http://localhost:" + Main.portaProcesso);
+                            proxy.web(req, res, { target: 'http://localhost:' + Main.portaProcesso });
+                        }
+                    });
+                    Main.proxyServer.listen(Main.portaProxy);
+                    /*  */
+                }
+            }
         } catch (error) {
             if (Main.vettoreProcessi.length > 0) {
                 let resto = true;
-                let tmp = 8080 + parseInt((Math.random() * (Math.random() * 10)).toString());
+                let tmp = this.percorsi.porta + parseInt((Math.random() * (Math.random() * 10)).toString());
                 while (resto) {
                     if (tmp > 9999) tmp = 5000;
                     let esco = false;
@@ -385,22 +411,24 @@ export class Main implements IGestorePercorsiPath {
             }
         }
     }
-    StartExpress() {
 
+    EstraiParametriDaRequest(richiesta: http.IncomingMessage, possibiliPosizioni: ISpawTrigger[]) {
+        let ritorno: any | undefined = undefined;
 
-        /* this.serverExpressDecorato.use(function (req, res) {
-            res.send(404);
-        });
-    
-        this.serverExpressDecorato.all('*', function (req, res) {
-            res.redirect('/');
-        }); */
-
-        //
-
-        this.serverExpressDecorato.listen(this.percorsi.porta)
-
-        StartMonitoring();
+        for (let index = 0; index < possibiliPosizioni.length; index++) {
+            const element = possibiliPosizioni[index];
+            element.nome
+            /* if (richiesta..body[element.nome] != undefined && element.posizione == 'body') {
+                tmp = richiesta.body[element.nome];
+            }
+            else if (richiesta.query[element.nome] != undefined && element.posizione == 'query') {
+                tmp = richiesta.query[element.nome];
+            }
+            else */ if (richiesta.headers[element.nome] != undefined && element.posizione == 'header') {
+                ritorno = richiesta.headers[element.nome];
+            }
+        }
+        return ritorno;
     }
     async StartTest(numeroRootTest?: number) {
 

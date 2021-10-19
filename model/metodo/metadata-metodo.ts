@@ -1,4 +1,4 @@
-import { ConstruisciErrore, ErroreMio, IClasseRiferimento, IContieneRaccoltaPercorsi, IDescrivibile, IHtml, IMetodo, IMetodoEventi, IMetodoLimitazioni, IMetodoParametri, IMetodoVettori, InizializzaLogbaseIn, InizializzaLogbaseOut, IParametriEstratti, IRaccoltaPercorsi, IReturn, IRitornoValidatore, IsJsonString, Rispondi, Risposta, RispostaControllo, SalvaListaClasseMetaData, SanificatoreCampo, SostituisciRicorsivo, tipo, TypeInterazone, TypeMetod, TypePosizione } from "../utility";
+import { ConstruisciErrore, ErroreMio, IClasseRiferimento, IContieneRaccoltaPercorsi, IDescrivibile, IHtml, IMetodo, IMetodoEventi, IMetodoLimitazioni, IMetodoParametri, IMetodoVettori, InizializzaLogbaseIn, InizializzaLogbaseOut, IParametriEstratti, IRaccoltaPercorsi, IReturn, IRitornoValidatore, IsJsonString, ISpawTrigger, Rispondi, Risposta, RispostaControllo, SalvaListaClasseMetaData, SanificatoreCampo, SostituisciRicorsivo, tipo, TypeInterazone, TypeMetod, TypePosizione } from "../utility";
 
 import slowDown, { Options as OptSlowDows } from "express-slow-down";
 import rateLimit, { Options as OptRateLimit } from "express-rate-limit";
@@ -6,7 +6,7 @@ import { CalcolaChiaveMemoryCache } from "../express-cache";
 import { NextFunction, Request, Response } from "express";
 import helmet from "helmet";
 import cors from 'cors';
-import memorycache from "memory-cache";
+//import memorycache from "memory-cache";
 import { TerminaleParametro } from "../parametro/metadata-parametro";
 import { ListaTerminaleClasse } from "../classe/lista-classe";
 
@@ -108,6 +108,7 @@ class MetodoParametri extends MetodoEventi implements IMetodoParametri {
 class MetodoLimitazioni extends MetodoParametri implements IMetodoLimitazioni {
 
     isSpawTrigger?: string;
+    checkSpawTrigger?: ISpawTrigger[];
 
     slow_down: OptSlowDows;
     rate_limit: OptRateLimit;
@@ -144,6 +145,7 @@ class MetodoLimitazioni extends MetodoParametri implements IMetodoLimitazioni {
         this.cacheOptionMemory = { durationSecondi: 1 };
     }
     InitMetodoLimitazioni(init: IMetodoLimitazioni) {
+        if (init.checkSpawTrigger) this.checkSpawTrigger = init.checkSpawTrigger;
         if (init.isSpawTrigger) this.isSpawTrigger = init.isSpawTrigger;
         if (init.slow_down) this.slow_down = init.slow_down;
         if (init.rate_limit) this.rate_limit = init.rate_limit;
@@ -1039,10 +1041,10 @@ class ArtefattoExpress {
                 if (tmp != undefined) {
                     if (metodo.onRispostaControllatePradefinita && ArtefattoExpress.VerificaPresenzaRispostaControllata(metodo, tmp) == false) {
                         const rispostaPilotata = await metodo.onRispostaControllatePradefinita(tmp)
-                        if (metodo.isSpawTrigger && this.VerificaPresenzaSpawnTrigger(metodo.isSpawTrigger, rispostaPilotata)) {
+                        /* if (metodo.isSpawTrigger && this.VerificaPresenzaSpawnTrigger(metodo.isSpawTrigger, rispostaPilotata)) {
                             console.log('è un evento scatenante dovrei avviare un nuovo processo.');
 
-                        }
+                        } */
                         Rispondi(res, rispostaPilotata, key, durationSecondi);
                         //throw new Error("Attenzione, cosa stai facendo?");
                     }
@@ -1065,8 +1067,7 @@ class ArtefattoExpress {
                                                 }
                                             }
                                             if (tt != undefined && tt != '' && t1 == false) {
-                                                // const proc = spawn(`ts-node ${Main.pathExe} --port=0010`); //qui vado ad eseguire il processo in parallelo
-                                                let porta = metodo.percorsi.porta;
+                                                let porta = metodo.percorsi.porta + 2;
                                                 try {
                                                     if (Main.vettoreProcessi.length > 0) {
                                                         if ('porta' in Main.vettoreProcessi[Main.vettoreProcessi.length - 1])
@@ -1077,9 +1078,9 @@ class ArtefattoExpress {
                                                             (
                                                                 (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) +
                                                                 (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) -
-                                                                (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) +
+                                                                (Math.random() * 10 * Math.random() * 20 * Math.random() * 10) +
                                                                 (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) -
-                                                                (Math.random() * 10 * Math.random() * 20 * Math.random() * 30)
+                                                                (Math.random() * 10 * Math.random() * 20 * Math.random() * 5)
                                                             );
                                                     }
                                                 } catch (error) {
@@ -1087,14 +1088,14 @@ class ArtefattoExpress {
                                                         (
                                                             (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) +
                                                             (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) -
-                                                            (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) +
+                                                            (Math.random() * 10 * Math.random() * 20 * Math.random() * 10) +
                                                             (Math.random() * 10 * Math.random() * 20 * Math.random() * 30) -
-                                                            (Math.random() * 10 * Math.random() * 20 * Math.random() * 30)
+                                                            (Math.random() * 10 * Math.random() * 20 * Math.random() * 5)
                                                         );
                                                 }
                                                 porta = Number(porta.toFixed(0));
-                                                const proc = exec(`node ./dist/index-esempio.js --porta=${porta}`); //exec(`npm run start-esempio`);
-                                                Main.vettoreProcessi.push({ porta: porta, nomeVariabile: metodo.isSpawTrigger, valoreValiabile: tt, processo: proc });
+                                                const proc = exec(`node ${Main.pathExe}${porta}`); //exec(`npm run start-esempio`);
+                                                Main.vettoreProcessi.push({ porta: porta, nomeVariabile: metodo.isSpawTrigger, valoreValiabile: tt, vettorePossibiliPosizioni: metodo.checkSpawTrigger ?? [], processo: proc });
 
                                             }
                                         }
@@ -1139,6 +1140,7 @@ class ArtefattoExpress {
             else {
                 const parametri = metodo.listaParametri.EstraiParametriDaRequest(req);
                 let valido: IRitornoValidatore | undefined | void = undefined;
+                res.setHeader("specchio", "riflesso");
                 if (metodo.Validatore) {
                     valido = metodo.Validatore(parametri, metodo.listaParametri) ?? undefined;
                     if (valido && valido?.approvato == true && metodo.Istanziatore) {

@@ -31,10 +31,13 @@ import crypto from "crypto";
 
 export function CalcolaChiaveMemoryCache(req: Request) {
     const keySHA = 'Besagno'
+    const headerTmp = req.headers['authorization'] != undefined ? String(req.headers['authorization']) : JSON.stringify({
+        "Aauthorization9X": "10"
+    })
 
-    const tmp = '-' + JSON.stringify(req.body) + '-' + JSON.stringify(req.header) + '-' + JSON.stringify(req.query) + '-';
+    const tmp = '-' + JSON.stringify(req.body) + '-' + headerTmp + '-' + JSON.stringify(req.query) + '-';
     const tmpmd = crypto.createHmac('sha1', keySHA)
-        .update(tmp);
+        .update(tmp).digest('hex');
     const ritorno = '__express__' + req.url + '__MP__' + tmpmd + '__';
     return ritorno;
 }

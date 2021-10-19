@@ -389,8 +389,13 @@ export interface IMetodoEventi {
 
     onPrimaDiEseguire?: (req: Request) => Request | Promise<Request>;
 }
+export interface ISpawTrigger {
+    nome: string,
+    posizione: TypePosizione
+}
 export interface IMetodoLimitazioni {
     isSpawTrigger?: string;
+    checkSpawTrigger?: ISpawTrigger[];
     slow_down?: OptSlowDows;
     rate_limit?: OptRateLimit;
     cors?: any;
@@ -674,7 +679,7 @@ export function Rispondi(res: Response, item: IReturn, key?: string, durationSec
     res.send(item.body);
     if (key != undefined) {
         const tempo = (durationSecondi ?? 1);
-        Main.cache.set<ICache>(key, <ICache>{ body: item.body, stato: res.statusCode }, tempo * 1000);
+        Main.cache.set<ICache>(key, <ICache>{ body: item.body, stato: res.statusCode }, tempo /* * 1000 */);
     }
 }
 
