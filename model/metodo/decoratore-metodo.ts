@@ -13,11 +13,11 @@
  * @returns 
  */
 
-import { IMetodo, IMetodoEventi, IMetodoLimitazioni, IMetodoParametri, IMetodoVettori, instanceOfIMetodoEventi, instanceOfIMetodoLimitazioni, instanceOfIMetodoParametri, instanceOfIMetodoVettori, IParametro, RispostaControllo } from "../utility";
+import { IMetodo, IMetodoEventi, IMetodoLimitazioni, IMetodoParametri, IMetodoVettori, IParametro, RispostaControllo } from "../utility";
 import { IstanzaMetodo } from "./istanza-metodo";
-import slowDown, { Options as OptSlowDows } from "express-slow-down";
-import rateLimit, { Options as OptRateLimit } from "express-rate-limit";
-import { TerminaleParametro } from "../parametro/metadata-parametro";
+import { Options as OptSlowDows } from "express-slow-down";
+import { Options as OptRateLimit } from "express-rate-limit";
+
 
 /* function decoratoreMetodo(parametri:IMetodoParametri, eventi:IMetodoEventi, limitazioni:IMetodoLimitazioni, vettori:IMetodoVettori) */
 function decoratoreMetodo(parametri: IMetodo,

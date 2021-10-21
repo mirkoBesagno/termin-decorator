@@ -1,22 +1,25 @@
 
 import { Main } from "./model/main/metadata-main";
 import { mpClas } from "./model/classe/decoratore-classe";
-import { mpMet, mpMetGen } from "./model/metodo/decoratore-metodo";
+import { mpMetGen } from "./model/metodo/decoratore-metodo";
 import { mpPar } from "./model/parametro/decoratore-parametro";
-import { IRitornoValidatore, ILogbase, IParametriEstratti } from "./model/utility";
-import { ListaTerminaleParametro } from './model/parametro/lista-parametro'; 
+import { IRitornoValidatore, ILogbase, IParametriEstratti, ErroreMio, GestioneErrore, IConnectionOption } from "./model/utility";
+import { ListaTerminaleParametro } from './model/parametro/lista-parametro';
 import { mpProp } from "./model/proprieta/decoratore-proprieta";
 
 import "reflect-metadata";
-
+export { IConnectionOption as IConnectionOption };
 export { Main as Main };
-export { mpMet as mpMet };
-export { mpMetGen as mpMetGen };
+/* export { mpMet as mpMet }; */
+/* export { mpMetGen as mpMetGen }; */
+export { mpMetGen as mpMet };
 export { mpPar as mpPar };
 export { mpClas as mpClas };
-export { mpProp as mpProp} 
- 
-export { IRitornoValidatore as IRitornoValidatore }; 
+export { mpProp as mpProp }
+
+export { ErroreMio as ErroreMio };
+export { IRitornoValidatore as IRitornoValidatore };
+export { GestioneErrore as GestioneErrore };
 
 export { IParametriEstratti as IParametriEstratti };
 export { ListaTerminaleParametro as ListaTerminaleParametro };

@@ -1,4 +1,4 @@
-import { GetListaClasseMetaData, IGestorePercorsiPath, IRaccoltaPercorsi, ISpawTrigger, SalvaListaClasseMetaData, targetTerminale } from "../utility";
+import { EseguiQueryControllata, GetListaClasseMetaData, IConnectionOption, IGestorePercorsiPath, IRaccoltaPercorsi, ISpawTrigger, ReturnQueryControllata, SalvaListaClasseMetaData, targetTerminale } from "../utility";
 
 import { ListaTerminaleClasse } from "../classe/lista-classe";
 
@@ -9,10 +9,9 @@ import swaggerUI from "swagger-ui-express";
 import * as http from 'http';
 import { ITestAPI, ListaTerminaleTest, ListaTerminaleTestAPI } from "../test-funzionale/lista-test-funzionale";
 import { GetListaTestAPIMetaData, GetListaTestMetaData, IReturnTest, ITest, SalvaListaTestAPIMetaData, SalvaListaTestMetaData } from "../test-funzionale/utility-test-funzionale";
-import { TerminaleTest, TerminaleTestAPI } from "../test-funzionale/metadata-test-funzionale";
+import { TerminaleTest } from "../test-funzionale/metadata-test-funzionale";
 import { StartMonitoring } from "./utility-main";
-import { CreateDataBase, DropAllTable, DropDataBase, EseguiQueryControllata, TriggerUpdate_updated_at_column } from "../postgres/tabella";
-import { Client } from "pg";
+import { DropAllTable, TriggerUpdate_updated_at_column } from "../postgres/tabella";
 
 import superagent from "superagent";
 import { Role, User } from "../postgres/role";
@@ -40,6 +39,7 @@ export interface ICache { body: object, stato: number }
 
 export class Main implements IGestorePercorsiPath {
     static cache = new nodecache();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static proxyServer: any;
     static portaProxy = 8080;
     static portaProcesso = 8081;
@@ -55,8 +55,10 @@ export class Main implements IGestorePercorsiPath {
     listaTerminaleTest: ListaTerminaleTest;
     listaRuoli?: Role[];
     listaUser?: User[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     httpServer: any;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     httpProxy: any;
 
 
@@ -73,16 +75,15 @@ export class Main implements IGestorePercorsiPath {
         this.listaTerminaleTest = Reflect.getMetadata(ListaTerminaleTest.nomeMetadataKeyTarget, targetTerminale);
     }
 
-    InizializzaPathExe(item: string) {
+    InizializzaPathExe(item: string): void {
         Main.pathExe = item;
     }
 
-    Inizializza(patheader: string, porta: number, rottaBase: boolean, creaFile?: boolean,
-        pathDoveScrivereFile?: string, sottoprocesso?: boolean) {
+    Inizializza(patheader: string, porta: number, /* rottaBase: boolean, creaFile?: boolean, */
+        pathDoveScrivereFile?: string, sottoprocesso?: boolean): void {
         //const tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
-
+        if (sottoprocesso) Main.isSottoProcesso = sottoprocesso
         const tmp = GetListaClasseMetaData();
-
         console.log('');
         if (tmp.length > 0) {
             this.percorsi.patheader = patheader;
@@ -90,8 +91,8 @@ export class Main implements IGestorePercorsiPath {
             const pathGlobal = '/' + this.path;
             this.percorsi.pathGlobal = pathGlobal;
 
-            (<any>this.serverExpressDecorato).use(express.json());
-            (<any>this.serverExpressDecorato).use(cookieParser());
+            (this.serverExpressDecorato).use(express.json());
+            (this.serverExpressDecorato).use(cookieParser());
 
             tmp.ConfiguraListaRotteApplicazione(this.path, this.percorsi, this.serverExpressDecorato);
 
@@ -106,10 +107,10 @@ export class Main implements IGestorePercorsiPath {
             console.log("Attenzione non vi sono rotte e quantaltro.");
         }
 
-        const list = GetListaClasseMetaData();
+        //const list = GetListaClasseMetaData();
         console.log('');
     }
-    InizializzaORM(/* client: Client */elencoQuery: string[], listaRuoli?: Role[], listaUser?: User[]) {
+    InizializzaORM(/* client: Client */elencoQuery: string[], listaRuoli?: Role[], listaUser?: User[]): string {
         const ritorno = '';
         if (listaRuoli) this.listaRuoli = listaRuoli;
         if (listaUser) this.listaUser = listaUser;
@@ -145,8 +146,12 @@ export class Main implements IGestorePercorsiPath {
         this.InizializzaUserGrantGenerale(elencoQuery, listaUser);
         return ritorno;
     }
+    async EseguiListaQuery(clientConnection: IConnectionOption, querys: string[]): Promise<ReturnQueryControllata[]> {
+        const tmp = await EseguiQueryControllata(clientConnection, querys);
+        return tmp;
+    }
 
-    InizializzaRuoli(/* client: Client */elencoQuery: string[], listaRuoli?: Role[]) {
+    private InizializzaRuoli(/* client: Client */elencoQuery: string[], listaRuoli?: Role[]) {
         let ritornoTmp = '';
         if (listaRuoli) {
             for (let index = 0; index < listaRuoli.length; index++) {
@@ -170,7 +175,7 @@ export class Main implements IGestorePercorsiPath {
         }
         return ritornoTmp;
     }
-    InizializzaRuoliGrantGenerale(/* client: Client */elencoQuery: string[], listaRuoli?: Role[]) {
+    private InizializzaRuoliGrantGenerale(/* client: Client */elencoQuery: string[], listaRuoli?: Role[]) {
         let ritornoTmp = '';
         if (listaRuoli) {
             for (let index = 0; index < listaRuoli.length; index++) {
@@ -188,7 +193,7 @@ export class Main implements IGestorePercorsiPath {
         }
         return ritornoTmp;
     }
-    InizializzaUser(/* client: Client */elencoQuery: string[], listaUser?: User[]) {
+    private InizializzaUser(/* client: Client */elencoQuery: string[], listaUser?: User[]) {
         let ritornoTmp = '';
         if (listaUser) {
             for (let index = 0; index < listaUser.length; index++) {
@@ -216,7 +221,7 @@ export class Main implements IGestorePercorsiPath {
         }
         return ritornoTmp;
     }
-    InizializzaUserGrantGenerale(/* client: Client */elencoQuery: string[], listaUser?: User[]) {
+    private InizializzaUserGrantGenerale(/* client: Client */elencoQuery: string[], listaUser?: User[]) {
         let ritornoTmp = '';
         if (listaUser) {
             for (let index = 0; index < listaUser.length; index++) {
@@ -236,7 +241,7 @@ export class Main implements IGestorePercorsiPath {
         }
         return ritornoTmp;
     }
-    CostruisciRuoli(item: string[]) {
+    private CostruisciRuoli(item: string[]) {
         let ritorno = '';
         for (let index = 0; index < item.length; index++) {
             const element = item[index];
@@ -246,7 +251,7 @@ export class Main implements IGestorePercorsiPath {
         return ritorno;
     }
 
-    async StartTestAPI() {
+    async StartTestAPI(): Promise<void> {
         const tmp: ListaTerminaleTestAPI = GetListaTestAPIMetaData();
         tmp.sort((x: ITestAPI, y: ITestAPI) => {
             if (x.numeroSequenza < y.numeroSequenza) return -1;
@@ -261,6 +266,7 @@ export class Main implements IGestorePercorsiPath {
             const tmpTest = tmp[index2];
             console.log('Classe :' + tmpTest);
             console.log("Inizio lista test con nome : " + tmpTest.nomeTest + ',| numero :' + tmpTest.numeroSequenza + ' :!:');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let risposta: any;
             try {
                 try {
@@ -271,10 +277,11 @@ export class Main implements IGestorePercorsiPath {
                             .set(tmpTest.header)
                             .set('accept', 'json')
                             ;
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     } catch (error: any) {
                         //console.log(error);
                         if ('response' in error) {
-                            risposta = (<any>error).response.body;
+                            risposta = (error).response.body;
                         }
                         throw new Error("Errore:" + error);
                     }
@@ -301,7 +308,7 @@ export class Main implements IGestorePercorsiPath {
         }
 
     }
-    StartHttpServer() {
+    StartHttpServer(): void {
 
         try {
             if (Main.vettoreProcessi.length > 0) {
@@ -341,7 +348,7 @@ export class Main implements IGestorePercorsiPath {
                     Main.proxyServer = http.createServer(function (req, res) {
                         // You can define here your custom logic to handle the request
                         // and then proxy the request.
-                        const variabileValore = '1';
+                        // const variabileValore = '1';
                         let esco = false;
                         for (let index = 0; index < Main.vettoreProcessi.length && esco == false; index++) {
                             const processo = Main.vettoreProcessi[index];
@@ -349,7 +356,7 @@ export class Main implements IGestorePercorsiPath {
                             processo.vettorePossibiliPosizioni;
                             /*  */
                             //devo estrarre il dato per poterlo verificare con la variabile
-                            let ritorno: any | undefined = undefined;
+                            let ritorno: string | string[] | undefined = undefined;
 
                             for (let index = 0; index < processo.vettorePossibiliPosizioni.length && esco == false; index++) {
                                 const element = processo.vettorePossibiliPosizioni[index];
@@ -368,6 +375,7 @@ export class Main implements IGestorePercorsiPath {
                                     }
                                 }
                             }
+                            console.log(ritorno);
                             /*  */
 
                             /* if (element.valoreValiabile == variabileValore) {
@@ -412,8 +420,8 @@ export class Main implements IGestorePercorsiPath {
         }
     }
 
-    EstraiParametriDaRequest(richiesta: http.IncomingMessage, possibiliPosizioni: ISpawTrigger[]) {
-        let ritorno: any | undefined = undefined;
+    EstraiParametriDaRequest(richiesta: http.IncomingMessage, possibiliPosizioni: ISpawTrigger[]): string | string[] | undefined {
+        let ritorno: string | string[] | undefined = undefined;
 
         for (let index = 0; index < possibiliPosizioni.length; index++) {
             const element = possibiliPosizioni[index];
@@ -430,15 +438,15 @@ export class Main implements IGestorePercorsiPath {
         }
         return ritorno;
     }
-    async StartTest(numeroRootTest?: number) {
+    async StartTest(numeroRootTest?: number): Promise<void> {
 
         if (this.listaTerminaleTest) {
             this.listaTerminaleTest.sort((x: TerminaleTest, y: TerminaleTest) => {
-                if (x.test.numeroRootTest < x.test.numeroRootTest) return -1;
-                else if (x.test.numeroRootTest > x.test.numeroRootTest) return 1;
+                if (x.test.numeroRootTest < y.test.numeroRootTest) return -1;
+                else if (x.test.numeroRootTest > y.test.numeroRootTest) return 1;
                 else {
-                    if (x.test.numero < x.test.numero) return -1;
-                    else if (x.test.numero > x.test.numero) return 1;
+                    if (x.test.numero < y.test.numero) return -1;
+                    else if (x.test.numero > y.test.numero) return 1;
                     else return 0;
                 }
             });
@@ -494,15 +502,15 @@ export class Main implements IGestorePercorsiPath {
             console.log('********************************************************************************************************************')
         }
     }
-    GetTest() {
+    GetTest(): number[] {
         const ritorno: number[] = [];
         if (this.listaTerminaleTest) {
             this.listaTerminaleTest.sort((x: TerminaleTest, y: TerminaleTest) => {
-                if (x.test.numeroRootTest < x.test.numeroRootTest) return -1;
-                else if (x.test.numeroRootTest > x.test.numeroRootTest) return 1;
+                if (x.test.numeroRootTest < y.test.numeroRootTest) return -1;
+                else if (x.test.numeroRootTest > y.test.numeroRootTest) return 1;
                 else {
-                    if (x.test.numero < x.test.numero) return -1;
-                    else if (x.test.numero > x.test.numero) return 1;
+                    if (x.test.numero < y.test.numero) return -1;
+                    else if (x.test.numero > y.test.numero) return 1;
                     else return 0;
                 }
             });
@@ -516,7 +524,7 @@ export class Main implements IGestorePercorsiPath {
         }
         return ritorno;
     }
-    AggiungiTest(parametri: ITest[]) {
+    AggiungiTest(parametri: ITest[]): void {
         const tmp: ListaTerminaleTest = GetListaTestMetaData();
         for (let index = 0; index < parametri.length; index++) {
             const element = parametri[index];
@@ -525,7 +533,7 @@ export class Main implements IGestorePercorsiPath {
         SalvaListaTestMetaData(tmp);
         this.listaTerminaleTest = Reflect.getMetadata(ListaTerminaleTest.nomeMetadataKeyTarget, targetTerminale);
     }
-    AggiungiTestAPI(parametri: ITestAPI[]) {
+    AggiungiTestAPI(parametri: ITestAPI[]): void {
 
         const tmp: ListaTerminaleTestAPI = GetListaTestAPIMetaData();
         for (let index = 0; index < parametri.length; index++) {
@@ -555,7 +563,8 @@ export class Main implements IGestorePercorsiPath {
             res.render('about-us');
         });
     } */
-    InizializzaSwagger(testo?: string) {
+    InizializzaSwagger(testo?: string): string {
+        console.log(testo);
         let ritorno = '';
         try {
             let swaggerClassePath = '';
@@ -611,13 +620,13 @@ export class Main implements IGestorePercorsiPath {
         }
     }
     /************************************** */
-    async PrintMenu() {
+    async PrintMenu(): Promise<void> {
         const tmp: ListaTerminaleClasse = Reflect.getMetadata(ListaTerminaleClasse.nomeMetadataKeyTarget, targetTerminale);
         //console.log("Menu main, digita il numero della la tua scelta: ");
         await tmp.PrintMenuClassi();
 
     }
-    ScriviFile(pathDoveScrivereFile: string) {
+    ScriviFile(pathDoveScrivereFile: string): string {
 
         fs.mkdirSync(pathDoveScrivereFile + '/FileGenerati_MP', { recursive: true });
 

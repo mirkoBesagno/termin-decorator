@@ -1,7 +1,7 @@
-import { ListaTerminaleClasse } from "../classe/lista-classe";
-import { GetListaClasseMetaData, IParametro, SalvaListaClasseMetaData } from "../utility";
+
+
+import {  IParametro } from "../utility";
 import { IstanzaParametro } from "./istanza-parametro";
-import { TerminaleParametro } from "./metadata-parametro";
 
 /**
  * di default mette obbligatorio a true

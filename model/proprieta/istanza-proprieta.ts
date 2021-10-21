@@ -1,6 +1,6 @@
 import { ListaTerminaleClasse } from "../classe/lista-classe";
 import { Constraint } from "../postgres/constraint";
-import { CheckClasseMetaData, GetListaClasseMetaData, IClasse, IProprieta, ORMObject, SalvaListaClasseMetaData, tipo } from "../utility";
+import { GetListaClasseMetaData, IProprieta, ORMObject, SalvaListaClasseMetaData, tipo } from "../utility";
 
 
 

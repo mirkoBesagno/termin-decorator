@@ -1,7 +1,7 @@
 
 import { Request } from "express";
 //import redis from "redis";
-import expressRedisCache from "express-redis-cache";
+/* import expressRedisCache from "express-redis-cache"; */
 
 /* 
 const RedisServer = require('redis-server'); 
@@ -29,7 +29,7 @@ export const cacheMiddleware = expressRedisCache({ client: redisClient, expire: 
 
 import crypto from "crypto";
 
-export function CalcolaChiaveMemoryCache(req: Request) {
+export function CalcolaChiaveMemoryCache(req: Request):string {
     const keySHA = 'Besagno'
     const headerTmp = req.headers['authorization'] != undefined ? String(req.headers['authorization']) : JSON.stringify({
         "Aauthorization9X": "10"

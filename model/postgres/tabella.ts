@@ -1,4 +1,4 @@
-import { Client } from "pg";
+
 import { ListaTerminaleProprieta } from "../proprieta/lista-proprieta";
 import { IGrant, IPolicy, typeGrantEvent } from "../utility";
 import { ListaPolicy } from "./policy";
@@ -283,7 +283,7 @@ export function DropAllTable() {
     COMMENT ON SCHEMA public IS 'standard public schema';`;
 }
 
-export interface ReturnQueryControllata {
+/* export interface ReturnQueryControllata {
     risultato?: string, errore?: {
         query: string,
         errore: string
@@ -319,4 +319,4 @@ export async function EseguiQueryControllata(client: Client, query: string): Pro
             risultato: undefined
         }
     }
-}
+} */

@@ -5,14 +5,66 @@ import { Options as OptRateLimit } from "express-rate-limit";
 
 import { Options as OptionsCache } from "express-redis-cache";
 
-import os from "os";
 import { ListaTerminaleClasse } from "./classe/lista-classe";
 import { TerminaleClasse } from "./classe/metadata-classe";
 export const targetTerminale = { name: 'Terminale' };
 import { ListaTerminaleParametro, Main } from "..";
 import { ITestAPI } from "./test-funzionale/lista-test-funzionale";
 import { ICache } from "./main/metadata-main";
+import { Client } from "pg";
 
+
+export interface ReturnQueryControllata {
+    risultato?: string, errore?: {
+        query: string,
+        errore: string
+    }, index: number
+}
+
+
+export async function EseguiQueryControllata(clientConnection: IConnectionOption, querys: string[]): Promise<ReturnQueryControllata[]> {
+    try {
+        const db = new Client({
+            host: clientConnection.host,
+            port: clientConnection.port,
+            user: clientConnection.user,
+            password: clientConnection.password,
+            database: clientConnection.database
+        })
+        await db.connect();
+
+        const vetRisultatiQuery: ReturnQueryControllata[] = [];
+        for (let index = 0; index < querys.length; index++) {
+            const element = querys[index];
+            try {
+                /* const result =  */await db.query(element);
+                console.log('ESEGUITOO : \n' + element);
+                vetRisultatiQuery.push({
+                    index: index,
+                    errore: undefined,
+                    risultato: element
+                });
+            } catch (error) {
+                console.log('\n\nINIZIO Errroe : \n**********************\n\n');
+                console.log('-Query:\n' + element + '\n\n');
+                console.log('-Error:\n' + error);
+                console.log('\n\nFINE Errroe : \n**********************\n\n');
+                vetRisultatiQuery.push({
+                    index: index,
+                    errore: {
+                        query: element,
+                        errore: '' + error
+                    },
+                    risultato: undefined
+                });
+            }
+        }
+        return vetRisultatiQuery;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    }
+}
 
 export interface IContieneRaccoltaPercorsi {
     percorsi: IRaccoltaPercorsi;
@@ -331,9 +383,9 @@ export interface IGestorePercorsiPath {
  * sommario?: string,
  * questa è la strada per andare ad assegnare questa funzione è piu classi o sotto percorsi
  * nomiClasseRiferimento?: IClasseRiferimento[],
-
+ 
  * onChiamataCompletata?: (logOn: string, result: any, logIn: string) => void
-
+ 
  * Validatore?: (parametri: IParametriEstratti, listaParametri: ListaTerminaleParametro) => IRitornoValidatore;
  */
 export interface IMetodo extends IMetodoParametri, IMetodoEventi, IMetodoLimitazioni, IMetodoVettori {
@@ -485,7 +537,7 @@ export interface IPolicy {
     nomeFunzioneUsing?: string
     /* 
     USING : Le righe della tabella esistenti vengono confrontate con l'espressione specificata in USING
-
+ 
     CHECK : Le nuove righe che verrebbero create tramite INSERT o UPDATE vengono confrontate con l'espressione specificata in WITH CHECK
     */
     // where: (NEW: any, OLD: any) => void | true | Error
@@ -498,15 +550,15 @@ export type TypeIstantevent = 'BEFORE' | 'AFTER' | 'INSTEAD OF';
 export type TypeSurgevent = 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE';
 /* 
 export class Html implements IHtml {
-
+ 
     path: string;
     percorsoIndipendente?: boolean;
-
+ 
     htmlPath?: string;
     html?: string;
-
+ 
     conenuto: string;
-
+ 
     constructor() {
         this.path = '';
         this.conenuto = '';
@@ -535,7 +587,7 @@ export interface IRisposta {
 
 /* export function StartMonitoring() {
     try {
-
+ 
         const used = process.memoryUsage();
         const partizionamentoMemoriaProcesso: {
             rss: string,
@@ -575,10 +627,10 @@ export interface IRisposta {
         partizionamentoMemoriaProcesso.cpuMedia = os.cpus();
         partizionamentoMemoriaProcesso.totalMemo = os.totalmem().toString();
         partizionamentoMemoriaProcesso.freeMemo = os.freemem().toString();
-
+ 
         //console.log("Data" + Date.now(), partizionamentoMemoriaProcesso);
-
-
+ 
+ 
         setTimeout(() => {
             StartMonitoring();
         }, (20) * 1000);
@@ -650,7 +702,13 @@ export class SanificatoreCampo {
         this.valoreFuturo = '';
     }
 }
-
+export interface IConnectionOption {
+    user?: string | undefined;
+    database?: string | undefined;
+    port: number;
+    host: string;
+    password?: string | undefined;
+}
 export class Risposta {
     stato: number;
     descrizione: string;

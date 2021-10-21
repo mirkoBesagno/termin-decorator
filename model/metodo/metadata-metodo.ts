@@ -1,4 +1,7 @@
-import { ConstruisciErrore, ErroreMio, IClasseRiferimento, IContieneRaccoltaPercorsi, IDescrivibile, IHtml, IMetodo, IMetodoEventi, IMetodoLimitazioni, IMetodoParametri, IMetodoVettori, InizializzaLogbaseIn, InizializzaLogbaseOut, IParametriEstratti, IRaccoltaPercorsi, IReturn, IRitornoValidatore, IsJsonString, ISpawTrigger, Rispondi, Risposta, RispostaControllo, SalvaListaClasseMetaData, SanificatoreCampo, SostituisciRicorsivo, tipo, TypeInterazone, TypeMetod, TypePosizione } from "../utility";
+import { ConstruisciErrore, ErroreMio, IClasseRiferimento, IContieneRaccoltaPercorsi, IDescrivibile, IHtml, IMetodo, IMetodoEventi, IMetodoLimitazioni, 
+    IMetodoParametri, IMetodoVettori, InizializzaLogbaseIn, InizializzaLogbaseOut, IParametriEstratti, IRaccoltaPercorsi, IReturn, IRitornoValidatore, 
+    IsJsonString, ISpawTrigger, Rispondi, Risposta, RispostaControllo, SanificatoreCampo, SostituisciRicorsivo, tipo, 
+    TypeInterazone, TypeMetod, TypePosizione } from "../utility";
 
 import slowDown, { Options as OptSlowDows } from "express-slow-down";
 import rateLimit, { Options as OptRateLimit } from "express-rate-limit";
@@ -15,7 +18,7 @@ import superagent from "superagent";
 import { ListaTerminaleParametro } from "../parametro/lista-parametro";
 import { ITestAPI } from "../test-funzionale/lista-test-funzionale";
 
-import { exec, spawn } from "child_process";
+import { exec } from "child_process";
 import { Main } from "../..";
 import { ICache } from "../main/metadata-main";
 
@@ -1116,6 +1119,8 @@ class ArtefattoExpress {
                                             source = risposta.html;
                                         else
                                             throw new Error("Errorissimo");
+                                        Rispondi(res, { stato: risposta.stato, body: source }, key, durationSecondi);
+                                        passato = true;
                                     } else {
                                         Rispondi(res, tmp, key, durationSecondi);
                                         passato = true;

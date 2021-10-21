@@ -1,9 +1,7 @@
-import { TerminaleParametro } from "../parametro/metadata-parametro";
-import { ICheck, IConstraints, IGrant, IParametro, IProprieta, IRitornoValidatore, ITrigger, ORMObject, tipo, TypeIstantevent, TypeSurgevent } from "../utility";
-import { Client, types } from "pg";
+
+import { IGrant, IProprieta, ITrigger, ORMObject, tipo } from "../utility";
 import { Trigger } from "../postgres/trigger";
 import { Constraint } from "../postgres/constraint";
-import { EseguiQueryControllata } from "../postgres/tabella";
 
 
 export class TerminaleProprieta implements IProprieta {

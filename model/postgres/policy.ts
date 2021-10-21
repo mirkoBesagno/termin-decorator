@@ -1,5 +1,6 @@
-import { Client } from "pg";
-import { CostruisciFunzione, CostruisciRuoli, EseguiQueryControllata } from "../postgres/tabella";
+
+
+import { CostruisciFunzione, CostruisciRuoli } from "../postgres/tabella";
 import { IPolicy } from "../utility";
 
 export class ListaPolicy extends Array<Policy> {
@@ -69,8 +70,7 @@ export class Policy implements IPolicy {
                         ${this.check && nomeFunzioneCK != "" ? 'WITH CHECK ("' + nomeFunzioneCK + '"())' : ''} 
                         ;
                     `;
-            ritorno = ritorno + '\n' + queri1 + '\n';
-            //await EseguiQueryControllata(client, queri1);
+            ritorno = ritorno + '\n' + queri1 + '\n'; 
             elencoQuery.push(queri1);
         } catch (error) {
             console.log('\n*****\n' + error + '\n********\n\n');

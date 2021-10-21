@@ -12,7 +12,7 @@ export class Trigger implements ITrigger {
     Validatore: string | ((nuovo: any, vecchio: any, argomenti: any[], instantevent: any, surgevent: any) => void | Error);
     typeFunction?: 'plv8' | 'sql';
 
-    CostruisceTrigger(nomeTabella: string) {
+    CostruisceTrigger(nomeTabella: string): string {
         let tmp = '';
         for (let index = 0; index < this.surgevent.length; index++) {
             const el = this.surgevent[index];
@@ -61,7 +61,7 @@ export class Trigger implements ITrigger {
         } catch (error) {
             console.log('\n*****\n' + error + '\n********\n\n');
         }
-
+        return '';
     }
     constructor(item?: ITrigger) {
         if (item) {

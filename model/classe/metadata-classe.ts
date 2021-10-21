@@ -1,17 +1,13 @@
 import { Request, Response, Router } from "express";
 import { ListaTerminaleMetodo } from "../metodo/lista-metodo";
 import { TerminaleMetodo } from "../metodo/metadata-metodo";
-import { GetListaClasseMetaData, IClasse, IConstraints, IGestorePercorsiPath, IGrant, IHtml, IMetodo, instanceOfIMetodoEventi, instanceOfIMetodoLimitazioni, instanceOfIMetodoParametri, instanceOfIMetodoVettori, IPolicy, IRaccoltaPercorsi, SalvaListaClasseMetaData, typeGrantEvent } from "../utility";
+import { GetListaClasseMetaData, IClasse, IGestorePercorsiPath, IHtml, IRaccoltaPercorsi, SalvaListaClasseMetaData } from "../utility";
 
 import chiedi from "prompts";
-import { ListaTerminaleProprieta } from "../proprieta/lista-proprieta";
-import { TerminaleParametro } from "../parametro/metadata-parametro";
 import { TerminaleProprieta } from "../proprieta/metadata-proprieta";
-import { Client } from "pg";
-import { ListaPolicy, Policy } from "../postgres/policy";
+import { ListaPolicy } from "../postgres/policy";
 import { ArtefattoClassePostgres, IArtefattoClassePostgres } from "../postgres/tabella";
 import { ListaTerminaleClasse } from "./lista-classe";
-import { IstanzaMetodo } from "../metodo/istanza-metodo";
 
 import fs from 'fs';
 

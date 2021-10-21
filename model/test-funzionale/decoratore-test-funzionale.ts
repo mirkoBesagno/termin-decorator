@@ -1,4 +1,4 @@
-import { ITestAPI, ListaTerminaleTest, ListaTerminaleTestAPI } from "./lista-test-funzionale";
+/* import { ITestAPI, ListaTerminaleTest, ListaTerminaleTestAPI } from "./lista-test-funzionale";
 import { TerminaleTest, TerminaleTestAPI } from "./metadata-test-funzionale";
 import { GetListaTestAPIMetaData, GetListaTestMetaData, ITest, SalvaListaTestAPIMetaData, SalvaListaTestMetaData } from "./utility-test-funzionale";
 
@@ -34,4 +34,4 @@ function decoratoreTestMetodo(parametri: ITest[]) {
         }
         SalvaListaTestMetaData(tmp);
     }
-}
+} */

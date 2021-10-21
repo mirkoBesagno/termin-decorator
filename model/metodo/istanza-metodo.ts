@@ -1,9 +1,11 @@
 import { ListaTerminaleClasse } from "../classe/lista-classe";
 import { TerminaleParametro } from "../parametro/metadata-parametro";
-import { AssegnaMetodo, GetListaClasseMetaData, IMetodo, IMetodoEventi, IMetodoLimitazioni, IMetodoParametri, IMetodoVettori, IParametro, RispostaControllo, SalvaListaClasseMetaData } from "../utility";
-import slowDown, { Options as OptSlowDows } from "express-slow-down";
-import rateLimit, { Options as OptRateLimit } from "express-rate-limit";
-import { TerminaleMetodo } from "./metadata-metodo";
+import {
+    AssegnaMetodo, GetListaClasseMetaData, IMetodo, IMetodoEventi, IMetodoLimitazioni, IMetodoParametri, IMetodoVettori, IParametro,
+    RispostaControllo, SalvaListaClasseMetaData
+} from "../utility";
+import { Options as OptSlowDows } from "express-slow-down";
+import { Options as OptRateLimit } from "express-rate-limit"; 
 
 export class IstanzaMetodo {
     constructor(parametri: IMetodo, nomeMetodo: string | symbol, descriptor: PropertyDescriptor, nomeClasse: string,
